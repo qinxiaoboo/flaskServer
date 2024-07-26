@@ -1,0 +1,9 @@
+ENV_PATH = 'D:\data\initData\env.xlsx'
+
+CHROME_CONF_PATH = 'D:\data\chromeconf\'
+CHROME_EXEC_PATH = 'C:\Program Files\Google\Chrome\Application\chrome.exe'   # 请改为你电脑内Chrome可执行文件路径
+CHROME_EXTEND = ["wf-proxyIp","ffbceckpkpbcmgiaehlloocglmijnpmp","mcohilncbfahbmgdjkbpemcciiolgcge","yescap_v2.0.beta"]
+CHROME_EXTEND_PATH = 'D:\data\etd\'
+
+DEFAULT_OPEN_PAGE = []
+DEFAULT_REMOVE_PAGE = []
