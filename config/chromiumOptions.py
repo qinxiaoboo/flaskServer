@@ -1,12 +1,29 @@
 from DrissionPage import ChromiumOptions
-from flaskServer.config.config import CHROME_EXEC_PATH,CHROME_CONF_PATH,CHROME_EXTEND,CHROME_EXTEND_PATH,DEFAULT_OPEN_PAGE,DEFAULT_REMOVE_PAGE
-def initChromiumOptions(first,useragent):
+from flaskServer.config.config import CHROME_EXEC_PATH,CHROME_EXTEND,CHROME_EXTEND_PATH,DEFAULT_OPEN_PAGE,DEFAULT_REMOVE_PAGE
+from flaskServer.config.config import CHROME_USER_DATA_PATH
+from pathlib import Path
+CHROME_USER_DATA_PATH = Path(CHROME_USER_DATA_PATH)
+
+def initChromiumOptions(env,port,useragent,proxy_server):
     co = ChromiumOptions()
-    co.set_browser_path(CHROME_EXEC_PATH)
-    if first:
-        co.set_argument("--no-first-run")
+    co.set_browser_path(Path(CHROME_EXEC_PATH))
+    co.set_argument("--no-first-run")
     if useragent:
         co.set_argument("--user-agent", useragent)
+    if proxy_server:
+        co.set_argument("--proxy-server", proxy_server)
+    if port:
+        co.set_local_port(port)
+    # 用户文件夹路径
+    data_path = CHROME_USER_DATA_PATH / Path("data/") / env
+    co.set_user_data_path(initDir(data_path))
+    # 缓存路径
+    cache_path = CHROME_USER_DATA_PATH / Path("cache/") / env
+    co.set_cache_path(initDir(cache_path))
+    # 下载路径
+    dowload_path = CHROME_USER_DATA_PATH / Path("dowloads/") / env
+    co.set_download_path(path=initDir(dowload_path))
+
     # 默认参数
     co.set_argument("--disable-background-timer-throttling")
     co.set_argument("--disable-backgrounding-occluded-windows")
@@ -50,11 +67,21 @@ def initChromiumOptions(first,useragent):
 
     # 添加扩展
     co.remove_extensions()
-    # extends_path = ""
-    if first:
-        for extend in CHROME_EXTEND:
-            co.add_extension(CHROME_EXTEND_PATH+extend)
-        # extends_path += CHROME_EXTEND_PATH + extend + ","
-    # co.set_argument("--load-extension",extends_path.rstrip(","))
+    extends_path = ""
+    for extend in CHROME_EXTEND:
+        co.add_extension(Path(CHROME_EXTEND_PATH) / Path(extend))
+        extends_path += CHROME_EXTEND_PATH + extend + ","
+    co.set_argument("--load-extension",extends_path.rstrip(","))
+    init_path = CHROME_USER_DATA_PATH / Path("config/") / Path(env) / Path("conf.ini")
+    co.save(path=init_path)
+    return co
 
-    co.save()
+def initDir(path:Path):
+    if path.exists():
+        pass
+    else:
+        path.mkdir(parents=True)
+    return path
+
+if __name__ == '__main__':
+    print(CHROME_USER_DATA_PATH / Path("data/"))

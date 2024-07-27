@@ -9,11 +9,19 @@ def getProxyByIp(ip):
 
 def update(ip,port,user,pwd):
     proxy = getProxyByIp(ip)
-    if proxy:
-        return proxy
-    else:
-        with app.app_context():
+    with app.app_context():
+        if proxy:
+            if proxy.port != port:
+                proxy.port = port
+            if proxy.user != user:
+                proxy.user = user
+            if proxy.pwd != pwd:
+                proxy.pwd = pwd
+        else:
             proxy = Proxy(ip=ip,port=port,user=user,pwd=pwd)
-            db.session.add(proxy)
-            db.session.commit()
-            return proxy
+        db.session.add(proxy)
+        db.session.commit()
+        return proxy
+
+if __name__ == '__main__':
+    update("168.80.24.58","8099","oz2USP43","Pr382u")

@@ -16,4 +16,9 @@ for index,row in df.iterrows():
         if proxy:
             ip,port,user,pwd = proxy.split(":")
             proxy = update(ip,port,user,pwd)
+        if tw:
+            pass
+
+if __name__ == '__main__':
+    pass
     
