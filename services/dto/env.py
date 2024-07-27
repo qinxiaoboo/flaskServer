@@ -31,19 +31,16 @@ def updateEnv(env,port,cookies,proxy,tw,discord,outlook,okx,init,bitlight):
                 ENV.bitlight_id = bitlight.id
             if port and ENV.port != port:
                 ENV.port = port
-            Env.user_agent = getUserAgent()
         else:
             ENV = Env(name=env,port=port,user_agent=getUserAgent(),cookies=cookies,t_proxy_id=getId(proxy)
                       ,tw_id=getId(tw),discord_id=getId(discord),outlook_id=getId(outlook),okx_id=getId(okx),
                       init_id=getId(init),bitlight_id=getId(bitlight))
         db.session.add(ENV)
-        print("UserAgent: ",getUserAgent())
         db.session.commit()
         print("新增一条环境信息，id：", ENV.id)
         return env
 
 def getId(object):
-    print(object)
     if object:
         return object.id
     else:

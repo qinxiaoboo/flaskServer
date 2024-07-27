@@ -9,7 +9,6 @@ from flaskServer.services.dto.env import updateEnv
 
 df = pd.read_excel(ENV_PATH)
 df = df.fillna(0)
-# df = df.replace(pd.NA,None)
 for index, row in df.iterrows():
     group = row["分组"]
     env = row["环境名称"]
@@ -26,25 +25,25 @@ for index, row in df.iterrows():
     PROXY, TW, DISCORD, OUTLOOK, OKX, BITLIGHT, INIT = [None for i in range(7)]
     if env and chrom_port:
         if proxy:
-            ip, port, user, pwd = proxy.split(":")
+            ip, port, user, pwd = proxy.split(",")
             PROXY = update(ip, port, user, pwd)
         if tw:
-            name, pwd, fa2 = tw.split(":")
+            name, pwd, fa2 = tw.split(",")
             TW = updateAccount(name, pwd, fa2, "TW")
         if discord:
-            name, pwd, fa2 = discord.split(":")
+            name, pwd, fa2 = discord.split(",")
             DISCORD = updateAccount(name, pwd, fa2, "DISCORD")
         if outlook:
-            name, pwd = outlook.split(":")
+            name, pwd = outlook.split(",")
             OUTLOOK = updateAccount(name, pwd, "", "OUTLOOK")
         if okx:
-            word, address = okx.split(":")
+            word, address = okx.split(",")
             OKX = updateWallt(env, word, address, "OKX")
         if bitlight:
-            word, address = bitlight.split(":")
+            word, address = bitlight.split(",")
             BITLIGHT = updateWallt(env, word, address, "BITLIGHT")
         if init:
-            word, address = init.split(":")
+            word, address = init.split(",")
             INIT = updateWallt(env, word, address, "INIT")
         updateEnv(env, chrom_port, cookies, PROXY, TW, DISCORD, OUTLOOK, OKX, INIT, BITLIGHT)
 
