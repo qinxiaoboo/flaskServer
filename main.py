@@ -2,7 +2,7 @@ from flaskServer.config.connect import app
 from flask import request
 from flaskServer.services.system.dict import getInfo
 from flaskServer.services.system.dict import updateInfo
-
+from flaskServer.config.scheduler import scheduler
 
 result = {"code": 0, 'msg': "success"}
 
@@ -19,4 +19,6 @@ def systemSettingSet():
     updateInfo(request.get_json())
 
 if __name__ == '__main__':
-    app.run(port=9000)
+    scheduler.init_app(app)
+    scheduler.start()
+    app.run(port=9000,use_reloader=False)

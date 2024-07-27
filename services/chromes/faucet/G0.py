@@ -1,4 +1,4 @@
-import time
+import random
 
 from flaskServer.mode.proxy import Proxy
 from flaskServer.mode.env import Env
@@ -24,14 +24,20 @@ def worker(env):
             logger.info(f"{env.name}环境领取成功")
     chrome.quit()
 
-if __name__ == '__main__':
+
+def toDo():
+    num = random.choice([ i for i in range(5)])
     with app.app_context():
         proxys = Proxy.query.all()
         envs = []
+        envs.append(Env.query.filter_by(name="Q-0").first())
         for proxy in proxys:
-            env = Env.query.filter_by(t_proxy_id=proxy.id).all()[3]
+            env = Env.query.filter_by(t_proxy_id=proxy.id).all()[num]
             envs.append(env)
         submit(worker,envs)
 
+
+if __name__ == '__main__':
+    toDo()
 
 

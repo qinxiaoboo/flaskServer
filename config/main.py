@@ -1,24 +1,30 @@
+from flask import Flask
+from flask_apscheduler import APScheduler
 import time
-import requests
-
-def print_hi(name):
-    # tab = chrome.new_tab()
-    # tab.get("https://faucet.0g.ai")
-    # tab.ele("#address").input("0x670d0e57dc475ec92c9268bbec5db9e5162378e2")
-    # tab.ele("@type=submit").wait.enabled(timeout=200)
-    # tab.ele("@type=submit").click()
-    # ele = tab.ele("@class=mt-2")
-    # ele = ele.ele("tag:p")
-    #
-    # print(ele)
-    res = requests.get("https://2fa.fb.rip/api/otp/TQNSHKZUJZNZWDMG")
-    print(res.ok)
-    print(res.json().get("data").get("otp"))
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
 
 
-# Press the green button in the gutter to run the script.
+class Config(object):
+    SCHEDULER_TIMEZONE = 'Asia/Shanghai'  # 配置时区
+    SCHEDULER_API_ENABLED = True  # 添加API
+
+scheduler = APScheduler()
+
+
+# interval example, 间隔执行, 每10秒执行一次
+@scheduler.task('interval', id='task_1', seconds=10, misfire_grace_time=900)
+def task1():
+    print('task 1 executed --------', time.time())
+
+
+# cron examples, 每5秒执行一次 相当于interval 间隔调度中seconds = 5
+@scheduler.task('cron', id='task_2', second='*/20')
+def task2():
+    print('task 2 executed --------', time.time())
+
+
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    app = Flask(__name__)
+    app.config.from_object(Config())
+    scheduler.init_app(app)
+    scheduler.start()
+    app.run()
