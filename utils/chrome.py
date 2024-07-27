@@ -1,5 +1,12 @@
-from fake_useragent  import UserAgent
+
 
 def getUserAgent():
-    ua = UserAgent(browsers=["chrome"], platforms=["pc"])
-    return ua.random.replace("Chrome/122", "Chrome/126")
+    s = set()
+    with open(r'D:\python\wf-chrome\flaskServer\utils\useragent.txt','r') as f:
+        for line in f:
+            s.add(line.strip())
+    return s.pop()
+
+if __name__ == '__main__':
+    print(getUserAgent())
+
