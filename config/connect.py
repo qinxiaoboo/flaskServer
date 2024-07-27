@@ -10,7 +10,7 @@ app = Flask(__name__)
 app.config[
     'SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{UserName}:{Password}@{HostName}:{Port}/{DataBase}?charset=utf8mb4"
 # 是否显示底层执行的SQL语句
-app.config['SQLALCHEMY_ECHO'] = True
+# app.config['SQLALCHEMY_ECHO'] = True
 
 db = SQLAlchemy(app)  # 创建db对象
 # with app.app_context():

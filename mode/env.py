@@ -12,7 +12,7 @@ class Env(db.Model):
     init_id = db.Column(db.Integer, unique=True, nullable=True)
     bitlight_id = db.Column(db.Integer, unique=True, nullable=True)
     name = db.Column(db.String(80), unique=True, nullable=False)
-    group = db.Column(db.String(120), unique=False, nullable=False)
+    group = db.Column(db.String(120), unique=False, nullable=True)
     port = db.Column(db.String(120), unique=True, nullable=False)
     cookies = db.Column(db.String(120), unique=False, nullable=True)
     user_agent = db.Column(db.String(80), unique=False, nullable=False)

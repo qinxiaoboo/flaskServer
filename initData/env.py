@@ -9,11 +9,11 @@ from flaskServer.services.dto.env import updateEnv
 
 df = pd.read_excel(ENV_PATH)
 df = df.fillna(0)
-df = df.replace(pd.NA,None)
+# df = df.replace(pd.NA,None)
 for index, row in df.iterrows():
     group = row["分组"]
     env = row["环境名称"]
-    port = row["启动端口"]
+    chrom_port = row["启动端口"]
     proxy = row["代理"]
     tw = row["推特账号"]
     discord = row["discord账号"]
@@ -22,14 +22,13 @@ for index, row in df.iterrows():
     init = row["init钱包"]
     bitlight = row["bitlight钱包"]
     okx = row["okx钱包"]
+    print(row)
     PROXY, TW, DISCORD, OUTLOOK, OKX, BITLIGHT, INIT = [None for i in range(7)]
-    if env and port:
+    if env and chrom_port:
         if proxy:
-            print(proxy)
             ip, port, user, pwd = proxy.split(":")
             PROXY = update(ip, port, user, pwd)
         if tw:
-            print(tw)
             name, pwd, fa2 = tw.split(":")
             TW = updateAccount(name, pwd, fa2, "TW")
         if discord:
@@ -47,7 +46,7 @@ for index, row in df.iterrows():
         if init:
             word, address = init.split(":")
             INIT = updateWallt(env, word, address, "INIT")
-        updateEnv(env, port, cookies, PROXY, TW, DISCORD, OUTLOOK, OKX, INIT, BITLIGHT)
+        updateEnv(env, chrom_port, cookies, PROXY, TW, DISCORD, OUTLOOK, OKX, INIT, BITLIGHT)
 
 if __name__ == '__main__':
     pass

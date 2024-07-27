@@ -21,6 +21,7 @@ def update(ip,port,user,pwd):
             proxy = Proxy(ip=ip,port=port,user=user,pwd=pwd)
         db.session.add(proxy)
         db.session.commit()
+        print("新增一条代理信息，id：",proxy.id)
         return proxy
 
 if __name__ == '__main__':

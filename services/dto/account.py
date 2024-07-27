@@ -27,8 +27,10 @@ def updateAccount(name,pwd,fa2,type,email_name=None,email_pass=None):
             account = Account(name=name,pwd=pwd,email_name=email_name,email_pass=email_pass,fa2=fa2,type=type)
         db.session.add(account)
         db.session.commit()
+        print("新增一条账号信息，id: ",account.id)
         return account
 
 if __name__ == '__main__':
     name,pwd,fa2 = "brown_laur21244:VwiuMLt8lPqirZ4:".split(":")
-    updateAccount(name,pwd,fa2,"TW")
+    acc = updateAccount(name,pwd,fa2,"TW")
+    print(acc.to_json())

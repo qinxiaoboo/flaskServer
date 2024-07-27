@@ -21,6 +21,7 @@ def updateWallt(env,word,address,t):
             wallet = Wallet(env=env,word_pass=word,address=address,type=t)
         db.session.add(wallet)
         db.session.commit()
+        print("新增一条钱包信息，id：",wallet.id)
         return wallet
 
 if __name__ == '__main__':
