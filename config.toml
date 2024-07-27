@@ -1,5 +1,7 @@
 # 初始化环境文件
 ENV_PATH = 'D:\data\initData\env.xlsx'
+# 线程数
+THREAD_POOL_NUM = 2
 # 浏览器执行器
 CHROME_EXEC_PATH = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
 # 扩展目录

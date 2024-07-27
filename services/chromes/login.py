@@ -9,11 +9,12 @@ from flaskServer.utils.chrome import initChrom, wait_pages
 from flaskServer.config.config import WALLET_PASSWORD
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 from flaskServer.mode.account import Account
+from loguru import logger
 import requests
 
 def LoginINITWallet(chrome,env):
     tab = chrome.get_tab(title="Initia Wallet")
-    print(tab.url)
+    logger.info(tab.url)
     if "#" not in tab.url:
         tab.ele("@type=password").input(WALLET_PASSWORD)
         tab.ele("@type=submit").click()
@@ -29,12 +30,12 @@ def LoginINITWallet(chrome,env):
             tab.ele("@name=words." + str(index) + ".value").input(word)
         tab.ele("@type=submit").click()
         tab.ele("@type=button")
-    print("INIT 登录成功")
+    logger.info("INIT 登录成功")
     tab.close()
 
 def LoginOKXWallet(chrome,env):
     tab = chrome.get_tab(title="OKX Wallet")
-    print(tab.url)
+    logger.info(tab.url)
     if "unlock" in tab.url:
         tab.ele("@type=password").input(WALLET_PASSWORD)
         tab.ele("@type=submit").click()
@@ -53,7 +54,7 @@ def LoginOKXWallet(chrome,env):
         tab.ele("@type=submit").click()
         tab.ele("@type=button").click()
         tab.ele("MATIC")
-    print("OKX 登录成功")
+    logger.info("OKX 登录成功")
     tab.close()
 
 def LoginBitlight(chrome:ChromiumPage,env):
@@ -75,17 +76,16 @@ def LoginBitlight(chrome:ChromiumPage,env):
     else:
         tab.ele("@type=password").input(WALLET_PASSWORD)
         tab.ele("@type=button").click()
-    print("登录Bitlight钱包成功！")
+    logger.info("登录Bitlight钱包成功！")
     tab.close()
-    return True
 
 def LoginTW(chrome:ChromiumPage,env):
     tab = chrome.new_tab(url="https://x.com/home")
     if "logout" in tab.url:
         tab.get(url="https://x.com/i/flow/login")
     else:
-        print("登录TW成功")
-        return True
+        logger.info("登录TW成功")
+        return tab
     tw:Account = Account.query.filter_by(id=env.tw_id).first()
     tab.ele("@autocomplete=username").input(tw.name)
     tab.ele("@@type=button@@text()=Next").click()
@@ -98,14 +98,13 @@ def LoginTW(chrome:ChromiumPage,env):
             tab.ele("@data-testid=ocfEnterTextTextInput").input(code)
             tab.ele("@@type=button@@text()=Next").click()
     if "home" in tab.url:
-        print("登录TW成功")
-        return True
-    else:
-        return False
+        logger.info("登录TW成功")
+    return tab
+
 
 def LoginDiscord(chrome:ChromiumPage,env):
     tab = chrome.new_tab(url="https://discord.com/app")
-    print(tab.url)
+    logger.info(tab.url)
     if "login" in tab.url:
         discord:Account = Account.query.filter_by(id=env.discord_id).first()
         tab.ele("@name=email").input(discord.name)
@@ -118,9 +117,8 @@ def LoginDiscord(chrome:ChromiumPage,env):
                 tab.ele("@autocomplete=one-time-code").input(code)
                 tab.ele("@type=submit").click()
     if "channels" in tab.url:
-        print("登录Discord成功！")
-        return True
-    else:return False
+        logger.info("登录Discord成功！")
+    return tab
 
 def LoginOutlook(chrome:ChromiumPage,env):
     tab = chrome.new_tab(url="https://outlook.live.com/mail/0/")
@@ -135,27 +133,65 @@ def LoginOutlook(chrome:ChromiumPage,env):
         tab.ele("@type=submit").click()
         tab.ele("@type=checkbox").click()
         tab.ele("@@type=submit@@text()=Yes").click()
-    print(tab.url)
+    logger.info(tab.url)
     if "https://outlook.live.com/mail/0" in tab.url:
-        print("登录OUTLOOK成功")
-        return True
-    else:return False
+        logger.info("登录OUTLOOK成功")
+    return tab
+
+def InitChromeOption(env):
+    with app.app_context():
+        proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
+        chrome = ChromiumPage(addr_or_opts=
+                              initChromiumOptions(env.name, env.port, env.user_agent,
+                                                  "http://" + proxy.ip + ":" + proxy.port))
+        initChrom(chrome, env.name, proxy.ip, proxy.port, proxy.user, proxy.pwd)
+        chrome.get("https://www.browserscan.net/zh")
+        wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
+        wait_pages(chrome, wait_page_list)
+        chrome.get_tab(title="Initia Wallet").close()
+        chrome.get_tab(title="Welcome to OKX").close()
+        chrome.get_tab(title="OKX Wallet").close()
+        return chrome
+
+
+def LoginChrome(env):
+    with app.app_context():
+        proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
+        chrome = ChromiumPage(addr_or_opts=
+        initChromiumOptions(env.name, env.port, env.user_agent,
+                            "http://" + proxy.ip + ":" + proxy.port))
+        initChrom(chrome, env.name, proxy.ip, proxy.port, proxy.user, proxy.pwd)
+        chrome.get("https://www.browserscan.net/zh")
+        wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
+        wait_pages(chrome, wait_page_list)
+        LoginINITWallet(chrome, env)
+        LoginOKXWallet(chrome, env)
+        LoginTW(chrome, env)
+        LoginDiscord(chrome, env)
+        LoginOutlook(chrome, env)
+        LoginBitlight(chrome, env)
+        tab = chrome.get_tab(title="Welcome to OKX")
+        tab.close()
+        logger.info(ChromiumOptions().address)
+        return chrome
+
 
 if __name__ == '__main__':
     with app.app_context():
         env = Env.query.filter_by(name="Q-2").first()
-        proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
-        chrome = ChromiumPage(addr_or_opts=initChromiumOptions(env.name,env.port, env.user_agent, "http://" + proxy.ip + ":" + proxy.port))
-        initChrom(chrome, env.name, proxy.ip, proxy.port,proxy.user,proxy.pwd)
-        chrome.get("https://www.browserscan.net/zh")
-        wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
-        wait_pages(chrome, wait_page_list)
-        LoginINITWallet(chrome,env)
-        LoginOKXWallet(chrome,env)
-        LoginTW(chrome,env)
-        LoginDiscord(chrome,env)
-        LoginOutlook(chrome,env)
-        LoginBitlight(chrome,env)
-
-
-        print(ChromiumOptions().address)
+        InitChromeOption(env)
+        # proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
+        # chrome = ChromiumPage(addr_or_opts=initChromiumOptions(env.name,env.port, env.user_agent, "http://" + proxy.ip + ":" + proxy.port))
+        # initChrom(chrome, env.name, proxy.ip, proxy.port,proxy.user,proxy.pwd)
+        # chrome.get("https://www.browserscan.net/zh")
+        # wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
+        # wait_pages(chrome, wait_page_list)
+        # LoginINITWallet(chrome,env)
+        # LoginOKXWallet(chrome,env)
+        # LoginTW(chrome,env)
+        # LoginDiscord(chrome,env)
+        # LoginOutlook(chrome,env)
+        # LoginBitlight(chrome,env)
+        #
+        #
+        # logger.info(ChromiumOptions().address)

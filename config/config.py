@@ -4,6 +4,7 @@ import toml
 cfg = toml.load(open(r'D:\python\wf-chrome\flaskServer\config.toml', 'r', encoding='utf-8'))
 
 ENV_PATH = cfg.get('ENV_PATH')
+THREAD_POOL_NUM = cfg.get('THREAD_POOL_NUM')
 CHROME_EXEC_PATH = cfg.get("CHROME_EXEC_PATH")
 CHROME_EXTEND = cfg.get("CHROME_EXTEND")
 CHROME_EXTEND_PATH = cfg.get("CHROME_EXTEND_PATH")
