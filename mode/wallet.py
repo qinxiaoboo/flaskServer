@@ -12,7 +12,7 @@ class Wallet(db.Model):
     def to_json(self):
         return {
             'id':self.id,
-            'user':self.word_pass,
+            'word_pass':self.word_pass,
             'type': self.type,
             'address': self.address,
 
