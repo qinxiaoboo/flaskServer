@@ -11,18 +11,18 @@ class Config(object):
 
 scheduler = APScheduler()
 app.config.from_object(Config())
+#
+# @scheduler.task('cron', id='do_faucet_0g', day="*", hour="7")
+# def faucet_0g_ai():
+#     toDo()
 
-@scheduler.task('cron', id='do_faucet_0g', day="*", hour="7")
-def faucet_0g_ai():
-    toDo()
-
-
-def task1(x):
-    print(f'task 1 executed --------: {x}', time.time())
-
-
-def task2(x):
-    print(f'task 2 executed --------: {x}', time.time())
-
-scheduler.add_job(func=task1, args=('循环',), trigger='interval', seconds=5, id='interval_task')
-scheduler.add_job(func=task2, args=('定时任务',), trigger='cron', second='*/10', id='cron_task')
+#
+# def task1(x):
+#     print(f'task 1 executed --------: {x}', time.time())
+#
+#
+# def task2(x):
+#     print(f'task 2 executed --------: {x}', time.time())
+#
+# scheduler.add_job(func=task1, args=('循环',), trigger='interval', seconds=5, id='interval_task')
+# scheduler.add_job(func=task2, args=('定时任务',), trigger='cron', second='*/10', id='cron_task')

@@ -1,17 +1,19 @@
+import requests
 from DrissionPage import ChromiumOptions
-from DrissionPage import ChromiumPage,errors
+from DrissionPage import ChromiumPage
+from loguru import logger
+
 from flaskServer.config.chromiumOptions import initChromiumOptions
-from flaskServer.config.connect import db,app
+from flaskServer.config.config import WALLET_PASSWORD
+from flaskServer.config.connect import app
+from flaskServer.mode.account import Account
 from flaskServer.mode.env import Env
 from flaskServer.mode.proxy import Proxy
 from flaskServer.mode.wallet import Wallet
-from flaskServer.utils.chrome import initChrom, wait_pages
-from flaskServer.config.config import WALLET_PASSWORD
-from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
-from flaskServer.mode.account import Account
 from flaskServer.services.dto.env import updateEnvStatus
-from loguru import logger
-import requests
+from flaskServer.utils.chrome import initChrom, wait_pages
+from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
+
 
 def LoginINITWallet(chrome,env):
     tab = chrome.get_tab(title="Initia Wallet")
@@ -184,6 +186,20 @@ def LoginChrome(env):
         tab.close()
         logger.info(ChromiumOptions().address)
         return chrome
+
+def toLoginAll(env):
+    if env.status == 0 or env.status == 1:
+        try:
+            chrome = LoginChrome(env)
+            updateEnvStatus(env.name, 2)
+            logger.info(f"{env.name}环境初始化成功")
+            chrome.quit()
+        except Exception as e:
+            logger.error(env.to_json(), e)
+    if env.status == 2:
+        logger.info(f"{env.name}环境初始化成功")
+
+
 
 
 if __name__ == '__main__':

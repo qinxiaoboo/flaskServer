@@ -54,6 +54,7 @@ def worker2(env):
 def toDo2():
     with app.app_context():
         envs = Env.query.all()
+        random.shuffle(envs)
         submit(worker2,envs)
 
 if __name__ == '__main__':
