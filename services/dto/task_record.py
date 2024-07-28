@@ -20,5 +20,10 @@ def updateTaskRecord(env,name,status):
         print(f"{env}新增一条{name}任务记录,状态：'{'完成' if status == 0 else '未完成'}'，id：",taskRecord.id)
         return taskRecord
 
+def updateTaskStatus(name,status):
+    with app.app_context():
+        db.session.query(TaskRecord).filter(TaskRecord.name==name).update({TaskRecord.status:status})
+        db.session.commit()
+
 if __name__ == '__main__':
-    updateTaskRecord("Q-1","multifarm",1)
+    updateTaskStatus("multifarm",1)

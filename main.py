@@ -10,6 +10,7 @@ from flaskServer.mode.env import Env
 from flaskServer.services.chromes.login import toLoginAll
 from flaskServer.services.chromes.chrome import Chrome
 from flaskServer.services.chromes.worker import submit
+from flaskServer.services.chromes.tasks.multifarm import toDo as toDoMultifarm
 
 result = {"code": 0, 'msg': "success"}
 chrome = None
@@ -42,6 +43,13 @@ def login(name):
 def off(name):
     chrome = Chrome(name)
     chrome.quit()
+    return "success"
+@app.route("/todo/multifarm")
+def multifarm ():
+    with app.app_context():
+        envs = Env.query.all()
+        random.shuffle(envs)
+        submit(toDoMultifarm,envs)
     return "success"
 
 

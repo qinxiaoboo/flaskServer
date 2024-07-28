@@ -9,3 +9,6 @@ class TaskRecord(db.Model):
     # 任务状态：0：已完成，1：默认值
     status = db.Column(db.Integer, unique=False, nullable=True)
 
+    # __mapper_args__ = {
+    #     "order_by": env_name.desc()
+    # }

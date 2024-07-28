@@ -9,8 +9,8 @@ git push -u origin main
 
 git url:
 https://github.com/qinxiaoboo/flaskServer
-
-
+生成requirements文件
+pip freeze > requirements.txt
 
 
 Python version: 3.11
