@@ -47,7 +47,7 @@ def LoginOKXWallet(chrome,env):
         eles = tab.eles("@type=text")
         for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
             eles[index].input(word)
-        tab.ele("@type=submit").click()
+        tab.ele("@@type=submit@!btn-disabled").click()
         passwords = tab.eles("@type=password")
         for pwd in passwords:
             pwd.input(WALLET_PASSWORD)
@@ -110,8 +110,9 @@ def LoginDiscord(chrome:ChromiumPage,env):
         tab.ele("@name=email").input(discord.name)
         tab.ele("@name=password").input(aesCbcPbkdf2DecryptFromBase64(discord.pwd))
         tab.ele("@type=submit").click()
-        if "login" in tab.url:
-            res = requests.get(aesCbcPbkdf2DecryptFromBase64(discord.fa2))
+        fa2 = aesCbcPbkdf2DecryptFromBase64(discord.fa2)
+        if "login" in tab.url and len(fa2) > 10:
+            res = requests.get(fa2)
             if res.ok:
                 code = res.json().get("data").get("otp")
                 tab.ele("@autocomplete=one-time-code").input(code)
@@ -126,13 +127,14 @@ def LoginOutlook(chrome:ChromiumPage,env):
     print(tab.url)
     if "microsoft" in tab.url:
         outlook:Account = Account.query.filter_by(id=env.outlook_id).first()
-        tab = tab.eles("@aria-label=Sign in to Outlook")[4].click.for_new_tab()
-        tab.ele("@data-testid=i0116").input(outlook.name)
-        tab.ele("@type=submit").click()
-        tab.ele("@name=passwd").input(aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
-        tab.ele("@type=submit").click()
-        tab.ele("@type=checkbox").click()
-        tab.ele("@@type=submit@@text()=Yes").click()
+        if "outlook" in outlook.name or "hotmail" in outlook.name:
+            tab = tab.eles("@aria-label=Sign in to Outlook")[4].click.for_new_tab()
+            tab.ele("@data-testid=i0116").input(outlook.name)
+            tab.ele("@type=submit").click()
+            tab.ele("@name=passwd").input(aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
+            tab.ele("@type=submit").click()
+            tab.ele("@type=checkbox").click()
+            tab.ele("@@type=submit@@text()=Yes").click()
     logger.info(tab.url)
     if "https://outlook.live.com/mail/0" in tab.url:
         logger.info("登录OUTLOOK成功")
@@ -145,7 +147,7 @@ def InitChromeOption(env):
                               initChromiumOptions(env.name, env.port, env.user_agent,
                                                   "http://" + proxy.ip + ":" + proxy.port))
         initChrom(chrome, env.name, proxy.ip, proxy.port, proxy.user, proxy.pwd)
-        chrome.get("https://www.browserscan.net/zh")
+        chrome.get("https://www.browserscan.net/zh?env=" + env.name)
         wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
         wait_pages(chrome, wait_page_list)
         chrome.get_tab(title="Initia Wallet").close()
@@ -161,7 +163,7 @@ def LoginChrome(env):
         initChromiumOptions(env.name, env.port, env.user_agent,
                             "http://" + proxy.ip + ":" + proxy.port))
         initChrom(chrome, env.name, proxy.ip, proxy.port, proxy.user, proxy.pwd)
-        chrome.get("https://www.browserscan.net/zh")
+        chrome.get("https://www.browserscan.net/zh?env="+env.name)
         wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
         wait_pages(chrome, wait_page_list)
         LoginINITWallet(chrome, env)
@@ -178,8 +180,8 @@ def LoginChrome(env):
 
 if __name__ == '__main__':
     with app.app_context():
-        env = Env.query.filter_by(name="Q-2").first()
-        InitChromeOption(env)
+        env = Env.query.filter_by(name="Q-4").first()
+        LoginChrome(env)
         # proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
         # chrome = ChromiumPage(addr_or_opts=initChromiumOptions(env.name,env.port, env.user_agent, "http://" + proxy.ip + ":" + proxy.port))
         # initChrom(chrome, env.name, proxy.ip, proxy.port,proxy.user,proxy.pwd)

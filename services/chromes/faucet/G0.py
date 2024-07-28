@@ -4,9 +4,10 @@ from flaskServer.mode.proxy import Proxy
 from flaskServer.mode.env import Env
 from flaskServer.mode.wallet import Wallet
 from flaskServer.services.chromes.worker import submit
-from flaskServer.services.chromes.login import InitChromeOption
+from flaskServer.services.chromes.login import InitChromeOption, LoginChrome
 from flaskServer.config.connect import db,app
 from loguru import logger
+
 
 def worker(env):
     chrome = InitChromeOption(env)
@@ -36,8 +37,18 @@ def toDo():
             envs.append(env)
         submit(worker,envs)
 
+def worker2(env):
+    chrome = LoginChrome(env)
+    chrome.wait(10)
+    chrome.quit()
+
+
+def toDo2():
+    with app.app_context():
+        envs = Env.query.all()
+        submit(worker2,envs)
 
 if __name__ == '__main__':
-    toDo()
+    toDo2()
 
 
