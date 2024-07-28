@@ -12,4 +12,15 @@ https://github.com/qinxiaoboo/flaskServer
 
 
 
-pip install -r requirements.txt
+
+Python version: 3.11
+
+Installing virtual env: \
+`python3 -m venv venv`
+
+Activating:
+ - Mac/Linux - `source venv/bin/activate`
+ - Windows - `.\venv\Scripts\activate`
+
+Installing all dependencies: \
+`pip install -r requirements.txt` \
