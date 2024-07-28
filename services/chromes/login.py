@@ -39,10 +39,13 @@ def ConfirmOKXWallet(chrome,tab,env):
     ele = tab.ele("@type=button").next()
     if ele.text == "Connect":
         ele.click()
+        chrome.wait.load_start()
+        chrome.wait(8,9)
+        tab = chrome.get_tab(title="OKX Wallet")
         tab.ele("@type=button").next().click()
     else:
         ele.click()
-    logger.info(f"OKX 钱包 {ele.text} 成功")
+    logger.info(f"OKX 钱包 确认成功 成功")
 
 
 def LoginOKXWallet(chrome,env):
@@ -95,15 +98,30 @@ def AuthTW(chrome:ChromiumPage,env):
     tab = chrome.get_tab(url=r"oauth2/authorize")
     print(tab)
     if tab :
-        tab.ele("@role=button").click()
+        tab.ele("@@role=button@@data-testid=OAuth_Consent_Button").click()
     else:
-        LoginTW(chrome,env)
+        tab = chrome.get_tab(url="twitter.com")
+        tw: Account = Account.query.filter_by(id=env.tw_id).first()
+        tab.ele("@autocomplete=username").input(tw.name)
+        tab.ele("@@type=button@@text()=Next").click()
+        tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+        tab.ele("@@type=button@@text()=Log in").click()
+        fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+        if "login" in tab.url and len(fa2) > 10:
+            res = requests.get(fa2)
+            if res.ok:
+                code = res.json().get("data").get("otp")
+                tab.ele("@data-testid=ocfEnterTextTextInput").input(code)
+                tab.ele("@@type=button@@text()=Next").click()
+        tab.ele("@@role=button@@data-testid=OAuth_Consent_Button").click()
 
 
 def LoginTW(chrome:ChromiumPage,env):
-    tab = chrome.get_tab(url="x.com/login")
+    tab = chrome.get_tab(url="twitter.com/i/flow/login")
     if tab is None:
-        tab = chrome.new_tab(url="https://x.com/home")
+        tab = chrome.get_tab(url="x.com/login")
+        if tab is None:
+            tab = chrome.new_tab(url="https://x.com/home")
     chrome.wait(1,2)
     print(tab.url)
     if "logout" in tab.url or "login" in tab.url:
