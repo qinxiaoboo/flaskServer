@@ -9,3 +9,7 @@ git push -u origin main
 
 git url:
 https://github.com/qinxiaoboo/flaskServer
+
+
+
+pip install -r requirements.txt

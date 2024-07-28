@@ -2,7 +2,6 @@ import requests
 from DrissionPage import ChromiumOptions
 from DrissionPage import ChromiumPage
 from loguru import logger
-
 from flaskServer.config.chromiumOptions import initChromiumOptions
 from flaskServer.config.config import WALLET_PASSWORD
 from flaskServer.config.connect import app
@@ -13,7 +12,7 @@ from flaskServer.mode.wallet import Wallet
 from flaskServer.services.dto.env import updateEnvStatus
 from flaskServer.utils.chrome import initChrom, wait_pages
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
-
+from flaskServer.config.config import get_ini_path
 
 def LoginINITWallet(chrome,env):
     tab = chrome.get_tab(title="Initia Wallet")
@@ -35,6 +34,16 @@ def LoginINITWallet(chrome,env):
         tab.ele("@type=button")
     logger.info("INIT 登录成功")
     tab.close()
+
+def ConfirmOKXWallet(chrome,tab,env):
+    ele = tab.ele("@type=button").next()
+    if ele.text == "Connect":
+        ele.click()
+        tab.ele("@type=button").next().click()
+    else:
+        ele.click()
+    logger.info(f"OKX 钱包 {ele.text} 成功")
+
 
 def LoginOKXWallet(chrome,env):
     tab = chrome.get_tab(title="OKX Wallet")
@@ -82,9 +91,22 @@ def LoginBitlight(chrome:ChromiumPage,env):
     logger.info("登录Bitlight钱包成功！")
     tab.close()
 
+def AuthTW(chrome:ChromiumPage,env):
+    tab = chrome.get_tab(url=r"oauth2/authorize")
+    print(tab)
+    if tab :
+        tab.ele("@role=button").click()
+    else:
+        LoginTW(chrome,env)
+
+
 def LoginTW(chrome:ChromiumPage,env):
-    tab = chrome.new_tab(url="https://x.com/home")
-    if "logout" in tab.url:
+    tab = chrome.get_tab(url="x.com/login")
+    if tab is None:
+        tab = chrome.new_tab(url="https://x.com/home")
+    chrome.wait(1,2)
+    print(tab.url)
+    if "logout" in tab.url or "login" in tab.url:
         tab.get(url="https://x.com/i/flow/login")
     else:
         logger.info("登录TW成功")
@@ -143,6 +165,20 @@ def LoginOutlook(chrome:ChromiumPage,env):
     if "https://outlook.live.com/mail/0" in tab.url:
         logger.info("登录OUTLOOK成功")
     return tab
+
+def InitChromeOptionByConf(env):
+    with app.app_context():
+        if env.status != 0:
+            chrome = ChromiumPage(addr_or_opts=ChromiumOptions(ini_path=get_ini_path(env.name)))
+            chrome.get("https://www.browserscan.net/zh?env=" + env.name)
+            wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
+            wait_pages(chrome, wait_page_list)
+            LoginOKXWallet(chrome,env)
+            chrome.get_tab(title="Initia Wallet").close()
+            chrome.get_tab(title="Welcome to OKX").close()
+            return chrome
+        else:
+            return InitChromeOption(env)
 
 def InitChromeOption(env):
     with app.app_context():
@@ -205,12 +241,11 @@ def toLoginAll(env):
 if __name__ == '__main__':
     with app.app_context():
         env = Env.query.filter_by(name="Q-8-3").first()
-        if env.status == 0 or env.status == 1:
+        if env.status == 0 or env.status == 2:
             try:
-                chrome = LoginChrome(env)
-                updateEnvStatus(env.name,2)
+                chrome = InitChromeOptionByConf(env)
                 logger.info("环境初始化成功")
-                chrome.quit()
+                # chrome.quit()
             except Exception as e:
                 logger.error(env.to_json(),e)
 

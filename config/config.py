@@ -1,5 +1,5 @@
 import toml
-
+from pathlib import Path
 
 cfg = toml.load(open(r'D:\python\wf-chrome\flaskServer\config.toml', 'r', encoding='utf-8'))
 
@@ -15,3 +15,6 @@ DEFAULT_OPEN_PAGE = cfg.get("DEFAULT_OPEN_PAGE")
 DEFAULT_REMOVE_PAGE = cfg.get("DEFAULT_REMOVE_PAGE")
 
 WALLET_PASSWORD = cfg.get("WALLET_PASSWORD")
+
+def get_ini_path(name):
+    return CHROME_USER_DATA_PATH / Path("config/") / Path(name) / Path("conf.ini")
