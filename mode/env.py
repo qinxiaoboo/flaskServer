@@ -16,6 +16,8 @@ class Env(db.Model):
     port = db.Column(db.String(120), unique=True, nullable=False)
     cookies = db.Column(db.String(120), unique=False, nullable=True)
     user_agent = db.Column(db.String(80), unique=False, nullable=False)
+    # 浏览器状态0:什么都没做，1：初始化了配置，2：初始化了账号和钱包
+    status = db.Column(db.Integer, unique=False, nullable=True)
 
 
     def to_json(self):

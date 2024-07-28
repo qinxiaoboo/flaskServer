@@ -5,6 +5,7 @@ from flaskServer.mode.env import Env
 from flaskServer.mode.wallet import Wallet
 from flaskServer.services.chromes.worker import submit
 from flaskServer.services.chromes.login import InitChromeOption, LoginChrome
+from flaskServer.services.dto.env import updateEnvStatus
 from flaskServer.config.connect import db,app
 from loguru import logger
 
@@ -38,9 +39,16 @@ def toDo():
         submit(worker,envs)
 
 def worker2(env):
-    chrome = LoginChrome(env)
-    chrome.wait(10)
-    chrome.quit()
+    if env.status == 0 or env.status == 1:
+        try:
+            chrome = LoginChrome(env)
+            updateEnvStatus(env.name, 2)
+            logger.info(f"{env.name}环境初始化成功")
+            chrome.quit()
+        except Exception as e:
+            logger.error(env.to_json(), e)
+    if env.status == 2:
+        logger.info(f"{env.name}环境初始化成功")
 
 
 def toDo2():

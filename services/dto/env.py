@@ -1,3 +1,5 @@
+from loguru import logger
+
 from flaskServer.mode.env import Env
 from flaskServer.config.connect import db,app
 from flaskServer.utils.chrome import getUserAgent
@@ -8,6 +10,16 @@ def getEnvByName(name):
     with app.app_context():
         env = Env.query.filter_by(name=name).first()
         return env
+def updateEnvStatus(name,status):
+    ENV = getEnvByName(name)
+    with app.app_context():
+        if ENV:
+            if ENV.status != status:
+                ENV.status = status
+        else:
+            logger.error(f"{name}环境不存在")
+        db.session.add(ENV)
+        db.session.commit()
 
 def updateEnv(env,port,cookies,proxy,tw,discord,outlook,okx,init,bitlight):
     ENV = getEnvByName(env)

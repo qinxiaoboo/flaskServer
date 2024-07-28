@@ -9,6 +9,7 @@ from flaskServer.utils.chrome import initChrom, wait_pages
 from flaskServer.config.config import WALLET_PASSWORD
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 from flaskServer.mode.account import Account
+from flaskServer.services.dto.env import updateEnvStatus
 from loguru import logger
 import requests
 
@@ -91,8 +92,9 @@ def LoginTW(chrome:ChromiumPage,env):
     tab.ele("@@type=button@@text()=Next").click()
     tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
     tab.ele("@@type=button@@text()=Log in").click()
-    if "login" in tab.url:
-        res = requests.get(aesCbcPbkdf2DecryptFromBase64(tw.fa2))
+    fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+    if "login" in tab.url and len(fa2) > 10:
+        res = requests.get(fa2)
         if res.ok:
             code = res.json().get("data").get("otp")
             tab.ele("@data-testid=ocfEnterTextTextInput").input(code)
@@ -143,10 +145,13 @@ def LoginOutlook(chrome:ChromiumPage,env):
 def InitChromeOption(env):
     with app.app_context():
         proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
-        chrome = ChromiumPage(addr_or_opts=
-                              initChromiumOptions(env.name, env.port, env.user_agent,
-                                                  "http://" + proxy.ip + ":" + proxy.port))
-        initChrom(chrome, env.name, proxy.ip, proxy.port, proxy.user, proxy.pwd)
+        if proxy:
+            chrome = ChromiumPage(addr_or_opts=
+                                  initChromiumOptions(env.name, env.port, env.user_agent,
+                                                      "http://" + proxy.ip + ":" + proxy.port))
+            initChrom(chrome, env.name, proxy.ip, proxy.port, proxy.user, proxy.pwd)
+        else:
+            chrome = ChromiumPage(addr_or_opts=initChromiumOptions(env.name, env.port, env.user_agent, None))
         chrome.get("https://www.browserscan.net/zh?env=" + env.name)
         wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
         wait_pages(chrome, wait_page_list)
@@ -159,10 +164,13 @@ def InitChromeOption(env):
 def LoginChrome(env):
     with app.app_context():
         proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
-        chrome = ChromiumPage(addr_or_opts=
-        initChromiumOptions(env.name, env.port, env.user_agent,
+        if proxy:
+            chrome = ChromiumPage(addr_or_opts=
+            initChromiumOptions(env.name, env.port, env.user_agent,
                             "http://" + proxy.ip + ":" + proxy.port))
-        initChrom(chrome, env.name, proxy.ip, proxy.port, proxy.user, proxy.pwd)
+            initChrom(chrome, env.name, proxy.ip, proxy.port, proxy.user, proxy.pwd)
+        else:
+            chrome = ChromiumPage(addr_or_opts=initChromiumOptions(env.name, env.port, env.user_agent,None))
         chrome.get("https://www.browserscan.net/zh?env="+env.name)
         wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
         wait_pages(chrome, wait_page_list)
@@ -180,8 +188,17 @@ def LoginChrome(env):
 
 if __name__ == '__main__':
     with app.app_context():
-        env = Env.query.filter_by(name="Q-4").first()
-        LoginChrome(env)
+        env = Env.query.filter_by(name="Q-8-3").first()
+        if env.status == 0 or env.status == 1:
+            try:
+                chrome = LoginChrome(env)
+                updateEnvStatus(env.name,2)
+                logger.info("环境初始化成功")
+                chrome.quit()
+            except Exception as e:
+                logger.error(env.to_json(),e)
+
+
         # proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
         # chrome = ChromiumPage(addr_or_opts=initChromiumOptions(env.name,env.port, env.user_agent, "http://" + proxy.ip + ":" + proxy.port))
         # initChrom(chrome, env.name, proxy.ip, proxy.port,proxy.user,proxy.pwd)
