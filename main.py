@@ -1,4 +1,5 @@
 from flaskServer.config.connect import app
+from gevent import pywsgi
 from flask import request
 from flaskServer.services.system.dict import getInfo
 from flaskServer.services.system.dict import updateInfo
@@ -21,4 +22,5 @@ def systemSettingSet():
 if __name__ == '__main__':
     scheduler.init_app(app)
     scheduler.start()
-    app.run(port=9000,use_reloader=False)
+    server = pywsgi.WSGIServer(("0.0.0.0",9000),app)
+    server.serve_forever()
