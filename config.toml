@@ -15,3 +15,9 @@ DEFAULT_REMOVE_PAGE = []
 
 # 钱包默认初始密码
 WALLET_PASSWORD = "123qweasd"
+
+
+GALXE_CAMPAIGN_IDS = [
+    "GCzqctkqub"
+
+]

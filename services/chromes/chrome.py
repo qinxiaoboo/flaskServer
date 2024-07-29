@@ -17,7 +17,7 @@ class Chrome:
     def toLogin(self):
         with app.app_context():
             env = Env.query.filter_by(name=self.name).first()
-            if env.status == 0 or env.status == 1:
+            if env:#.status == 0 or env.status == 1:
                 self.chrome = LoginChrome(env)
                 updateEnvStatus(env.name,2)
             else:
