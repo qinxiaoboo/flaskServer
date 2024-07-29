@@ -9,6 +9,10 @@ def getAccount(name,type):
         account = Account.query.filter(and_(Account.name==name,Account.type==type)).first()
         return account
 
+def getAccountById(id):
+    with app.app_context():
+        return Account.query.filter_by(id=id).first()
+
 def updateAccount(name,pwd,fa2,type,email_name=None,email_pass=None):
     pwd = aesCbcPbkdf2EncryptToBase64(pwd)
     fa2 = aesCbcPbkdf2EncryptToBase64(fa2)

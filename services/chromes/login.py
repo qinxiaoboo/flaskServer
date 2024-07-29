@@ -16,7 +16,6 @@ from flaskServer.config.config import get_ini_path
 
 def LoginINITWallet(chrome,env):
     tab = chrome.get_tab(title="Initia Wallet")
-    logger.info(tab.url)
     if "#" not in tab.url:
         tab.ele("@type=password").input(WALLET_PASSWORD)
         tab.ele("@type=submit").click()
@@ -33,7 +32,7 @@ def LoginINITWallet(chrome,env):
             tab.ele("@name=words." + str(index) + ".value").input(word)
         tab.ele("@type=submit").click()
         tab.ele("@type=button")
-    logger.info(f"{env.name}: INIT 登录成功")
+        logger.info(f"{env.name}: INIT 登录成功")
     tab.close()
 
 def ConfirmOKXWallet(chrome,tab,env):
@@ -73,7 +72,7 @@ def LoginOKXWallet(chrome,env):
         tab.ele("@type=submit").click()
         tab.ele("@type=button").click()
         tab.ele("MATIC")
-    logger.info(f"{env.name}: OKX 登录成功")
+        logger.info(f"{env.name}: OKX 登录成功")
     tab.close()
 
 def LoginBitlight(chrome:ChromiumPage,env):
@@ -135,7 +134,7 @@ def LoginTW(chrome:ChromiumPage,env):
         logger.info(f"{env.name}: 开始登录 TW 账号")
         tab.get(url="https://x.com/i/flow/login")
     else:
-        logger.info(f"{env.name}登录TW成功")
+        logger.info(f"{env.name}: 登录TW成功")
         return tab
     tw:Account = Account.query.filter_by(id=env.tw_id).first()
     tab.ele("@autocomplete=username").input(tw.name)
@@ -150,7 +149,7 @@ def LoginTW(chrome:ChromiumPage,env):
             tab.ele("@data-testid=ocfEnterTextTextInput").input(code)
             tab.ele("@@type=button@@text()=Next").click()
     if "home" in tab.url:
-        logger.info(f"{env.name} 登录TW成功")
+        logger.info(f"{env.name}: 登录TW成功")
     return tab
 
 
@@ -189,9 +188,12 @@ def LoginOutlook(chrome:ChromiumPage,env):
             tab.ele("@type=submit").click()
             tab.ele("@type=checkbox").click()
             tab.ele("@@type=submit@@text()=Yes").click()
-    logger.info(f"{env.name}:{tab.url}")
-    if "https://outlook.live.com/mail/0" in tab.url:
-        logger.info("登录OUTLOOK成功")
+            if "https://outlook.live.com/mail/0" in tab.url:
+                logger.info(f"{env.name}: 登录OUTLOOK成功")
+        else:
+            tab.close()
+            logger.info(f"{env.name}: 邮箱格式不正确，关闭邮箱标签")
+
     return tab
 
 def InitChromeOptionByConf(env):

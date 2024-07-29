@@ -16,7 +16,7 @@ DEFAULT_REMOVE_PAGE = []
 # 钱包默认初始密码
 WALLET_PASSWORD = "123qweasd"
 
-
+FAKE_TWITTER = true
 GALXE_CAMPAIGN_IDS = [
     "GCzqctkqub"
 
