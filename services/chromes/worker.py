@@ -24,8 +24,8 @@ def submit(func,datas,*args, **kwargs):
                     break
             if flag:
                 break
-        for f in fs:
-            logger.info('{} result = {}'.format(f, f.result()))
+        # for f in fs:
+        #     logger.info('{} result = {}'.format(f, f.result()))
 
 
 if __name__ == '__main__':

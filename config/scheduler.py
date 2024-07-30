@@ -3,6 +3,7 @@ import time
 from flask_apscheduler import APScheduler
 from flaskServer.config.connect import app
 from flaskServer.services.chromes.faucet.G0 import toDo
+from flaskServer.services.chromes.tasks.plumenetwork import toDoFaucet
 
 # 定时任务配置
 class Config(object):
@@ -24,5 +25,5 @@ app.config.from_object(Config())
 # def task2(x):
 #     print(f'task 2 executed --------: {x}', time.time())
 #
-# scheduler.add_job(func=task1, args=('循环',), trigger='interval', seconds=5, id='interval_task')
-# scheduler.add_job(func=task2, args=('定时任务',), trigger='cron', second='*/10', id='cron_task')
+scheduler.add_job(func=toDoFaucet, args=('ETH',), trigger='interval', hours=1.1, id='interval_toDoFaucet_ETH')
+scheduler.add_job(func=toDoFaucet, args=('GOON',), trigger='interval', hours=2.1, id='interval_toDoFaucet_GOON')
