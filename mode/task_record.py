@@ -1,3 +1,4 @@
+import datetime
 
 from flaskServer.config.connect import db
 
@@ -8,6 +9,10 @@ class TaskRecord(db.Model):
     env_name = db.Column(db.String(120), unique=True, nullable=False)
     # 任务状态：0：已完成，1：默认值
     status = db.Column(db.Integer, unique=False, nullable=True)
+    count = db.Column(db.Integer, unique=False, nullable=True)
+    createtime = db.Column(db.DateTime, default=datetime.datetime.now(),comment="创建时间")
+    updatetime = db.Column(db.DateTime, default=datetime.datetime.now(),comment="更新时间")
+    #
 
     # __mapper_args__ = {
     #     "order_by": env_name.desc()

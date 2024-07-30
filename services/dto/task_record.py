@@ -1,3 +1,5 @@
+import datetime
+
 from flaskServer.mode.task_record import TaskRecord
 from flaskServer.config.connect import db,app
 from sqlalchemy import and_
@@ -13,8 +15,10 @@ def updateTaskRecord(env,name,status):
         if taskRecord:
             if taskRecord.status != status:
                 taskRecord.status = status
+            taskRecord.count = taskRecord.count + 1
+            taskRecord.updatetime = datetime.datetime.now()
         else:
-            taskRecord = TaskRecord(name=name,env_name=env,status=status)
+            taskRecord = TaskRecord(name=name,env_name=env,status=status,count=1)
         db.session.add(taskRecord)
         db.session.commit()
         print(f"{env}新增一条{name}任务记录,状态：'{'完成' if status == 0 else '未完成'}'，id：",taskRecord.id)
@@ -22,8 +26,9 @@ def updateTaskRecord(env,name,status):
 
 def updateTaskStatus(name,status):
     with app.app_context():
-        db.session.query(TaskRecord).filter(TaskRecord.name==name).update({TaskRecord.status:status})
+        db.session.query(TaskRecord).filter(TaskRecord.name==name).update({TaskRecord.status:status,TaskRecord.updatetime:datetime.datetime.now()})
         db.session.commit()
 
 if __name__ == '__main__':
-    updateTaskStatus("multifarm",1)
+    # updateTaskStatus("multifarm",0)
+    updateTaskRecord("Q-8-7","multifarm",1)
