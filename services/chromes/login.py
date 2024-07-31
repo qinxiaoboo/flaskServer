@@ -197,13 +197,13 @@ def InitChromeOptionByConf(env):
     with app.app_context():
         if env.status != 0:
             chrome = ChromiumPage(addr_or_opts=ChromiumOptions(ini_path=get_ini_path(env.name)))
-            chrome.get("https://www.browserscan.net/zh?env=" + env.name)
+            chrome.get("https://whoer.com/zh?env=" + env.name)
             wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
             wait_pages(chrome, wait_page_list)
             LoginOKXWallet(chrome,env)
             chrome.get_tab(title="Initia Wallet").close()
             chrome.get_tab(title="Welcome to OKX").close()
-
+            return chrome
         else:
             return InitChromeOption(env)
 
@@ -217,7 +217,7 @@ def InitChromeOption(env):
             initChrom(chrome, env.name, proxy.ip, proxy.port, proxy.user, proxy.pwd)
         else:
             chrome = ChromiumPage(addr_or_opts=initChromiumOptions(env.name, env.port, env.user_agent, None))
-        chrome.get("https://www.browserscan.net/zh?env=" + env.name)
+        chrome.get("https://whoer.com/zh?env=" + env.name)
         wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
         wait_pages(chrome, wait_page_list)
         chrome.get_tab(title="Initia Wallet").close()
@@ -235,7 +235,7 @@ def GalxeChrome(env):
             initChrom(chrome, env.name, proxy.ip, proxy.port, proxy.user, proxy.pwd)
         else:
             chrome = ChromiumPage(addr_or_opts=initChromiumOptions(env.name, env.port, env.user_agent,None))
-        chrome.get("https://www.browserscan.net/zh?env="+env.name)
+        chrome.get("https://whoer.com/zh?env="+env.name)
         wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
         wait_pages(chrome, wait_page_list)
         LoginINITWallet(chrome,env)
@@ -259,7 +259,7 @@ def LoginChrome(env):
             initChrom(chrome, env.name, proxy.ip, proxy.port, proxy.user, proxy.pwd)
         else:
             chrome = ChromiumPage(addr_or_opts=initChromiumOptions(env.name, env.port, env.user_agent,None))
-        chrome.get("https://www.browserscan.net/zh?env="+env.name)
+        chrome.get("https://whoer.com/zh?env="+env.name)
         wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
         wait_pages(chrome, wait_page_list)
         LoginINITWallet(chrome, env)
@@ -303,7 +303,7 @@ if __name__ == '__main__':
         # proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
         # chrome = ChromiumPage(addr_or_opts=initChromiumOptions(env.name,env.port, env.user_agent, "http://" + proxy.ip + ":" + proxy.port))
         # initChrom(chrome, env.name, proxy.ip, proxy.port,proxy.user,proxy.pwd)
-        # chrome.get("https://www.browserscan.net/zh")
+        # chrome.get("https://whoer.com/zh")
         # wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
         # wait_pages(chrome, wait_page_list)
         # LoginINITWallet(chrome,env)

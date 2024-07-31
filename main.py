@@ -11,6 +11,7 @@ from flaskServer.services.chromes.login import toLoginAll
 from flaskServer.services.chromes.chrome import Chrome
 from flaskServer.services.chromes.worker import submit
 from flaskServer.services.chromes.tasks.multifarm import toDo as toDoMultifarm
+from threading import Thread
 
 result = {"code": 0, 'msg': "success"}
 chrome = None
@@ -36,7 +37,7 @@ def loginAll ():
 @app.route("/init/<name>")
 def login(name):
     chrome = Chrome(name)
-    chrome.toLogin()
+    Thread(target=chrome.toLogin,args=()).start()
     return "success"
 
 @app.route("/off/<name>")

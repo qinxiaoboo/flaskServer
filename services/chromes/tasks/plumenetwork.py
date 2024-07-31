@@ -72,7 +72,7 @@ def getFaucet(chrome,env,type):
     chrome.wait(2,3)
     try:
         tab.ele("@data-testid=get-tokens-button").click()
-        chrome.wait(5,6)
+        chrome.wait(7,8)
         text = tab.s_ele("@class=flex w-[300px] flex-col justify-center py-2").text
         if "Whoosh! Slow down!" in text:
             logger.info(env.name + f": {text}")
@@ -123,11 +123,17 @@ def toDo(env):
         logger.info(f"======开始执行{env.name}环境")
         chrome: ChromiumPage = InitChromeOptionByConf(env)
         try:
-            tab = getFaucet(chrome,env,"ETH")
-            # tab.get("https://faucet.plumenetwork.xyz/")
+            # tab = getFaucet(chrome,env,"ETH")
+            tab = getTab(chrome,env)
+            if tab:
+                tab.get("https://miles.plumenetwork.xyz/daily-checkin")
+
 
         except Exception as e:
             logger.error(f"{env.name} 执行异常：{e}")
 
 if __name__ == '__main__':
-    toDoFaucet("ETH")
+    # toDoFaucet("ETH")
+    with app.app_context():
+        env = Env.query.filter_by(name="Q-1-2").first()
+        toDo(env)
