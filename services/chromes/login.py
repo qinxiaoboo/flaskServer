@@ -117,6 +117,7 @@ def AuthTW(chrome:ChromiumPage,env):
                 tab.ele("@@type=button@@text()=Next").click()
         tab.ele("@@role=button@@data-testid=OAuth_Consent_Button").click()
         logger.info(f"{env.name}: 推特登录并认证成功")
+    return tab
 
 
 def LoginTW(chrome:ChromiumPage,env):
@@ -193,6 +194,11 @@ def LoginOutlook(chrome:ChromiumPage,env):
 
     return tab
 
+def setTitle(chrome,env):
+    tab = chrome.get_tab(url="whoer.com")
+    tab.run_js(f"document.title='{env.name}'")
+
+
 def InitChromeOptionByConf(env):
     with app.app_context():
         if env.status != 0:
@@ -203,6 +209,7 @@ def InitChromeOptionByConf(env):
             LoginOKXWallet(chrome,env)
             chrome.get_tab(title="Initia Wallet").close()
             chrome.get_tab(title="Welcome to OKX").close()
+            setTitle(chrome,env)
             return chrome
         else:
             return InitChromeOption(env)
@@ -223,6 +230,8 @@ def InitChromeOption(env):
         chrome.get_tab(title="Initia Wallet").close()
         chrome.get_tab(title="Welcome to OKX").close()
         chrome.get_tab(title="OKX Wallet").close()
+        setTitle(chrome, env)
+        return chrome
 
 
 def GalxeChrome(env):
@@ -245,6 +254,7 @@ def GalxeChrome(env):
         LoginOutlook(chrome, env)
         tab = chrome.get_tab(title="Welcome to OKX")
         tab.close()
+        setTitle(chrome, env)
         logger.info(f"{env.name}: {ChromiumOptions().address}")
         return chrome
 
@@ -270,6 +280,7 @@ def LoginChrome(env):
         LoginBitlight(chrome, env)
         tab = chrome.get_tab(title="Welcome to OKX")
         tab.close()
+        setTitle(chrome, env)
         logger.info(ChromiumOptions().address)
         return chrome
 
@@ -295,6 +306,8 @@ if __name__ == '__main__':
             try:
                 chrome = InitChromeOptionByConf(env)
                 logger.info("环境初始化成功")
+
+
                 # chrome.quit()
             except Exception as e:
                 logger.error(env.to_json(),e)
