@@ -69,29 +69,31 @@ def getFaucet(chrome,env,type):
     chrome.wait(1,2)
     if type=="GOON":
         tab.ele("@data-testid=goon-radio-card").click()
-    chrome.wait(1,2)
+    chrome.wait(2,3)
     try:
         tab.ele("@data-testid=get-tokens-button").click()
-        chrome.wait(7,8)
+        chrome.wait(5,6)
+        text = tab.s_ele("@class=flex w-[300px] flex-col justify-center py-2").text
+        if "Whoosh! Slow down!" in text:
+            logger.info(env.name + f": {text}")
+            return
         ele = chrome.get_tab(title=Content.OKX_TITLE).ele("@type=button").next()
-        print(ele.text)
         if (ele.text == "Claim via faucet"):
-            logger.info(f"{Env.name}:{type}不足无法领取测试币")
+            logger.info(f"{env.name}:{type}不足无法领取测试币")
         else:
             text = tab.s_ele("@class=flex w-[300px] flex-col justify-center py-2").text
-            print(text)
             if "Working on it" in text:
-                logger.info(f" {Env.name}: 正在领取{type}测试币, {text}")
+                logger.info(f" {env.name}: 正在领取{type}测试币, {text}")
                 chrome.wait(3)
                 ele.click()
                 chrome.wait(3)
                 text = tab.s_ele("@class=flex w-[300px] flex-col justify-center py-2").text
                 if "Mission accomplished" in text:
-                    logger.info(f"{Env.name}: 领取{type}测试币成功")
+                    logger.info(env.name + f": 领取{type}测试币成功")
             elif "Whoosh! Slow down!" in text:
-                logger.info(f"{Env.name}: {text}")
+                logger.info( env.name + f": {text}")
     except Exception as e:
-        logger.error(f"{Env.name}: 该IP已经领取过测试币,{e}")
+        logger.error(f"{env.name}: 该IP已经领取过测试币,{e}")
 
 
 def worker(env,type):

@@ -197,15 +197,13 @@ def InitChromeOptionByConf(env):
     with app.app_context():
         if env.status != 0:
             chrome = ChromiumPage(addr_or_opts=ChromiumOptions(ini_path=get_ini_path(env.name)))
-            try:
-                chrome.get("https://www.browserscan.net/zh?env=" + env.name)
-                wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
-                wait_pages(chrome, wait_page_list)
-                LoginOKXWallet(chrome,env)
-                chrome.get_tab(title="Initia Wallet").close()
-                chrome.get_tab(title="Welcome to OKX").close()
-            finally:
-                return chrome
+            chrome.get("https://www.browserscan.net/zh?env=" + env.name)
+            wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
+            wait_pages(chrome, wait_page_list)
+            LoginOKXWallet(chrome,env)
+            chrome.get_tab(title="Initia Wallet").close()
+            chrome.get_tab(title="Welcome to OKX").close()
+
         else:
             return InitChromeOption(env)
 
@@ -219,15 +217,13 @@ def InitChromeOption(env):
             initChrom(chrome, env.name, proxy.ip, proxy.port, proxy.user, proxy.pwd)
         else:
             chrome = ChromiumPage(addr_or_opts=initChromiumOptions(env.name, env.port, env.user_agent, None))
-        try:
-            chrome.get("https://www.browserscan.net/zh?env=" + env.name)
-            wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
-            wait_pages(chrome, wait_page_list)
-            chrome.get_tab(title="Initia Wallet").close()
-            chrome.get_tab(title="Welcome to OKX").close()
-            chrome.get_tab(title="OKX Wallet").close()
-        finally:
-            return chrome
+        chrome.get("https://www.browserscan.net/zh?env=" + env.name)
+        wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
+        wait_pages(chrome, wait_page_list)
+        chrome.get_tab(title="Initia Wallet").close()
+        chrome.get_tab(title="Welcome to OKX").close()
+        chrome.get_tab(title="OKX Wallet").close()
+
 
 def GalxeChrome(env):
     with app.app_context():

@@ -11,7 +11,8 @@ def getUserAgent():
 
 
 def wait_pages(chrome,wait_page_list):
-    while True:
+    count = 100
+    while count:
         for tab_id in chrome.tab_ids:
             tab = chrome.get_tab(id_or_num=tab_id)
             for title in wait_page_list:
@@ -20,6 +21,7 @@ def wait_pages(chrome,wait_page_list):
                     continue
         if len(wait_page_list) > 0:
             chrome.wait(1,2)
+            count-= 1
         else:
             break
 

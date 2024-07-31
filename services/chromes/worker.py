@@ -3,7 +3,6 @@ from concurrent.futures import ThreadPoolExecutor
 import time
 from loguru import logger
 
-executor = ThreadPoolExecutor(THREAD_POOL_NUM)
 
 # def worker(data,name,age,key="key",value="value"):
 #     print(data)
@@ -11,7 +10,7 @@ executor = ThreadPoolExecutor(THREAD_POOL_NUM)
 
 def submit(func,datas,*args, **kwargs):
     fs = []
-    with executor:
+    with ThreadPoolExecutor(THREAD_POOL_NUM) as executor:
         for data in datas:
             f = executor.submit(func,data, *args, **kwargs)
             fs.append(f)

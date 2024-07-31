@@ -27,3 +27,4 @@ app.config.from_object(Config())
 #
 scheduler.add_job(func=toDoFaucet, args=('ETH',), trigger='interval', hours=1.1, id='interval_toDoFaucet_ETH')
 scheduler.add_job(func=toDoFaucet, args=('GOON',), trigger='interval', hours=2.1, id='interval_toDoFaucet_GOON')
+scheduler.add_job(func=toDo, args=(), trigger='interval', hours=24.1, id='interval_toDoFaucet_0G')
