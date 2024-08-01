@@ -74,6 +74,7 @@ def LoginOKXWallet(chrome,env):
 
 def LoginBitlight(chrome:ChromiumPage,env):
     tab = chrome.new_tab(url="chrome-extension://fdojfgffiecmmppcjnahfgiignlnehap/popup/popup.html")
+    chrome.wait(0.1)
     if "unlock" not in tab.url:
         tab.ele("@@type=button@@text()=I already have a wallet").click()
         passwords = tab.eles("@type=password")

@@ -5,7 +5,9 @@ THREAD_POOL_NUM = 2
 # 浏览器执行器
 CHROME_EXEC_PATH = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
 # 扩展目录
-CHROME_EXTEND = ["wf-proxyIp","ffbceckpkpbcmgiaehlloocglmijnpmp","mcohilncbfahbmgdjkbpemcciiolgcge","yescap_v2.0.beta","bitlight"]
+CHROME_EXTEND = ["wf-proxyIp","ffbceckpkpbcmgiaehlloocglmijnpmp","okx","yescap_v2.0.beta","bitlight"]
+# 工作目录
+WORK_PATH = 'D:\python\wf-chrome\'
 CHROME_EXTEND_PATH = 'D:\data\etd\'
 # 缓存和用户数据，浏览器配置，浏览器下载地址
 CHROME_USER_DATA_PATH = 'D:\data\cache\'

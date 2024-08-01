@@ -7,6 +7,7 @@ ENV_PATH = cfg.get('ENV_PATH')
 THREAD_POOL_NUM = cfg.get('THREAD_POOL_NUM')
 CHROME_EXEC_PATH = cfg.get("CHROME_EXEC_PATH")
 CHROME_EXTEND = cfg.get("CHROME_EXTEND")
+WORK_PATH = cfg.get("WORK_PATH")
 CHROME_EXTEND_PATH = cfg.get("CHROME_EXTEND_PATH")
 
 CHROME_USER_DATA_PATH = cfg.get("CHROME_USER_DATA_PATH")
@@ -18,5 +19,6 @@ WALLET_PASSWORD = cfg.get("WALLET_PASSWORD")
 
 def get_ini_path(name):
     return CHROME_USER_DATA_PATH / Path("config/") / Path(name) / Path("conf.ini")
+
 FAKE_TWITTER = cfg.get("FAKE_TWITTER")
 GALXE_CAMPAIGN_IDS = cfg.get("GALXE_CAMPAIGN_IDS")

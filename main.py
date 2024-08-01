@@ -16,9 +16,7 @@ from threading import Thread
 result = {"code": 0, 'msg': "success"}
 chrome = None
 
-@app.route('/')
-def hello_world():
-    return {"username":"ALQLgu","password":"BWkSWw","ipaddress":"45.93.213.234","port":8000}
+
 @app.route('/system/setting/get')
 def systemSettingGet():
     result["data"] = getInfo(request.args)

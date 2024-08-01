@@ -1,7 +1,7 @@
 import random
-
+from flaskServer.config.config import WORK_PATH
 s = list()
-with open(r'D:\python\wf-chrome\flaskServer\utils\useragent.txt', 'r') as f:
+with open(WORK_PATH + r'\flaskServer\utils\useragent.txt', 'r') as f:
     for line in f:
         s.append(line.strip())
 
@@ -35,5 +35,5 @@ def initChrom(chrome,env,http_host,http_port,user,pw):
 
 
 if __name__ == '__main__':
-    print(getUserAgent(userAgent="hello"))
+    print(getUserAgent(userAgent=""))
 
