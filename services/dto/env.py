@@ -21,7 +21,7 @@ def updateEnvStatus(name,status):
         db.session.add(ENV)
         db.session.commit()
 
-def updateEnv(env,port,cookies,proxy,tw,discord,outlook,okx,init,bitlight):
+def updateEnv(env,port,cookies,proxy,tw,discord,outlook,okx,init,bitlight,userAgent):
     ENV = getEnvByName(env)
     with app.app_context():
         if ENV:
@@ -44,7 +44,7 @@ def updateEnv(env,port,cookies,proxy,tw,discord,outlook,okx,init,bitlight):
             if port and ENV.port != port:
                 ENV.port = port
         else:
-            ENV = Env(name=env,port=port,user_agent=getUserAgent(),cookies=cookies,t_proxy_id=getId(proxy)
+            ENV = Env(name=env,port=port,user_agent=getUserAgent(userAgent),cookies=cookies,t_proxy_id=getId(proxy)
                       ,tw_id=getId(tw),discord_id=getId(discord),outlook_id=getId(outlook),okx_id=getId(okx),
                       init_id=getId(init),bitlight_id=getId(bitlight))
         db.session.add(ENV)

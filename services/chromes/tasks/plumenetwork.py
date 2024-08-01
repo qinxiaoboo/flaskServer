@@ -123,8 +123,8 @@ def toDo(env):
         logger.info(f"======开始执行{env.name}环境")
         chrome: ChromiumPage = InitChromeOptionByConf(env)
         try:
-            # tab = getFaucet(chrome,env,"ETH")
-            tab = getTab(chrome,env)
+            tab = getFaucet(chrome,env,"ETH")
+            # tab = getTab(chrome,env)
             if tab:
                 tab.get("https://miles.plumenetwork.xyz/daily-checkin")
 
@@ -135,5 +135,5 @@ def toDo(env):
 if __name__ == '__main__':
     # toDoFaucet("ETH")
     with app.app_context():
-        env = Env.query.filter_by(name="Q-1-2").first()
+        env = Env.query.filter_by(name="Q-4").first()
         toDo(env)

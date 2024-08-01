@@ -5,8 +5,8 @@ with open(r'D:\python\wf-chrome\flaskServer\utils\useragent.txt', 'r') as f:
     for line in f:
         s.append(line.strip())
 
-def getUserAgent():
-
+def getUserAgent(userAgent):
+    if userAgent:return userAgent
     return random.choice(s)
 
 
@@ -35,5 +35,5 @@ def initChrom(chrome,env,http_host,http_port,user,pw):
 
 
 if __name__ == '__main__':
-    print(getUserAgent())
+    print(getUserAgent(userAgent="hello"))
 

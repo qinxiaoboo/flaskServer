@@ -21,6 +21,7 @@ for index, row in df.iterrows():
     init = row["init钱包"]
     bitlight = row["bitlight钱包"]
     okx = row["okx钱包"]
+    userAgent = row["UserAgent"]
     print(row)
     PROXY, TW, DISCORD, OUTLOOK, OKX, BITLIGHT, INIT = [None for i in range(7)]
     if env and chrom_port:
@@ -45,7 +46,7 @@ for index, row in df.iterrows():
         if init:
             word, address = init.split(",")
             INIT = updateWallt(env, word, address, "INIT")
-        updateEnv(env, chrom_port, cookies, PROXY, TW, DISCORD, OUTLOOK, OKX, INIT, BITLIGHT)
+        updateEnv(env, chrom_port, cookies, PROXY, TW, DISCORD, OUTLOOK, OKX, INIT, BITLIGHT,userAgent)
 
 if __name__ == '__main__':
     pass
