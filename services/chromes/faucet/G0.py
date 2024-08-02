@@ -8,8 +8,8 @@ from flaskServer.mode.proxy import Proxy
 from flaskServer.mode.wallet import Wallet
 from flaskServer.services.chromes.login import NoAccountChrome
 from flaskServer.services.chromes.worker import submit
-from flaskServer.utils.decorator import closeChrome
 
+# 处理页面任务
 def worker(env):
     chrome = None
     try:
@@ -30,6 +30,7 @@ def worker(env):
         if chrome:
             chrome.quit()
 
+# 任务调度
 def toDo():
     num = random.choice([ i for i in range(5)])
     with app.app_context():
