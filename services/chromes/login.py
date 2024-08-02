@@ -213,6 +213,7 @@ def LoginOutlook(chrome:ChromiumPage,env):
 
 def OKXChrome(env):
     with app.app_context():
+        chrome =None
         try:
             proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
             chrome = getChrome(proxy,env)
@@ -292,7 +293,7 @@ def toLoginAll(env):
 
 if __name__ == '__main__':
     with app.app_context():
-        env = Env.query.filter_by(name="Q-4-3").first()
+        env = Env.query.filter_by(name="Q-2").first()
         try:
             chrome = OKXChrome(env)
             logger.info("环境初始化成功")

@@ -123,8 +123,8 @@ def toDo(env):
         try:
             tab = getFaucet(chrome,env,"ETH")
             # tab = getTab(chrome,env)
-            if tab:
-                tab.get("https://miles.plumenetwork.xyz/daily-checkin")
+            # if tab:
+            #     tab.get("https://miles.plumenetwork.xyz/daily-checkin")
 
 
         except Exception as e:
@@ -133,5 +133,5 @@ def toDo(env):
 if __name__ == '__main__':
     # toDoFaucet("ETH")
     with app.app_context():
-        env = Env.query.filter_by(name="Q-4").first()
+        env = Env.query.filter_by(name="Q-2").first()
         toDo(env)
