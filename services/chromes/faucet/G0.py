@@ -4,14 +4,14 @@ from flaskServer.mode.proxy import Proxy
 from flaskServer.mode.env import Env
 from flaskServer.mode.wallet import Wallet
 from flaskServer.services.chromes.worker import submit
-from flaskServer.services.chromes.login import InitChromeOption, LoginChrome
+from flaskServer.services.chromes.login import NoAccountChrome, LoginChrome
 from flaskServer.services.dto.env import updateEnvStatus
 from flaskServer.config.connect import db,app
 from loguru import logger
 
 
 def worker(env):
-    chrome = InitChromeOption(env)
+    chrome = NoAccountChrome(env)
     try:
         tab = chrome.new_tab(url="https://faucet.0g.ai")
         with app.app_context():
@@ -28,7 +28,8 @@ def worker(env):
     except Exception as e:
         logger.error(f"{env.name}: {e}")
     finally:
-        chrome.quit()
+        if chrome:
+            chrome.quit()
 
 
 def toDo():

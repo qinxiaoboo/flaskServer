@@ -11,11 +11,18 @@ from flaskServer.services.chromes.login import toLoginAll
 from flaskServer.services.chromes.chrome import Chrome
 from flaskServer.services.chromes.worker import submit
 from flaskServer.services.chromes.tasks.multifarm import toDo as toDoMultifarm
+from flaskServer.services.dto.env import updateAllStatus
 from threading import Thread
 
 result = {"code": 0, 'msg': "success"}
 chrome = None
 
+
+
+@app.route("/chromes/reset")
+def reset ():
+    updateAllStatus(0)
+    return "success"
 
 @app.route('/system/setting/get')
 def systemSettingGet():
@@ -24,6 +31,8 @@ def systemSettingGet():
 @app.route("/system/setting/update")
 def systemSettingSet():
     updateInfo(request.get_json())
+    return "success"
+
 @app.route("/init/all")
 def loginAll ():
     with app.app_context():

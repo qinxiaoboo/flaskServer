@@ -1,6 +1,7 @@
 from DrissionPage import ChromiumOptions
 from flaskServer.config.config import CHROME_EXEC_PATH,CHROME_EXTEND,CHROME_EXTEND_PATH,DEFAULT_OPEN_PAGE,DEFAULT_REMOVE_PAGE
 from flaskServer.config.config import CHROME_USER_DATA_PATH
+from loguru import logger
 from pathlib import Path
 CHROME_USER_DATA_PATH = Path(CHROME_USER_DATA_PATH)
 
@@ -69,8 +70,12 @@ def initChromiumOptions(env,port,useragent,proxy_server):
     co.remove_extensions()
     extends_path = ""
     for extend in CHROME_EXTEND:
-        co.add_extension(Path(CHROME_EXTEND_PATH) / Path(extend))
-        extends_path += CHROME_EXTEND_PATH + extend + ","
+        etdpath = Path(CHROME_EXTEND_PATH) / Path(extend)
+        if etdpath.exists():
+            co.add_extension(etdpath)
+            extends_path += CHROME_EXTEND_PATH + extend + ","
+        else:
+            logger.error(f"配置文件可能有误，{etdpath},路径不存在")
     co.set_argument("--load-extension",extends_path.rstrip(","))
     init_path = CHROME_USER_DATA_PATH / Path("config/") / Path(env) / Path("conf.ini")
     co.save(path=init_path)

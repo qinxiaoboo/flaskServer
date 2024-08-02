@@ -1,13 +1,10 @@
-import random
-from flaskServer.config.config import WORK_PATH
-s = list()
-with open(WORK_PATH + r'\flaskServer\utils\useragent.txt', 'r') as f:
-    for line in f:
-        s.append(line.strip())
 
-def getUserAgent(userAgent):
-    if userAgent:return userAgent
-    return random.choice(s)
+from loguru import logger
+from DrissionPage import ChromiumPage
+from DrissionPage import ChromiumOptions
+from flaskServer.config.chromiumOptions import initChromiumOptions
+from flaskServer.config.config import get_ini_path
+from flaskServer.services.dto.env import updateEnvStatus
 
 
 def wait_pages(chrome,wait_page_list):
@@ -25,6 +22,43 @@ def wait_pages(chrome,wait_page_list):
         else:
             break
 
+def setTitle(chrome,env):
+    tab = chrome.get_tab(url="whoer.com")
+    tab.run_js(f"document.title='{env.name}'")
+
+def closeInitTab(chrome):
+    tab = chrome.get_tab(title="Welcome to OKX")
+    tab.close()
+
+def getChrome(proxy,env):
+    chrome = None
+    try:
+        if env.status == 0 or env.status == None:  # 如果环境是初始化状态
+            if proxy:  # 需要代理
+                chrome = ChromiumPage(addr_or_opts=
+                    initChromiumOptions(env.name, env.port, env.user_agent,"http://" + proxy.ip + ":" + proxy.port))
+                initChrom(chrome, env.name, proxy.ip, proxy.port, proxy.user, proxy.pwd)
+            else:
+                chrome = ChromiumPage(addr_or_opts=initChromiumOptions(env.name, env.port, env.user_agent, None))
+        else:
+            ini_path = get_ini_path(env.name)
+            if ini_path.exists():
+                chrome = ChromiumPage(addr_or_opts=ChromiumOptions(ini_path=ini_path))
+            else:
+                logger.error(f"{env.name}: ini_path配置文件不存在")
+        if chrome:
+            chrome.get("https://whoer.com/zh?env=" + env.name)
+            wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
+            wait_pages(chrome, wait_page_list)
+            closeInitTab(chrome)
+            setTitle(chrome, env)
+            updateEnvStatus(env.name, 1)
+        return chrome
+    except Exception as e:
+        if chrome:
+            chrome.quit()
+        raise e
+
 def initChrom(chrome,env,http_host,http_port,user,pw):
     # 设置代理
     chrome.get(
@@ -35,5 +69,5 @@ def initChrom(chrome,env,http_host,http_port,user,pw):
 
 
 if __name__ == '__main__':
-    print(getUserAgent(userAgent=""))
+    pass
 
