@@ -11,12 +11,13 @@ name = "multifarm"
 
 def toDo(env):
     with app.app_context():
+        chrome = None
         logger.info(f"======开始执行{env.name}环境")
-        record = TaskRecord.query.filter(and_(TaskRecord.env_name==env.name,TaskRecord.name==name)).first()
-        if record and record.status == 0:
-            return
-        chrome:ChromiumPage = OKXChrome(env)
         try:
+            record = TaskRecord.query.filter(and_(TaskRecord.env_name==env.name,TaskRecord.name==name)).first()
+            if record and record.status == 0:
+                return
+            chrome = OKXChrome(env)
             LoginTW(chrome,env)
             tab = chrome.new_tab(url="http://www.multifarm.io/?r=37JUJ4")
             tab.ele("get started").click()
@@ -41,11 +42,11 @@ def toDo(env):
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
         finally:
-            chrome.quit()
+            if chrome:
+                chrome.quit()
 
 
 if __name__ == '__main__':
-    pass
     with app.app_context():
         env = Env.query.filter_by(name="Q-0").first()
         toDo(env)
