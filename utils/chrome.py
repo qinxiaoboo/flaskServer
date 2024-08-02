@@ -1,10 +1,11 @@
-
-from loguru import logger
 from DrissionPage import ChromiumPage
 from DrissionPage import ChromiumOptions
+from DrissionPage.errors import *
 from flaskServer.config.chromiumOptions import initChromiumOptions
+from flaskServer.config.config import HEADLESS
 from flaskServer.config.config import get_ini_path
 from flaskServer.services.dto.env import updateEnvStatus
+
 
 
 def wait_pages(chrome,wait_page_list):
@@ -21,6 +22,8 @@ def wait_pages(chrome,wait_page_list):
             count-= 1
         else:
             break
+    return (len(wait_page_list) == 0)
+
 
 def setTitle(chrome,env):
     tab = chrome.get_tab(url="whoer.com")
@@ -30,29 +33,45 @@ def closeInitTab(chrome):
     tab = chrome.get_tab(title="Welcome to OKX")
     tab.close()
 
-def getChrome(proxy,env):
+def getChromiumOptions(co):
+    co.headless(on_off=HEADLESS)
+    return co
+
+def getChromiumPage(env, proxy): # 获取一个ChromiumPage对象
     chrome = None
     try:
         if env.status == 0 or env.status == None:  # 如果环境是初始化状态
             if proxy:  # 需要代理
-                chrome = ChromiumPage(addr_or_opts=
-                    initChromiumOptions(env.name, env.port, env.user_agent,"http://" + proxy.ip + ":" + proxy.port))
+                chrome = ChromiumPage(addr_or_opts=getChromiumOptions(initChromiumOptions(env.name, env.port, env.user_agent,"http://" + proxy.ip + ":" + proxy.port)))
                 initChrom(chrome, env.name, proxy.ip, proxy.port, proxy.user, proxy.pwd)
             else:
-                chrome = ChromiumPage(addr_or_opts=initChromiumOptions(env.name, env.port, env.user_agent, None))
+                chrome = ChromiumPage(addr_or_opts=getChromiumOptions(initChromiumOptions(env.name, env.port, env.user_agent, None)))
         else:
             ini_path = get_ini_path(env.name)
             if ini_path.exists():
-                chrome = ChromiumPage(addr_or_opts=ChromiumOptions(ini_path=ini_path))
+                chrome = ChromiumPage(addr_or_opts=getChromiumOptions(ChromiumOptions(ini_path=ini_path)))
             else:
-                logger.error(f"{env.name}: ini_path配置文件不存在")
+                raise Exception(f"{env.name}: ini_path配置文件不存在")
+        return chrome
+    except Exception as e:
         if chrome:
-            chrome.get("https://whoer.com/zh?env=" + env.name)
-            wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
-            wait_pages(chrome, wait_page_list)
+            chrome.quit()
+        raise e
+
+def getChrome(proxy,env):
+    chrome = None
+    try:
+        chrome = getChromiumPage(env,proxy)
+        chrome.get("https://whoer.com/zh?env=" + env.name)
+        wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
+        flag = wait_pages(chrome, wait_page_list)
+        if flag:
             closeInitTab(chrome)
             setTitle(chrome, env)
             updateEnvStatus(env.name, 1)
+            print(chrome.user_agent)
+        else:
+            raise WaitTimeoutError("等待初始页面等待超时！~")
         return chrome
     except Exception as e:
         if chrome:

@@ -11,7 +11,6 @@ from flaskServer.mode.proxy import Proxy
 from flaskServer.mode.wallet import Wallet
 from flaskServer.services.dto.env import updateEnvStatus
 from flaskServer.utils.chrome import getChrome
-from flaskServer.utils.chrome import wait_pages
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 
 
@@ -198,7 +197,6 @@ def OKXChrome(env):
             chrome = getChrome(proxy,env)
             LoginOKXWallet(chrome,env)
             chrome.get_tab(title="Initia Wallet").close()
-            chrome.get_tab(title="Welcome to OKX").close()
             return chrome
         except Exception as e:
             if chrome:
@@ -212,7 +210,6 @@ def NoAccountChrome(env):
             proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
             chrome = getChrome(proxy,env)
             chrome.get_tab(title="Initia Wallet").close()
-            chrome.get_tab(title="Welcome to OKX").close()
             chrome.get_tab(title="OKX Wallet").close()
             return chrome
         except Exception as e:
@@ -270,11 +267,10 @@ def toLoginAll(env):
 
 if __name__ == '__main__':
     with app.app_context():
-        env = Env.query.filter_by(name="Q-8-3").first()
-        if env.status == 0:
-            try:
-                chrome = NoAccountChrome(env)
-                logger.info("环境初始化成功")
-
-            except Exception as e:
-                logger.error(env.to_json(),e)
+        env = Env.query.filter_by(name="Q-4-3").first()
+        try:
+            chrome = LoginChrome(env)
+            logger.info("环境初始化成功")
+            chrome.quit()
+        except Exception as e:
+            logger.error(env.to_json(),e)
