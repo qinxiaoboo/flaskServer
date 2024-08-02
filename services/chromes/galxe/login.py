@@ -1,14 +1,11 @@
 from DrissionPage._elements.chromium_element import ChromiumElement
+from loguru import logger
 
-from flaskServer.services.chromes.login import GalxeChrome
 from flaskServer.config.connect import app
 from flaskServer.mode.env import Env
-from flaskServer.services.dto.account import getAccountById
 from flaskServer.services.chromes.login import ConfirmOKXWallet
-from flaskServer.services.content import Content
-from flaskServer.config.config import FAKE_TWITTER
-from DrissionPage import ChromiumPage
-from loguru import logger
+from flaskServer.services.chromes.login import GalxeChrome
+from flaskServer.services.dto.account import getAccountById
 
 if __name__ == '__main__':
     with app.app_context():
@@ -31,7 +28,6 @@ if __name__ == '__main__':
         roleWapper = tab.ele("@class=flex flex-col gap-5 mb-8")
         roles = roleWapper.eles("x:/div")
         for role in roles[1:]:
-
             # 判断任务是否成功
             try:
                 success = role.s_ele("@class=text-success")

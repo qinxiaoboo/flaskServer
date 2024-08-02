@@ -1,16 +1,14 @@
 import random
 
 from DrissionPage import ChromiumPage
-from flaskServer.config.connect import db,app
+from loguru import logger
+
+from flaskServer.config.connect import app
 from flaskServer.mode.env import Env
 from flaskServer.mode.proxy import Proxy
-from flaskServer.mode.task_record import TaskRecord
-from flaskServer.services.chromes.login import InitChromeOptionByConf,LoginTW,AuthTW, ConfirmOKXWallet
 from flaskServer.services.chromes.worker import submit
-from flaskServer.services.dto.task_record import updateTaskRecord
 from flaskServer.services.content import Content
-from sqlalchemy import and_
-from loguru import logger
+from flaskServer.services.chromes.login import OKXChrome
 
 # 任务名称
 name = "plume_network"
@@ -98,7 +96,7 @@ def getFaucet(chrome,env,type):
 
 def worker(env,type):
     logger.info(f"======开始执行{env.name}环境")
-    chrome: ChromiumPage = InitChromeOptionByConf(env)
+    chrome: ChromiumPage = OKXChrome(env)
     try:
         getFaucet(chrome, env, type)
     except Exception as e:
@@ -121,7 +119,7 @@ def toDoFaucet(type):
 def toDo(env):
     with app.app_context():
         logger.info(f"======开始执行{env.name}环境")
-        chrome: ChromiumPage = InitChromeOptionByConf(env)
+        chrome: ChromiumPage = OKXChrome(env)
         try:
             tab = getFaucet(chrome,env,"ETH")
             # tab = getTab(chrome,env)

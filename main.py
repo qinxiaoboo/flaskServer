@@ -8,7 +8,7 @@ from flaskServer.services.system.dict import updateInfo
 from flaskServer.config.scheduler import scheduler
 from flaskServer.mode.env import Env
 from flaskServer.services.chromes.login import toLoginAll
-from flaskServer.services.chromes.chrome import Chrome
+from flaskServer.services.chromes.login import LoginChrome
 from flaskServer.services.chromes.worker import submit
 from flaskServer.services.chromes.tasks.multifarm import toDo as toDoMultifarm
 from flaskServer.services.dto.env import updateAllStatus
@@ -43,15 +43,11 @@ def loginAll ():
 
 @app.route("/init/<name>")
 def login(name):
-    chrome = Chrome(name)
-    Thread(target=chrome.toLogin,args=()).start()
+    with app.app_context():
+        env = Env.query.filter_by(name=name).first()
+    Thread(target=LoginChrome,args=(env,)).start()
     return "success"
 
-@app.route("/off/<name>")
-def off(name):
-    chrome = Chrome(name)
-    chrome.quit()
-    return "success"
 @app.route("/todo/multifarm")
 def multifarm ():
     with app.app_context():

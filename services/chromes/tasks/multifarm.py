@@ -2,7 +2,7 @@ from DrissionPage import ChromiumPage
 from flaskServer.config.connect import db,app
 from flaskServer.mode.env import Env
 from flaskServer.mode.task_record import TaskRecord
-from flaskServer.services.chromes.login import InitChromeOptionByConf,LoginTW,AuthTW, ConfirmOKXWallet
+from flaskServer.services.chromes.login import OKXChrome,LoginTW,AuthTW, ConfirmOKXWallet
 from flaskServer.services.dto.task_record import updateTaskRecord
 from sqlalchemy import and_
 from loguru import logger
@@ -15,7 +15,7 @@ def toDo(env):
         record = TaskRecord.query.filter(and_(TaskRecord.env_name==env.name,TaskRecord.name==name)).first()
         if record and record.status == 0:
             return
-        chrome:ChromiumPage = InitChromeOptionByConf(env)
+        chrome:ChromiumPage = OKXChrome(env)
         try:
             LoginTW(chrome,env)
             tab = chrome.new_tab(url="http://www.multifarm.io/?r=37JUJ4")
