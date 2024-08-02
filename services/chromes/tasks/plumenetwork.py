@@ -119,16 +119,16 @@ def toDoFaucet(type):
 def toDo(env):
     with app.app_context():
         logger.info(f"======开始执行{env.name}环境")
-        chrome: ChromiumPage = OKXChrome(env)
         try:
+            chrome: ChromiumPage = OKXChrome(env)
             tab = getFaucet(chrome,env,"ETH")
             # tab = getTab(chrome,env)
             # if tab:
             #     tab.get("https://miles.plumenetwork.xyz/daily-checkin")
 
-
         except Exception as e:
             logger.error(f"{env.name} 执行异常：{e}")
+            raise e
 
 if __name__ == '__main__':
     # toDoFaucet("ETH")
