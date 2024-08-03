@@ -1,9 +1,16 @@
 # 初始化环境文件
 ENV_PATH = 'D:\data\initData\env.xlsx'
-# 线程数
+# 线程池并发数
 THREAD_POOL_NUM = 2
+# 协程数量
+THREADS_NUM = 1
+RANDOM_ORDER = true
+SKIP_FIRST_ACCOUNTS = 40
+WAIT_BETWEEN_ACCOUNTS = [0,0]
 # 浏览器执行器
 CHROME_EXEC_PATH = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
+# 浏览器版本
+CHROME_VERSION = "127"
 # 扩展列表
 CHROME_EXTEND = ["wf-proxyIp","ffbceckpkpbcmgiaehlloocglmijnpmp","okx","yescap_v2.0.beta","bitlight"]
 # 工作目录
@@ -20,9 +27,28 @@ DEFAULT_REMOVE_PAGE = []
 HEADLESS = false
 # 钱包默认初始密码
 WALLET_PASSWORD = "123qweasd"
+
+CAP_MONSTER_API_KEY = "c8131af726a3334fb1c4fec3b8c5b33d"
+TWO_CAPTCHA_API_KEY = ""
+CAP_SOLVER_API_KEY = "CAP-27DC5CC99864A5F25B067F913750333A"
+
 # 推特是否伪造
-FAKE_TWITTER = true
+FAKE_TWITTER = false
+#
+MAX_TRIES = 3
+DISABLE_SSL = true
 GALXE_CAMPAIGN_IDS = [
-    "GCzqctkqub"
+    "GC8kztvs3p"
 
 ]
+HIDE_UNSUPPORTED = false
+CAPTCHA_ON = true
+[RPCs]
+Ethereum = 'https://rpc.ankr.com/eth'
+Optimism = 'https://mainnet.optimism.io'
+BSC = 'https://rpc.ankr.com/bsc'
+Polygon = 'https://polygon-bor.publicnode.com'
+Arbitrum = 'https://arb1.arbitrum.io/rpc'
+Avalanche = 'https://avalanche-c-chain.publicnode.com'
+Base = 'https://mainnet.base.org'
+Scroll = 'https://1rpc.io/scroll'

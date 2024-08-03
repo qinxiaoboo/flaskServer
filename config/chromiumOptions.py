@@ -76,6 +76,7 @@ def initChromiumOptions(env,port,useragent,proxy_server):
             extends_path += CHROME_EXTEND_PATH + extend + ","
         else:
             logger.error(f"配置文件可能有误，{etdpath},路径不存在")
+            raise Exception(f"配置文件可能有误，{etdpath},路径不存在")
     co.set_argument("--load-extension",extends_path.rstrip(","))
     init_path = CHROME_USER_DATA_PATH / Path("config/") / Path(env) / Path("conf.ini")
     co.save(path=init_path)

@@ -14,6 +14,7 @@ from flaskServer.services.chromes.login import LoginChrome
 from flaskServer.services.chromes.worker import submit
 from flaskServer.services.chromes.tasks.multifarm import toDo as toDoMultifarm
 from flaskServer.services.dto.env import updateAllStatus
+from flaskServer.services.internal.tasks.spaces_stats import todo as countPoints
 from threading import Thread
 
 logger.remove()
@@ -23,7 +24,6 @@ logger.add(sys.stderr, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | '
 
 result = {"code": 0, 'msg': "success"}
 chrome = None
-
 
 
 @app.route("/chromes/reset")
@@ -63,6 +63,10 @@ def multifarm ():
         submit(toDoMultifarm,envs)
     return "success"
 
+@app.route("/galxe/countpoints")
+def countpoints():
+    countPoints()
+    return "success"
 
 if __name__ == '__main__':
     scheduler.init_app(app)
