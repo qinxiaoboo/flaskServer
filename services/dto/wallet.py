@@ -8,6 +8,11 @@ def getWalletByWord(env,t):
         wallet = Wallet.query.filter(and_(Wallet.env==env,Wallet.type==t)).first()
         return wallet
 
+def getWalletByID(_id):
+    with app.app_context():
+        wallet = Wallet.query.filter_by(id=_id).first()
+        return wallet
+
 def updateWallt(env,word,address,t):
     word = aesCbcPbkdf2EncryptToBase64(word)
     wallet = getWalletByWord(env,t)

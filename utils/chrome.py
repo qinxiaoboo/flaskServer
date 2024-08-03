@@ -1,3 +1,4 @@
+from loguru import logger
 from DrissionPage import ChromiumPage
 from DrissionPage import ChromiumOptions
 from DrissionPage.errors import *
@@ -69,7 +70,7 @@ def getChrome(proxy,env):
             closeInitTab(chrome)
             setTitle(chrome, env)
             updateEnvStatus(env.name, 1)
-            print(chrome.user_agent)
+            logger.info(f"{env.name}: 页面等待成功~ \nUserAgent：{chrome.user_agent}")
         else:
             raise WaitTimeoutError("等待初始页面等待超时！~")
         return chrome

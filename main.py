@@ -1,5 +1,7 @@
 import random
+import sys
 
+from loguru import logger
 from flaskServer.config.connect import app
 from gevent import pywsgi
 from flask import request
@@ -13,6 +15,11 @@ from flaskServer.services.chromes.worker import submit
 from flaskServer.services.chromes.tasks.multifarm import toDo as toDoMultifarm
 from flaskServer.services.dto.env import updateAllStatus
 from threading import Thread
+
+logger.remove()
+logger.add(sys.stderr, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | '
+                              '<level>{level: <7}</level> | '
+                              '<level>{message}</level>')
 
 result = {"code": 0, 'msg': "success"}
 chrome = None

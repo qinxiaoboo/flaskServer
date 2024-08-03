@@ -6,6 +6,10 @@ def getProxyByIp(ip):
     with app.app_context():
         proxy = Proxy.query.filter_by(ip=ip).first()
         return proxy
+def getProxyByID(_id):
+    with app.app_context():
+        proxy = Proxy.query.filter_by(id=_id).first()
+        return proxy
 
 def update(ip,port,user,pwd):
     proxy = getProxyByIp(ip)
