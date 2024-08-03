@@ -30,7 +30,6 @@ REFERRAL_LINKS = [line.strip() for line in open(Path(WORK_PATH) / Path('flaskSer
 with open(Path(WORK_PATH) / Path('flaskServer/files/surveys.csv'), 'r', encoding='utf-8') as file:
     reader = csv.reader(file)
     SURVEYS = [row for row in reader]
-CAP_MONSTER_API_KEY = cfg.get('CAP_MONSTER_API_KEY')
 TWO_CAPTCHA_API_KEY = cfg.get('TWO_CAPTCHA_API_KEY')
 CAP_SOLVER_API_KEY = cfg.get('CAP_SOLVER_API_KEY')
 SURVEYS = {row[0].lower(): row[1:] for row in SURVEYS}
