@@ -18,9 +18,9 @@ def init():
         points = {}
         for t in ts:
             if t.env_name in points:
-                points[t.env_name].append({f"{t.name}-{t.alia}":f"{t.points}:{t.ranking}"})
+                points[t.env_name].append({f"{t.alia}":f"{t.points}:{t.ranking}"})
             else:
-                points[t.env_name] = [{f"{t.name}-{t.alia}":f"{t.points}:{t.ranking}"}]
+                points[t.env_name] = [{f"{t.alia}":f"{t.points}:{t.ranking}"}]
         for key,value in points.items():
             dicts = dict()
             dicts["环境"] = key
