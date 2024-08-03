@@ -4,6 +4,7 @@ from Crypto.Random import get_random_bytes
 from Crypto.Hash import SHA256
 from Crypto.Util.Padding import pad
 from Crypto.Util.Padding import unpad
+from flaskServer.config.config import TEXT_PASSWORD
 import base64
 
 # uses https://www.pycryptodome.org version 3.9.9
@@ -19,8 +20,8 @@ def base64Decoding(input):
 def generateSalt32Byte():
   return get_random_bytes(32)
 # 文本加密
-def aesCbcPbkdf2EncryptToBase64(plaintext,password="nihao,word"):
-  passwordBytes = password.encode("ascii")
+def aesCbcPbkdf2EncryptToBase64(plaintext):
+  passwordBytes = TEXT_PASSWORD.encode("ascii")
   salt = generateSalt32Byte()
   PBKDF2_ITERATIONS = 15000
   encryptionKey = PBKDF2(passwordBytes, salt, 32, count=PBKDF2_ITERATIONS, hmac_hash_module=SHA256)
@@ -31,8 +32,8 @@ def aesCbcPbkdf2EncryptToBase64(plaintext,password="nihao,word"):
   ciphertextBase64 = base64Encoding(ciphertext)
   return saltBase64 + ":" + ivBase64 + ":" + ciphertextBase64
 # 文本解密
-def aesCbcPbkdf2DecryptFromBase64(ciphertextBase64, password="nihao,word"):
-  passwordBytes = password.encode("ascii")
+def aesCbcPbkdf2DecryptFromBase64(ciphertextBase64):
+  passwordBytes = TEXT_PASSWORD.encode("ascii")
   data = ciphertextBase64.split(":")
   salt = base64Decoding(data[0])
   iv = base64Decoding(data[1])
