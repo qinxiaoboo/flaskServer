@@ -15,7 +15,7 @@ from flaskServer.services.chromes.worker import submit
 from flaskServer.services.chromes.tasks.multifarm import toDo as toDoMultifarm
 from flaskServer.services.dto.env import updateAllStatus
 from flaskServer.services.internal.tasks.spaces_stats import todo as countPoints
-from flaskServer.services.chromes.galxe.login import toDoGalxeTask
+from flaskServer.services.chromes.galxe.login import toDoGalxeTask,toDoGalxeTaskAll
 from threading import Thread
 
 logger.remove()
@@ -67,6 +67,14 @@ def multifarm ():
 @app.route("/galxe/countpoints")
 def countpoints():
     countPoints()
+    return "success"
+
+@app.route("/galxe/task/all")
+def galxeAll ():
+    with app.app_context():
+        envs = Env.query.all()
+        random.shuffle(envs)
+        submit(toDoGalxeTaskAll,envs)
     return "success"
 @app.route("/galxe/task/<name>")
 def taskSign(name):

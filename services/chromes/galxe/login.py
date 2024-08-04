@@ -231,8 +231,22 @@ def compireTasks(chrome,env):
                 claimPoints(chrome, env, tab, task)
 
 def toDoGalxeTask(env):
-    chrome = GalxeChrome(env)
-    compireTasks(chrome, env)
+    with app.app_context():
+        chrome = GalxeChrome(env)
+        compireTasks(chrome, env)
+def toDoGalxeTaskAll(env):
+    with app.app_context():
+        chrome = None
+        try:
+            logger.info(f"{env.name}: 开始执行银河任务")
+            chrome = GalxeChrome(env)
+            compireTasks(chrome, env)
+            logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
+            chrome.quit()
+        except Exception as e:
+            logger.error(f"{env.name}: {e}")
+            if chrome:
+                chrome.quit()
 
 
 if __name__ == '__main__':
