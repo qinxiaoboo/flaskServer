@@ -21,7 +21,7 @@ def updateTaskRecord(env,name,status):
             taskRecord = TaskRecord(name=name,env_name=env,status=status,count=1)
         db.session.add(taskRecord)
         db.session.commit()
-        print(f"{env}新增一条{name}任务记录,状态：'{'完成' if status == 0 else '未完成'}'，id：",taskRecord.id)
+        print(f"{env}新增一条{name}任务记录,状态：'{'完成' if status == 1 else '未完成'}'，id：",taskRecord.id)
         return taskRecord
 
 def updateTaskStatus(name,status):

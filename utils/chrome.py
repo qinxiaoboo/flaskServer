@@ -10,6 +10,7 @@ from flaskServer.services.dto.env import updateEnvStatus
 def get_Custome_Tab(tab):
     if OFF_VIDEO:
         tab.set.blocked_urls("*.m4s")
+        tab.set.blocked_urls("*.mp4")
     if OFF_IMG:
         tab.set.blocked_urls("*.jpg")
     return tab

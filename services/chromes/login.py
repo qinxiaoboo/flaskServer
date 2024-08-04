@@ -124,17 +124,20 @@ def AuthTW(chrome:ChromiumPage,env):
             tab.ele("@@type=button@@text()=Log in").click()
             fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
             if "login" in tab.url and len(fa2) > 10:
-                res = requests.get(fa2)
-                if res.ok:
-                    code = res.json().get("data").get("otp")
-                    tab.ele("@data-testid=ocfEnterTextTextInput").input(code)
-                    tab.ele("@@type=button@@text()=Next").click()
+                tw2faV(tab,fa2)
             tab.ele("@@role=button@@data-testid=OAuth_Consent_Button").click()
             logger.info(f"{env.name}: 推特登录并认证成功")
         else:
             logger.warning(f"{env.name}: TW 账号为空，跳过无法完成")
     return get_Custome_Tab(tab)
 
+def tw2faV(tab,fa2):
+    res = requests.get(fa2)
+    if res.ok:
+        code = res.json().get("data").get("otp")
+        print(tab.url)
+        tab.ele("@data-testid=ocfEnterTextTextInput").input(code)
+        tab.ele("@@type=button@@text()=Next").click()
 
 def LoginTW(chrome:ChromiumPage,env):
     tab = chrome.get_tab(url=".com/i/flow/login")
@@ -157,11 +160,7 @@ def LoginTW(chrome:ChromiumPage,env):
         tab.ele("@@type=button@@text()=Log in").click()
         fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
         if "login" in tab.url and len(fa2) > 10:
-            res = requests.get(fa2)
-            if res.ok:
-                code = res.json().get("data").get("otp")
-                tab.ele("@data-testid=ocfEnterTextTextInput").input(code)
-                tab.ele("@@type=button@@text()=Next").click()
+            tw2faV(tab,fa2)
         if "home" in tab.url:
             logger.info(f"{env.name}: 登录TW成功")
     else:
