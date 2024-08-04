@@ -5,7 +5,7 @@ THREAD_POOL_NUM = 2
 # 协程数量
 THREADS_NUM = 1
 RANDOM_ORDER = true
-SKIP_FIRST_ACCOUNTS = 40
+SKIP_FIRST_ACCOUNTS = 45
 WAIT_BETWEEN_ACCOUNTS = [0,0]
 # 浏览器执行器
 CHROME_EXEC_PATH = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
@@ -25,6 +25,12 @@ DEFAULT_OPEN_PAGE = []
 DEFAULT_REMOVE_PAGE = []
 # 是否开启无头模式
 HEADLESS = false
+# 是否静音
+MUTE = true
+# 是否禁止视频
+OFF_VIDEO = true
+# 是否禁止图片
+OFF_IMG = true
 # 钱包默认初始密码
 WALLET_PASSWORD = ""
 TEXT_PASSWORD = ""
@@ -33,13 +39,16 @@ TWO_CAPTCHA_API_KEY = ""
 CAP_SOLVER_API_KEY = ""
 
 # 推特是否伪造
-FAKE_TWITTER = false
+FLLOW_FAKE_TWITTER = false
+FAKE_TWITTER = true
 #
 MAX_TRIES = 3
 DISABLE_SSL = true
 GALXE_CAMPAIGN_IDS = [
     "GC8kztvs3p"
-
+]
+GALXE_CAMPAIGN_URLS = [
+    "PlumeNetwork/GC8kztvs3p"
 ]
 HIDE_UNSUPPORTED = false
 CAPTCHA_ON = true

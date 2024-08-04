@@ -10,9 +10,9 @@ from flaskServer.mode.env import Env
 from flaskServer.mode.proxy import Proxy
 from flaskServer.mode.wallet import Wallet
 from flaskServer.services.dto.env import updateEnvStatus
-from flaskServer.utils.chrome import getChrome
+from flaskServer.utils.chrome import getChrome,get_Custome_Tab
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
-
+from flaskServer.services.content import Content
 
 def LoginINITWallet(chrome,env):
     tab = chrome.get_tab(title="Initia Wallet")
@@ -43,7 +43,12 @@ def ConfirmOKXWallet(chrome,tab,env):
     if ele.text == "Connect":
         new = ele.click.for_new_tab()
         logger.info(f"{env.name}: 连接OKX钱包成功")
-        new.ele("@type=button").next().click()
+        new.wait.load_start()
+        try:
+            new.ele("@type=button",timeout=5).next().click()
+        except Exception as e:
+            new = chrome.get_tab(title=Content.OKX_TITLE)
+            new.ele("@type=button").next().click()
         logger.info(f"{env.name}: 确认OKX钱包成功")
     else:
         ele.click()
@@ -128,11 +133,11 @@ def AuthTW(chrome:ChromiumPage,env):
             logger.info(f"{env.name}: 推特登录并认证成功")
         else:
             logger.warning(f"{env.name}: TW 账号为空，跳过无法完成")
-    return tab
+    return get_Custome_Tab(tab)
 
 
 def LoginTW(chrome:ChromiumPage,env):
-    tab = chrome.get_tab(url="twitter.com/i/flow/login")
+    tab = chrome.get_tab(url=".com/i/flow/login")
     if tab is None:
         tab = chrome.get_tab(url="x.com/login")
         if tab is None:
@@ -161,7 +166,7 @@ def LoginTW(chrome:ChromiumPage,env):
             logger.info(f"{env.name}: 登录TW成功")
     else:
         logger.info(f"{env.name}: TW 账号为空，跳过登录")
-    return tab
+    return get_Custome_Tab(tab)
 
 
 def LoginDiscord(chrome:ChromiumPage,env):
@@ -184,7 +189,7 @@ def LoginDiscord(chrome:ChromiumPage,env):
             logger.info(f"{env.name}: DISCORD 账号为空，跳过登录")
     if "channels" in tab.url:
         logger.info(f"{env.name}登录Discord成功！")
-    return tab
+    return get_Custome_Tab(tab)
 
 def LoginOutlook(chrome:ChromiumPage,env):
     tab = chrome.new_tab(url="https://outlook.live.com/mail/0/")
@@ -208,7 +213,7 @@ def LoginOutlook(chrome:ChromiumPage,env):
                 logger.info(f"{env.name}: 邮箱格式不正确，关闭邮箱标签")
         else:
             logger.info(f"{env.name}: 邮箱 账号为空，跳过登录")
-    return tab
+    return get_Custome_Tab(tab)
 
 
 def OKXChrome(env):
@@ -249,7 +254,7 @@ def GalxeChrome(env):
             LoginTW(chrome, env)
             LoginDiscord(chrome, env)
             LoginOutlook(chrome, env)
-            logger.info(f"{env.name}: {ChromiumOptions().address}")
+            logger.info(f"{env.name}: {chrome.address}")
             return chrome
         except Exception as e:
             if chrome:

@@ -25,6 +25,9 @@ def get_ini_path(name):
     return CHROME_USER_DATA_PATH / Path("config/") / Path(name) / Path("conf.ini")
 
 HEADLESS = cfg.get("HEADLESS")
+MUTE = cfg.get("MUTE")
+OFF_VIDEO = cfg.get("OFF_VIDEO")
+OFF_IMG = cfg.get("OFF_IMG")
 REFERRAL_LINKS = [line.strip() for line in open(Path(WORK_PATH) / Path('flaskServer/files/referral_links.txt'), 'r', encoding='utf-8').read().splitlines()
                   if line.strip() != '']
 with open(Path(WORK_PATH) / Path('flaskServer/files/surveys.csv'), 'r', encoding='utf-8') as file:
@@ -36,6 +39,7 @@ SURVEYS = {row[0].lower(): row[1:] for row in SURVEYS}
 CHROME_VERSION = cfg.get("CHROME_VERSION")
 MAX_TRIES = cfg.get("MAX_TRIES")
 DISABLE_SSL = cfg.get("DISABLE_SSL")
+FLLOW_FAKE_TWITTER = cfg.get("FLLOW_FAKE_TWITTER")
 FAKE_TWITTER = cfg.get("FAKE_TWITTER")
 GALXE_CAMPAIGN_IDS = cfg.get("GALXE_CAMPAIGN_IDS")
 RPCs = cfg.get('RPCs')

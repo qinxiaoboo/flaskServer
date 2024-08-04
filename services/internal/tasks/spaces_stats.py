@@ -3,6 +3,7 @@ from flaskServer.services.internal.galxe.account import GalxeAccount, wait_a_bit
 from flaskServer.services.dto.space_points import updateSpacePoints
 from flaskServer.services.internal.worker import worker
 from flaskServer.initData.galxe_points import init
+from flaskServer.config.config import GALXE_CAMPAIGN_IDS
 from loguru import logger
 
 
@@ -14,11 +15,11 @@ async def process_env(env):
         logger.info(f'{account.idx}) Galxe signed in')
         await wait_a_bit()
 
-        # for campaign_id in GALXE_CAMPAIGN_IDS:
-        #     await galxe_account.complete_campaign(campaign_id)
-        #     await galxe_account.claim_campaign(campaign_id)
+        for campaign_id in GALXE_CAMPAIGN_IDS:
+            await galxe_account.complete_campaign(campaign_id)
+            await galxe_account.claim_campaign(campaign_id)
 
-        # await wait_a_bit()
+        await wait_a_bit()
 
         logger.info(f'{account.idx}) Checking spaces stats')
         await galxe_account.spaces_stats()

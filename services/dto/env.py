@@ -1,12 +1,9 @@
-import re
-
 from loguru import logger
 
-from flaskServer.mode.env import Env
-from flaskServer.config.connect import db,app
-from flaskServer.utils.envutil import getUserAgent
 from flaskServer.config.config import CHROME_VERSION
-from sqlalchemy import and_
+from flaskServer.config.connect import db, app
+from flaskServer.mode.env import Env
+from flaskServer.utils.envutil import getUserAgent
 
 
 def getEnvByName(name):
@@ -53,7 +50,7 @@ def updateEnv(env,port,cookies,proxy,tw,discord,outlook,okx,init,bitlight,userAg
             if port and ENV.port != port:
                 ENV.port = port
             if CHROME_VERSION not in ENV.user_agent:
-                ENV.user_agent = re.sub(r"Chrome/\d+",f"Chrome/{CHROME_VERSION}",ENV.user_agent)
+                ENV.user_agent = getUserAgent(userAgent)
             print("更新一条环境信息，id：", ENV.id)
         else:
             ENV = Env(name=env,port=port,user_agent=getUserAgent(userAgent),cookies=cookies,t_proxy_id=getId(proxy)

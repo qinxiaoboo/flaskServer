@@ -317,6 +317,8 @@ class GalxeAccount:
         return await self._process_campaign(campaign_id, self._complete_campaign_process)
 
     async def _complete_campaign_process(self, campaign):
+        print("=================================")
+        print(campaign)
         logger.info(f'{self.idx}) Starting complete {campaign["name"]}')
 
         if campaign['requireEmail']:

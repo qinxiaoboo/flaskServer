@@ -3,11 +3,16 @@ from DrissionPage import ChromiumPage
 from DrissionPage import ChromiumOptions
 from DrissionPage.errors import *
 from flaskServer.config.chromiumOptions import initChromiumOptions
-from flaskServer.config.config import HEADLESS
-from flaskServer.config.config import get_ini_path
+from flaskServer.config.config import HEADLESS,get_ini_path,MUTE,OFF_VIDEO,OFF_IMG
 from flaskServer.services.dto.env import updateEnvStatus
 
 
+def get_Custome_Tab(tab):
+    if OFF_VIDEO:
+        tab.set.blocked_urls("*.m4s")
+    if OFF_IMG:
+        tab.set.blocked_urls("*.jpg")
+    return tab
 
 def wait_pages(chrome,wait_page_list):
     count = 100
@@ -36,6 +41,7 @@ def closeInitTab(chrome):
 
 def getChromiumOptions(co):
     co.headless(on_off=HEADLESS)
+    co.mute(on_off=MUTE)
     return co
 
 def getChromiumPage(env, proxy): # 获取一个ChromiumPage对象

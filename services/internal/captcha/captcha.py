@@ -6,7 +6,7 @@ from loguru import logger
 from urllib.parse import urlparse
 
 from flaskServer.services.internal.utils import async_retry, get_proxy_url
-from flaskServer.config.config import TWO_CAPTCHA_API_KEY, CAP_MONSTER_API_KEY, CAP_SOLVER_API_KEY, DISABLE_SSL
+from flaskServer.config.config import TWO_CAPTCHA_API_KEY, CAP_SOLVER_API_KEY, DISABLE_SSL
 USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"
 
 from .constants import TWO_CAPTCHA_API_URL, CAP_MONSTER_API_URL, CAP_SOLVER_API_URL
@@ -48,11 +48,11 @@ async def solve_recaptcha_v2(idx, url, site_key, proxy=None, **kwargs):
             TWO_CAPTCHA_API_URL, TWO_CAPTCHA_API_KEY, TaskType.RECAPTCHA_V2,
             idx, url, site_key, proxy, userAgent=USER_AGENT, **kwargs,
         )
-    elif CAP_MONSTER_API_KEY:
-        return await _solve_captcha(
-            CAP_MONSTER_API_URL, CAP_MONSTER_API_KEY, TaskType.RECAPTCHA_V2,
-            idx, url, site_key, proxy, userAgent=USER_AGENT, **kwargs,
-        )
+    # elif CAP_MONSTER_API_KEY:
+    #     return await _solve_captcha(
+    #         CAP_MONSTER_API_URL, CAP_MONSTER_API_KEY, TaskType.RECAPTCHA_V2,
+    #         idx, url, site_key, proxy, userAgent=USER_AGENT, **kwargs,
+    #     )
     else:
         raise Exception('No captcha service API keys specified for recaptcha v2')
 
@@ -70,11 +70,11 @@ async def solve_recaptcha_v3(idx, url, site_key, page_action, proxy=None, **kwar
             TWO_CAPTCHA_API_URL, TWO_CAPTCHA_API_KEY, TaskType.RECAPTCHA_V3_PROXY_LESS,
             idx, url, site_key, proxy, pageAction=page_action, minScore=0.9, userAgent=USER_AGENT, **kwargs,
         )
-    elif CAP_MONSTER_API_KEY:
-        return await _solve_captcha(
-            CAP_MONSTER_API_URL, CAP_MONSTER_API_KEY, TaskType.RECAPTCHA_V3_PROXY_LESS,
-            idx, url, site_key, proxy, pageAction=page_action, minScore=0.9, userAgent=USER_AGENT, **kwargs,
-        )
+    # elif CAP_MONSTER_API_KEY:
+    #     return await _solve_captcha(
+    #         CAP_MONSTER_API_URL, CAP_MONSTER_API_KEY, TaskType.RECAPTCHA_V3_PROXY_LESS,
+    #         idx, url, site_key, proxy, pageAction=page_action, minScore=0.9, userAgent=USER_AGENT, **kwargs,
+    #     )
     else:
         raise Exception('No captcha service API keys specified for recaptcha v3')
 
@@ -102,12 +102,12 @@ async def solve_geetest(idx, url, proxy, gt, challenge, version, init_parameters
             idx, url, proxy=proxy, userAgent=USER_AGENT, gt=gt, challenge=challenge,
             version=version, initParameters=init_parameters,
         )
-    elif CAP_MONSTER_API_KEY:
-        return await _solve_captcha(
-            CAP_MONSTER_API_URL, CAP_MONSTER_API_KEY, TaskType.GEETEST,
-            idx, url, proxy=proxy, userAgent=USER_AGENT, gt=gt, challenge=challenge,
-            version=version, initParameters=init_parameters,
-        )
+    # elif CAP_MONSTER_API_KEY:
+    #     return await _solve_captcha(
+    #         CAP_MONSTER_API_URL, CAP_MONSTER_API_KEY, TaskType.GEETEST,
+    #         idx, url, proxy=proxy, userAgent=USER_AGENT, gt=gt, challenge=challenge,
+    #         version=version, initParameters=init_parameters,
+    #     )
     else:
         raise Exception('No captcha service API keys specified for geetest')
 
