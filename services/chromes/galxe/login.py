@@ -10,7 +10,7 @@ from flaskServer.services.dto.account import getAccountById
 from flaskServer.services.content import Content
 from flaskServer.services.chromes.login import LoginTW
 from flaskServer.config.config import FAKE_TWITTER,FLLOW_FAKE_TWITTER,GALXE_CAMPAIGN_URLS
-from flaskServer.services.dto.task_record import updateTaskRecord
+from flaskServer.services.dto.task_record import updateTaskRecord,checkTaskStatus
 
 def loginGalxe(chrome,env,task):
     tab = chrome.new_tab("https://app.galxe.com/quest/" + task)
@@ -43,6 +43,7 @@ def checkTW(chrome,tab,env):
             tw.refresh()
         if tw:
             tw.refresh()
+            tw.close()
         LoginTW(chrome,env)
         return True
 
@@ -114,6 +115,7 @@ def refreshRole(chrome,role,name):
         chrome.wait(3, 5)
 
 def claimPoints(chrome,env,tab,task):
+    chrome.wait(2,3)
     end = tab.ele("@class=flex items-center justify-end z-[2] w-full")
     end = end.ele("c:button")
     print(end.text)
@@ -122,6 +124,7 @@ def claimPoints(chrome,env,tab,task):
         print(end.click)
         tab.actions.move_to(end)
         end.click()
+        chrome.wait(5,8)
         try:
             result = tab.ele("@class=text-size-18 font-extrabold sm:text-size-32 font-mona",timeout=10)
             if "Points" in result.text:
@@ -130,11 +133,14 @@ def claimPoints(chrome,env,tab,task):
                 updateTaskRecord(env.name,f"{task}",1)
         except Exception as e:
             end.click()
+            chrome.wait(5, 8)
             result = tab.ele("@class=text-size-18 font-extrabold sm:text-size-32 font-mona",timeout=20)
             if "Points" in result.text:
                 logger.info(f"{env.name}: e领取成功：{result.text}")
                 tab.ele("@@type=button@@text()=Close").click()
                 updateTaskRecord(env.name,f"{task}",1)
+    elif "Claimed" in end.text:
+        updateTaskRecord(env.name, f"{task}", 1)
 
 
 def execTask(chrome,env,tab):
@@ -176,32 +182,47 @@ def execTask(chrome,env,tab):
             logger.info(f"{env.name}: {name} 任务刷新")
             refreshRole(chrome,role,name)
 
+def getIDS(slide):
+    ids = []
+    eles = slide.s_eles("css:div[id]")
+    for ele in eles:
+        id = ele.attr("id")
+        ids.append(id)
+    return ids
+
+
+def compireTasks(chrome,env):
+    for parentTask in GALXE_CAMPAIGN_URLS:
+        tab = loginGalxe(chrome, env, parentTask)
+        slide = tab.ele("@class=SiblingSlide_slide-bar__i6lXo")
+        if slide:
+            slide = tab.ele("@class=SiblingSlide_slide-bar__i6lXo")
+            for idx,id in enumerate(getIDS(slide)):
+                if id in parentTask:
+                    task = parentTask
+                    if checkTaskStatus(env.name, task): continue
+                else:
+                    task = re.sub(r'/\w+', f'/{id}', parentTask)
+                    if checkTaskStatus(env.name, task): continue
+                    try:
+                        ele = slide.eles("css:div[id]")[idx]
+                        tab.actions.move_to(ele)
+                        ele.click()
+                    except Exception as e:
+                        tab.get("https://app.galxe.com/quest/" + task)
+                        new = chrome.get_tab(title=Content.OKX_TITLE)
+                        if new:
+                            new.ele("@type=button").next().click()
+                    chrome.wait(2, 3)
+                execTask(chrome, env, tab)
+                claimPoints(chrome, env, tab, task)
+
 if __name__ == '__main__':
     with app.app_context():
-        env = Env.query.filter_by(name="Q-4-2").first()
+        env = Env.query.filter_by(name="Q-0").first()
         tw = getAccountById(env.tw_id)
         chrome = GalxeChrome(env)
-        for parentTask in GALXE_CAMPAIGN_URLS:
-            tab = loginGalxe(chrome, env, parentTask)
-            slide = tab.ele("@class=SiblingSlide_slide-bar__i6lXo")
-            if slide:
-                slide = tab.ele("@class=SiblingSlide_slide-bar__i6lXo")
-                eles = slide.eles("css:div[id]")
-                for ele in eles:
-                    print(ele)
-                    id = ele.attr("id")
-                    if id in parentTask:
-                        task = parentTask
-                    else:
-                        task = re.sub(r'/\w+',f'/{id}',parentTask)
-                        try:
-                            tab.actions.move_to(ele)
-                            ele.click()
-                        except Exception as  e:
-                            tab.get("https://app.galxe.com/quest/"+task)
-                        chrome.wait(2,3)
-                    execTask(chrome,env,tab)
-                    claimPoints(chrome,env,tab,task)
+        compireTasks(chrome,env)
 
 
 

@@ -22,15 +22,15 @@ def initTaskList():
                 tasks[t.env_name].append({f"{t.name}": "未完成" if t.status == 0 else "完成"})
             else:
                 tasks[t.env_name] = [{f"{t.name}": "未完成" if t.status == 0 else "完成"}]
-            for key, value in tasks.items():
-                dicts = dict()
-                dicts["环境"] = key
-                for data in value:
-                    for name, vv in data.items():
-                        dicts[f"{name}"] = f"{vv}"
-                r.add_data(dicts)
+        for key, value in tasks.items():
+            dicts = dict()
+            dicts["环境"] = key
+            for data in value:
+                for name, vv in data.items():
+                    dicts[f"{name}"] = f"{vv}"
+            print(dicts)
+            r.add_data(dicts)
     r.record()
-    print(r.show_msg)
 
 
 if __name__ == '__main__':

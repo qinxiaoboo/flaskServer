@@ -10,8 +10,8 @@ from datetime import datetime
 def init():
     p = Path(ENV_PATH).parent / 'points.csv'
     if p.exists():
-        shutil.move(p, p.parent / f"task_{datetime.now().strftime('%Y_%m_%d(%H_%M)')}.csv")
-    r = Recorder(path=p ,cache_size=20)
+        shutil.move(p, p.parent / f"points_{datetime.now().strftime('%Y_%m_%d(%H_%M)')}.csv")
+    r = Recorder(path=p, cache_size=20)
     r.set.fit_head(True)
     with app.app_context():
         ts = db.session.query(SpacePoints).order_by(SpacePoints.env_name.asc()).all()

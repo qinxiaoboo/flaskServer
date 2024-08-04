@@ -9,6 +9,13 @@ def getTaskRecord(env,name):
         taskRecord = TaskRecord.query.filter(and_(TaskRecord.env_name==env,TaskRecord.name==name)).first()
         return taskRecord
 
+
+def checkTaskStatus(env,name):
+    taskRecord = getTaskRecord(env,name)
+    if taskRecord:
+        return (taskRecord.status == 1)
+    return False
+
 def updateTaskRecord(env,name,status):
     taskRecord = getTaskRecord(env,name)
     with app.app_context():

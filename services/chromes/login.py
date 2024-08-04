@@ -45,7 +45,7 @@ def ConfirmOKXWallet(chrome,tab,env):
         logger.info(f"{env.name}: 连接OKX钱包成功")
         new.wait.load_start()
         try:
-            new.ele("@type=button",timeout=5).next().click()
+            new.ele("@type=button",timeout=8).next().click()
         except Exception as e:
             new = chrome.get_tab(title=Content.OKX_TITLE)
             new.ele("@type=button").next().click()
