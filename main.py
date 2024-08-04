@@ -24,23 +24,23 @@ logger.add(sys.stderr, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | '
                               '<level>{message}</level>')
 
 result = {"code": 0, 'msg': "success"}
-chrome = None
 
-
+# 初始化 浏览器配置
 @app.route("/chromes/reset")
 def reset ():
     updateAllStatus(0)
     return "success"
 
-@app.route('/system/setting/get')
-def systemSettingGet():
-    result["data"] = getInfo(request.args)
-    return result
-@app.route("/system/setting/update")
-def systemSettingSet():
-    updateInfo(request.get_json())
-    return "success"
-
+# @app.route('/system/setting/get')
+# def systemSettingGet():
+#     result["data"] = getInfo(request.args)
+#     return result
+# #
+# @app.route("/system/setting/update")
+# def systemSettingSet():
+#     updateInfo(request.get_json())
+#     return "success"
+# 初始化所有环境
 @app.route("/init/all")
 def loginAll ():
     with app.app_context():
@@ -48,14 +48,14 @@ def loginAll ():
         random.shuffle(envs)
         submit(toLoginAll,envs)
     return "success"
-
+# 初始化单个环境
 @app.route("/init/<name>")
 def login(name):
     with app.app_context():
         env = Env.query.filter_by(name=name).first()
     Thread(target=LoginChrome,args=(env,)).start()
     return "success"
-
+# 0g官网任务
 @app.route("/todo/multifarm")
 def multifarm ():
     with app.app_context():
@@ -63,12 +63,12 @@ def multifarm ():
         random.shuffle(envs)
         submit(toDoMultifarm,envs)
     return "success"
-
+# 银河任务统计
 @app.route("/galxe/countpoints")
 def countpoints():
     countPoints()
     return "success"
-
+# 执行全量银河任务
 @app.route("/galxe/task/all")
 def galxeAll ():
     with app.app_context():
@@ -76,6 +76,7 @@ def galxeAll ():
         random.shuffle(envs)
         submit(toDoGalxeTaskAll,envs)
     return "success"
+# 单个执行银河任务
 @app.route("/galxe/task/<name>")
 def taskSign(name):
     with app.app_context():
