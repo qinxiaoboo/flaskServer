@@ -39,8 +39,10 @@ def checkTW(chrome,tab,env):
     if login:
         tab.close()
         tw = chrome.get_tab(url="https://x.com/home")
-        tw.refresh()
-        tw.refresh()
+        if tw:
+            tw.refresh()
+        if tw:
+            tw.refresh()
         LoginTW(chrome,env)
         return True
 
@@ -49,6 +51,9 @@ def get_new_tab(wapp):
         new_tab = wapp.click.for_new_tab()
     except Exception as e:
         new_tab = wapp.click.for_new_tab()
+        print(new_tab)
+        if not new_tab:
+            new_tab = wapp.click.for_new_tab()
     return new_tab
 
 def twConfirm(chrome,wapp,env):
@@ -121,12 +126,14 @@ def claimPoints(chrome,env,tab,task):
             result = tab.ele("@class=text-size-18 font-extrabold sm:text-size-32 font-mona",timeout=10)
             if "Points" in result.text:
                 logger.info(f"{env.name}: 领取成功：{result.text}")
+                tab.ele("@@type=button@@text()=Close").click()
                 updateTaskRecord(env.name,f"{task}",1)
         except Exception as e:
             end.click()
             result = tab.ele("@class=text-size-18 font-extrabold sm:text-size-32 font-mona",timeout=20)
             if "Points" in result.text:
                 logger.info(f"{env.name}: e领取成功：{result.text}")
+                tab.ele("@@type=button@@text()=Close").click()
                 updateTaskRecord(env.name,f"{task}",1)
 
 
@@ -171,7 +178,7 @@ def execTask(chrome,env,tab):
 
 if __name__ == '__main__':
     with app.app_context():
-        env = Env.query.filter_by(name="Q-2").first()
+        env = Env.query.filter_by(name="Q-4-2").first()
         tw = getAccountById(env.tw_id)
         chrome = GalxeChrome(env)
         for parentTask in GALXE_CAMPAIGN_URLS:

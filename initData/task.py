@@ -16,9 +16,19 @@ def initTaskList():
     r.set.fit_head(True)
     with app.app_context():
         ts = db.session.query(TaskRecord).order_by(TaskRecord.env_name.asc()).all()
+        tasks = dict()
         for t in ts:
-            r.add_data({"环境": t.env_name,f"{t.name}": "完成" if t.status == 0 else "未完成"})
-            print(f"{t.name} {t.env_name} {t.status}")
+            if t.env_name in tasks:
+                tasks[t.env_name].append({f"{t.name}": "未完成" if t.status == 0 else "完成"})
+            else:
+                tasks[t.env_name] = [{f"{t.name}": "未完成" if t.status == 0 else "完成"}]
+            for key, value in tasks.items():
+                dicts = dict()
+                dicts["环境"] = key
+                for data in value:
+                    for name, vv in data.items():
+                        dicts[f"{name}"] = f"{vv}"
+                r.add_data(dicts)
     r.record()
     print(r.show_msg)
 
