@@ -22,20 +22,21 @@ def LoginINITWallet(chrome,env):
         tab.ele("@type=button")
         logger.info(f"{env.name}: INIT 解锁成功")
     else:
-        init_wallet = Wallet.query.filter_by(id=env.init_id).first()
-        if init_wallet:
-            tab.ele("@href=#/account/import/mnemonic").click()
-            tab.ele("@@name=password@@type=password").input(WALLET_PASSWORD)
-            tab.ele("@@name=confirm@@type=password").input(WALLET_PASSWORD)
-            tab.ele("@type=checkbox").click()
-            tab.ele("@type=submit").click()
-            for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(init_wallet.word_pass).split(" ")):
-                tab.ele("@name=words." + str(index) + ".value").input(word)
-            tab.ele("@type=submit").click()
-            tab.ele("@type=button")
-            logger.info(f"{env.name}: INIT 登录成功")
-        else:
-            logger.info(f"{env.name}: INIT 账号为空，跳过登录")
+        with app.app_context():
+            init_wallet = Wallet.query.filter_by(id=env.init_id).first()
+            if init_wallet:
+                tab.ele("@href=#/account/import/mnemonic").click()
+                tab.ele("@@name=password@@type=password").input(WALLET_PASSWORD)
+                tab.ele("@@name=confirm@@type=password").input(WALLET_PASSWORD)
+                tab.ele("@type=checkbox").click()
+                tab.ele("@type=submit").click()
+                for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(init_wallet.word_pass).split(" ")):
+                    tab.ele("@name=words." + str(index) + ".value").input(word)
+                tab.ele("@type=submit").click()
+                tab.ele("@type=button")
+                logger.info(f"{env.name}: INIT 登录成功")
+            else:
+                logger.info(f"{env.name}: INIT 账号为空，跳过登录")
     tab.close()
 
 def ConfirmOKXWallet(chrome,tab,env):
@@ -63,23 +64,24 @@ def LoginOKXWallet(chrome,env):
         tab.ele("@type=button")
         logger.info(f"{env.name}: OKX 解锁成功")
     else:
-        wallet = Wallet.query.filter_by(id=env.okx_id).first()
-        if wallet:
-            tab.ele("Import wallet").click()
-            tab.ele("@@text()=Import wallet@@style=font-weight: 500; flex: 1 0 0%;").click()
-            eles = tab.eles("@type=text")
-            for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
-                eles[index].input(word)
-            tab.ele("@@type=submit@!btn-disabled").click()
-            passwords = tab.eles("@type=password")
-            for pwd in passwords:
-                pwd.input(WALLET_PASSWORD)
-            tab.ele("@type=submit").click()
-            tab.ele("@type=button").click()
-            tab.ele("MATIC")
-            logger.info(f"{env.name}: OKX 登录成功")
-        else:
-            logger.info(f"{env.name}: OKX 账号为空，跳过登录")
+        with app.app_context():
+            wallet = Wallet.query.filter_by(id=env.okx_id).first()
+            if wallet:
+                tab.ele("Import wallet").click()
+                tab.ele("@@text()=Import wallet@@style=font-weight: 500; flex: 1 0 0%;").click()
+                eles = tab.eles("@type=text")
+                for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
+                    eles[index].input(word)
+                tab.ele("@@type=submit@!btn-disabled").click()
+                passwords = tab.eles("@type=password")
+                for pwd in passwords:
+                    pwd.input(WALLET_PASSWORD)
+                tab.ele("@type=submit").click()
+                tab.ele("@type=button").click()
+                tab.ele("MATIC")
+                logger.info(f"{env.name}: OKX 登录成功")
+            else:
+                logger.info(f"{env.name}: OKX 账号为空，跳过登录")
     tab.close()
 
 def LoginBitlight(chrome:ChromiumPage,env):
@@ -92,17 +94,18 @@ def LoginBitlight(chrome:ChromiumPage,env):
         for i,pwd in enumerate(passwords):
             eyes[i].click()
             pwd.input(WALLET_PASSWORD)
-        wallet = Wallet.query.filter_by(id=env.bitlight_id).first()
-        if wallet:
-            tab.ele("@@type=button@@text()=Continue").click()
-            eles = tab.eles("@type=password")
-            for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
-                eles[index].input(word)
-            tab.ele("@@type=button@@text()=Continue").click()
-            tab.ele("@type=button")
-            logger.info(f"{env.name}: 登录Bitlight钱包成功！")
-        else:
-            logger.info(f"{env.name}: Bitlight 账号为空，跳过登录")
+        with app.app_context():
+            wallet = Wallet.query.filter_by(id=env.bitlight_id).first()
+            if wallet:
+                tab.ele("@@type=button@@text()=Continue").click()
+                eles = tab.eles("@type=password")
+                for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
+                    eles[index].input(word)
+                tab.ele("@@type=button@@text()=Continue").click()
+                tab.ele("@type=button")
+                logger.info(f"{env.name}: 登录Bitlight钱包成功！")
+            else:
+                logger.info(f"{env.name}: Bitlight 账号为空，跳过登录")
     else:
         tab.ele("@type=password").input(WALLET_PASSWORD)
         tab.ele("@type=button").click()
@@ -116,19 +119,20 @@ def AuthTW(chrome:ChromiumPage,env):
         logger.info(f"{env.name}: 推特认证成功")
     else:
         tab = chrome.get_tab(url="twitter.com")
-        tw: Account = Account.query.filter_by(id=env.tw_id).first()
-        if tw:
-            tab.ele("@autocomplete=username").input(tw.name)
-            tab.ele("@@type=button@@text()=Next").click()
-            tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
-            tab.ele("@@type=button@@text()=Log in").click()
-            fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
-            if "login" in tab.url and len(fa2) > 10:
-                tw2faV(tab,fa2)
-            tab.ele("@@role=button@@data-testid=OAuth_Consent_Button").click()
-            logger.info(f"{env.name}: 推特登录并认证成功")
-        else:
-            logger.warning(f"{env.name}: TW 账号为空，跳过无法完成")
+        with app.app_context():
+            tw: Account = Account.query.filter_by(id=env.tw_id).first()
+            if tw:
+                tab.ele("@autocomplete=username").input(tw.name)
+                tab.ele("@@type=button@@text()=Next").click()
+                tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                tab.ele("@@type=button@@text()=Log in").click()
+                fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                if "login" in tab.url and len(fa2) > 10:
+                    tw2faV(tab,fa2)
+                tab.ele("@@role=button@@data-testid=OAuth_Consent_Button").click()
+                logger.info(f"{env.name}: 推特登录并认证成功")
+            else:
+                logger.warning(f"{env.name}: TW 账号为空，跳过无法完成")
     return get_Custome_Tab(tab)
 
 def tw2faV(tab,fa2):
@@ -151,41 +155,43 @@ def LoginTW(chrome:ChromiumPage,env):
         tab.get(url="https://x.com/i/flow/login")
     else:
         logger.info(f"{env.name}: 登录TW成功")
-        return tab
-    tw:Account = Account.query.filter_by(id=env.tw_id).first()
-    if tw:
-        tab.ele("@autocomplete=username").input(tw.name)
-        tab.ele("@@type=button@@text()=Next").click()
-        tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
-        tab.ele("@@type=button@@text()=Log in").click()
-        fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
-        if "login" in tab.url and len(fa2) > 10:
-            tw2faV(tab,fa2)
-        if "home" in tab.url:
-            logger.info(f"{env.name}: 登录TW成功")
-    else:
-        logger.info(f"{env.name}: TW 账号为空，跳过登录")
-    return get_Custome_Tab(tab)
+        return get_Custome_Tab(tab)
+    with app.app_context():
+        tw:Account = Account.query.filter_by(id=env.tw_id).first()
+        if tw:
+            tab.ele("@autocomplete=username").input(tw.name)
+            tab.ele("@@type=button@@text()=Next").click()
+            tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+            tab.ele("@@type=button@@text()=Log in").click()
+            fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+            if "login" in tab.url and len(fa2) > 10:
+                tw2faV(tab,fa2)
+            if "home" in tab.url:
+                logger.info(f"{env.name}: 登录TW成功")
+        else:
+            logger.info(f"{env.name}: TW 账号为空，跳过登录")
+        return get_Custome_Tab(tab)
 
 
 def LoginDiscord(chrome:ChromiumPage,env):
     tab = chrome.new_tab(url="https://discord.com/app")
     if "login" in tab.url:
         logger.info(f"{env.name} 开始登录 Discord 账号")
-        discord:Account = Account.query.filter_by(id=env.discord_id).first()
-        if discord:
-            tab.ele("@name=email").input(discord.name)
-            tab.ele("@name=password").input(aesCbcPbkdf2DecryptFromBase64(discord.pwd))
-            tab.ele("@type=submit").click()
-            fa2 = aesCbcPbkdf2DecryptFromBase64(discord.fa2)
-            if "login" in tab.url and len(fa2) > 10:
-                res = requests.get(fa2)
-                if res.ok:
-                    code = res.json().get("data").get("otp")
-                    tab.ele("@autocomplete=one-time-code").input(code)
-                    tab.ele("@type=submit").click()
-        else:
-            logger.info(f"{env.name}: DISCORD 账号为空，跳过登录")
+        with app.app_context():
+            discord:Account = Account.query.filter_by(id=env.discord_id).first()
+            if discord:
+                tab.ele("@name=email").input(discord.name)
+                tab.ele("@name=password").input(aesCbcPbkdf2DecryptFromBase64(discord.pwd))
+                tab.ele("@type=submit").click()
+                fa2 = aesCbcPbkdf2DecryptFromBase64(discord.fa2)
+                if "login" in tab.url and len(fa2) > 10:
+                    res = requests.get(fa2)
+                    if res.ok:
+                        code = res.json().get("data").get("otp")
+                        tab.ele("@autocomplete=one-time-code").input(code)
+                        tab.ele("@type=submit").click()
+            else:
+                logger.info(f"{env.name}: DISCORD 账号为空，跳过登录")
     if "channels" in tab.url:
         logger.info(f"{env.name}登录Discord成功！")
     return get_Custome_Tab(tab)
@@ -194,24 +200,26 @@ def LoginOutlook(chrome:ChromiumPage,env):
     tab = chrome.new_tab(url="https://outlook.live.com/mail/0/")
     chrome.wait(2,3)
     if "microsoft" in tab.url:
-        outlook:Account = Account.query.filter_by(id=env.outlook_id).first()
-        if outlook:
-            if "outlook" in outlook.name or "hotmail" in outlook.name:
-                logger.info(f"{env.name}: 开始登陆 outlook邮箱")
-                tab = tab.eles("@aria-label=Sign in to Outlook")[4].click.for_new_tab()
-                tab.ele("@data-testid=i0116").input(outlook.name)
-                tab.ele("@type=submit").click()
-                tab.ele("@name=passwd").input(aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
-                tab.ele("@type=submit").click()
-                tab.ele("@type=checkbox").click()
-                tab.ele("@@type=submit@@text()=Yes").click()
-                if "https://outlook.live.com/mail/0" in tab.url:
-                    logger.info(f"{env.name}: 登录OUTLOOK成功")
+        with app.app_context():
+            outlook:Account = Account.query.filter_by(id=env.outlook_id).first()
+            if outlook:
+                if "outlook" in outlook.name or "hotmail" in outlook.name:
+                    logger.info(f"{env.name}: 开始登陆 outlook邮箱")
+                    tab = tab.eles("@aria-label=Sign in to Outlook")[4].click.for_new_tab()
+                    tab.ele("@data-testid=i0116").input(outlook.name)
+                    tab.ele("@type=submit").click()
+                    tab.ele("@name=passwd").input(aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
+                    tab.ele("@type=submit").click()
+                    tab.ele("@type=checkbox").click()
+                    tab.ele("@@type=submit@@text()=Yes").click()
+                    if "https://outlook.live.com/mail/0" in tab.url:
+                        logger.info(f"{env.name}: 登录OUTLOOK成功")
+                else:
+                    tab.close()
+                    logger.info(f"{env.name}: 邮箱格式不正确，关闭邮箱标签")
+                    return
             else:
-                tab.close()
-                logger.info(f"{env.name}: 邮箱格式不正确，关闭邮箱标签")
-        else:
-            logger.info(f"{env.name}: 邮箱 账号为空，跳过登录")
+                logger.info(f"{env.name}: 邮箱 账号为空，跳过登录")
     return get_Custome_Tab(tab)
 
 

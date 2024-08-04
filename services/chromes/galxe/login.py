@@ -144,7 +144,7 @@ def claimPoints(chrome,env,tab,task):
     elif "Ended" in end.text:
         logger.info(f"{env.name}: {task} 已结束：{end.text}")
 
-def checkClaimd(tab,task):
+def checkClaimd(tab,task,env):
     end = tab.ele("@class=flex items-center justify-end z-[2] w-full")
     end = end.ele("c:button")
     print(end.text)
@@ -226,7 +226,7 @@ def compireTasks(chrome,env):
                         if new:
                             new.ele("@type=button").next().click()
                     chrome.wait(2, 3)
-                if checkClaimd(tab,task): continue
+                if checkClaimd(tab,task,env): continue
                 execTask(chrome, env, tab)
                 claimPoints(chrome, env, tab, task)
 
