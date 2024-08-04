@@ -141,7 +141,19 @@ def claimPoints(chrome,env,tab,task):
                 updateTaskRecord(env.name,f"{task}",1)
     elif "Claimed" in end.text:
         updateTaskRecord(env.name, f"{task}", 1)
+    elif "Ended" in end.text:
+        logger.info(f"{env.name}: {task} 已结束：{end.text}")
 
+def checkClaimd(tab,task):
+    end = tab.ele("@class=flex items-center justify-end z-[2] w-full")
+    end = end.ele("c:button")
+    print(end.text)
+    if "Claimed" in end.text:
+        updateTaskRecord(env.name, f"{task}", 1)
+        return True
+    elif "Ended" in end.text:
+        logger.info(f"{env.name}: {task} 已结束：{end.text}")
+        return True
 
 def execTask(chrome,env,tab):
     follow = tab.s_ele("@class=text-size-12 font-semibold")
@@ -176,9 +188,9 @@ def execTask(chrome,env,tab):
             if name.startswith("Survey"):
                 button = role.ele("c:button")
                 button.click()
-                chrome.wait(2, 3)
-                role.ele("c:input").input("https://x.com/" + tw.name)
-                role.ele("@type=button").click()
+                # chrome.wait(2, 3)
+                # role.ele("c:input").input("https://x.com/" + tw.name)
+                # role.ele("@type=button").click()
             logger.info(f"{env.name}: {name} 任务刷新")
             refreshRole(chrome,role,name)
 
@@ -214,15 +226,19 @@ def compireTasks(chrome,env):
                         if new:
                             new.ele("@type=button").next().click()
                     chrome.wait(2, 3)
+                if checkClaimd(tab,task): continue
                 execTask(chrome, env, tab)
                 claimPoints(chrome, env, tab, task)
+
+def toDoGalxeTask(env):
+    chrome = GalxeChrome(env)
+    compireTasks(chrome, env)
+
 
 if __name__ == '__main__':
     with app.app_context():
         env = Env.query.filter_by(name="Q-0").first()
-        tw = getAccountById(env.tw_id)
-        chrome = GalxeChrome(env)
-        compireTasks(chrome,env)
+        toDoGalxeTask(env)
 
 
 
