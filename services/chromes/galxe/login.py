@@ -152,7 +152,7 @@ def checkClaimd(tab,task,env):
         updateTaskRecord(env.name, f"{task}", 1)
         return True
     elif "Ended" in end.text:
-        logger.info(f"{env.name}: {task} 已结束：{end.text}")
+        logger.info(f"{env.name}: {task} 任务已结束：{end.text}")
         return True
 
 def execTask(chrome,env,tab):
@@ -234,6 +234,7 @@ def toDoGalxeTask(env):
     with app.app_context():
         chrome = GalxeChrome(env)
         compireTasks(chrome, env)
+
 def toDoGalxeTaskAll(env):
     with app.app_context():
         chrome = None

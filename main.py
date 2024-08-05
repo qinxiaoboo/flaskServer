@@ -10,8 +10,8 @@ from flaskServer.services.system.dict import updateInfo
 from flaskServer.config.scheduler import scheduler
 from flaskServer.mode.env import Env
 from flaskServer.services.chromes.login import toLoginAll
-from flaskServer.services.chromes.login import LoginChrome
-from flaskServer.services.chromes.worker import submit
+from flaskServer.services.chromes.login import DebugChrome
+from flaskServer.services.chromes.worker import submit, executor
 from flaskServer.services.chromes.tasks.multifarm import toDo as toDoMultifarm
 from flaskServer.services.dto.env import updateAllStatus
 from flaskServer.services.internal.tasks.spaces_stats import todo as countPoints
@@ -46,14 +46,14 @@ def loginAll ():
     with app.app_context():
         envs = Env.query.all()
         random.shuffle(envs)
-        submit(toLoginAll,envs)
+        Thread(target=submit, args=(toLoginAll, envs,)).start()
     return "success"
 # 初始化单个环境
 @app.route("/init/<name>")
 def login(name):
     with app.app_context():
         env = Env.query.filter_by(name=name).first()
-    Thread(target=LoginChrome,args=(env,)).start()
+        Thread(target=DebugChrome,args=(env,)).start()
     return "success"
 # 0g官网任务
 @app.route("/todo/multifarm")
@@ -61,12 +61,12 @@ def multifarm ():
     with app.app_context():
         envs = Env.query.all()
         random.shuffle(envs)
-        submit(toDoMultifarm,envs)
+        Thread(target=submit, args=(toDoMultifarm, envs,)).start()
     return "success"
 # 银河任务统计
 @app.route("/galxe/countpoints")
 def countpoints():
-    countPoints()
+    Thread(target=countPoints, args=()).start()
     return "success"
 # 执行全量银河任务
 @app.route("/galxe/task/all")
@@ -74,7 +74,7 @@ def galxeAll ():
     with app.app_context():
         envs = Env.query.all()
         random.shuffle(envs)
-        submit(toDoGalxeTaskAll,envs)
+        Thread(target=submit, args=(toDoGalxeTaskAll,envs,)).start()
     return "success"
 # 单个执行银河任务
 @app.route("/galxe/task/<name>")

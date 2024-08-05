@@ -287,6 +287,20 @@ def LoginChrome(env):
                 chrome.quit()
             raise e
 
+def DebugChrome(env):
+    with app.app_context():
+        proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
+        chrome = getChrome(proxy,env)
+        LoginINITWallet(chrome, env)
+        LoginOKXWallet(chrome, env)
+        LoginTW(chrome, env)
+        LoginDiscord(chrome, env)
+        LoginOutlook(chrome, env)
+        LoginBitlight(chrome, env)
+        logger.info(ChromiumOptions().address)
+        updateEnvStatus(env.name, 2)
+        return chrome
+
 def toLoginAll(env):
     if env.status != 2:
         chrome = None

@@ -15,11 +15,11 @@ async def process_env(env):
         logger.info(f'{account.idx}) Galxe signed in')
         await wait_a_bit()
 
-        for campaign_id in GALXE_CAMPAIGN_IDS:
-            await galxe_account.complete_campaign(campaign_id)
-            await galxe_account.claim_campaign(campaign_id)
-
-        await wait_a_bit()
+        # for campaign_id in GALXE_CAMPAIGN_IDS:
+        #     await galxe_account.complete_campaign(campaign_id)
+        #     await galxe_account.claim_campaign(campaign_id)
+        #
+        # await wait_a_bit()
 
         logger.info(f'{account.idx}) Checking spaces stats')
         await galxe_account.spaces_stats()

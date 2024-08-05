@@ -3,12 +3,19 @@ from concurrent.futures import ThreadPoolExecutor
 import time
 from loguru import logger
 
-
+# 创建线程池
+executor = ThreadPoolExecutor(max_workers=THREAD_POOL_NUM)
 # def worker(data,name,age,key="key",value="value"):
 #     print(data)
 #     print(name,age,key,value)
 
+# 异步执行
 def submit(func,datas,*args, **kwargs):
+    for data in datas:
+        executor.submit(func, data, *args, **kwargs)
+
+# 同步执行
+def awaitSubmit(func,datas,*args, **kwargs):
     fs = []
     with ThreadPoolExecutor(THREAD_POOL_NUM) as executor:
         for data in datas:
@@ -23,8 +30,7 @@ def submit(func,datas,*args, **kwargs):
                     break
             if flag:
                 break
-        # for f in fs:
-        #     logger.info('{} result = {}'.format(f, f.result()))
+    return fs
 
 
 if __name__ == '__main__':
