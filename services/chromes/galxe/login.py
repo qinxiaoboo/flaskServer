@@ -52,7 +52,6 @@ def get_new_tab(wapp):
         new_tab = wapp.click.for_new_tab()
     except Exception as e:
         new_tab = wapp.click.for_new_tab()
-        print(new_tab)
         if not new_tab:
             new_tab = wapp.click.for_new_tab()
     return new_tab
@@ -110,7 +109,7 @@ def twButton(chrome,wapp,env):
         twButton(chrome,wapp,env)
 
 def refreshRole(chrome,role,name):
-    if "Twitter" in name or "Tweet" in name or "Discord" in name:
+    if "Twitter" in name or "Tweet" in name or "Discord" in name or "Telegram" in name:
         role.ele("c:button").click()
         chrome.wait(3, 5)
 
@@ -119,10 +118,8 @@ def claimPoints(chrome,env,tab,task):
     chrome.wait(2,3)
     end = tab.ele("@class=flex items-center justify-end z-[2] w-full")
     end = end.ele("c:button")
-    print(end.text)
     if "Points" in end.text:
         chrome.wait(1,2)
-        print(end.click)
         tab.actions.move_to(end)
         end.click()
         chrome.wait(5,8)
@@ -148,7 +145,6 @@ def claimPoints(chrome,env,tab,task):
 def checkClaimd(tab,task,env):
     end = tab.ele("@class=flex items-center justify-end z-[2] w-full")
     end = end.ele("c:button")
-    print(end.text)
     if "Claimed" in end.text:
         updateTaskRecord(env.name, f"{task}", 1)
         return True
@@ -159,7 +155,6 @@ def checkClaimd(tab,task,env):
 def execTask(chrome,env,tab):
     follow = tab.s_ele("@class=text-size-12 font-semibold")
     if "Following" not in follow.text:
-        print(f"follow元素: {follow}")
         follow = tab.ele("@class=text-size-12 font-semibold", timeout=3)
         follow.click()
         logger.info(f"{env.name}: 关注space")

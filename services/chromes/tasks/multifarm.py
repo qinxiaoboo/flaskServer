@@ -38,7 +38,7 @@ def toDo(env):
                 tw.close()
             while tab.eles("@class: max-lg:mr-3 h-[29.43px] uppercase w-[110px] tablet:h-[1.667vw] tablet:w-[7.2vw] flex justify-center items-center font-akiraExpanded font-extrabold tracking-widest text-center text-[9.207px] tablet:text-[0.521vw] rounded-[3.06px] transition-all   text-yellow hover:bg-[#FFCC3E] hover:text-[#0B0B0B] border-[0.04vw] outline-none border-[#FFCC3E] cursor-not-allowed"):
                 chrome.wait(2,3)
-            updateTaskRecord(env.name,name,0)
+            updateTaskRecord(env.name,name,1)
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
         finally:
@@ -47,6 +47,8 @@ def toDo(env):
 
 
 if __name__ == '__main__':
+    from flaskServer.services.chromes.worker import submit
     with app.app_context():
-        env = Env.query.filter_by(name="Q-0").first()
-        toDo(env)
+        # env = Env.query.filter_by(name="Q-0").first()
+        envs = Env.query.all()
+        submit(toDo,envs)
