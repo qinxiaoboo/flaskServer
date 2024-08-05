@@ -15,7 +15,7 @@ from flaskServer.services.chromes.worker import submit, executor
 from flaskServer.services.chromes.tasks.multifarm import toDo as toDoMultifarm
 from flaskServer.services.dto.env import updateAllStatus
 from flaskServer.services.internal.tasks.spaces_stats import todo as countPoints
-from flaskServer.services.chromes.galxe.login import toDoGalxeTask,toDoGalxeTaskAll
+from flaskServer.services.chromes.galxe.login import debugGalxeTask,toDoGalxeTaskAll
 from threading import Thread
 
 logger.remove()
@@ -81,7 +81,7 @@ def galxeAll ():
 def taskSign(name):
     with app.app_context():
         env = Env.query.filter_by(name=name).first()
-        Thread(target=toDoGalxeTask, args=(env,)).start()
+        Thread(target=debugGalxeTask, args=(env,)).start()
     return "success"
 
 if __name__ == '__main__':

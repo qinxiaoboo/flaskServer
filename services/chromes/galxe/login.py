@@ -110,9 +110,10 @@ def twButton(chrome,wapp,env):
         twButton(chrome,wapp,env)
 
 def refreshRole(chrome,role,name):
-    if "Twitter" in name or "Tweet" in name:
+    if "Twitter" in name or "Tweet" in name or "Discord" in name:
         role.ele("c:button").click()
         chrome.wait(3, 5)
+
 
 def claimPoints(chrome,env,tab,task):
     chrome.wait(2,3)
@@ -230,7 +231,7 @@ def compireTasks(chrome,env):
                 execTask(chrome, env, tab)
                 claimPoints(chrome, env, tab, task)
 
-def toDoGalxeTask(env):
+def debugGalxeTask(env):
     with app.app_context():
         chrome = GalxeChrome(env)
         compireTasks(chrome, env)
@@ -253,7 +254,7 @@ def toDoGalxeTaskAll(env):
 if __name__ == '__main__':
     with app.app_context():
         env = Env.query.filter_by(name="Q-0").first()
-        toDoGalxeTask(env)
+        debugGalxeTask(env)
 
 
 
