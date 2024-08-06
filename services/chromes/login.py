@@ -145,10 +145,10 @@ def tw2faV(tab,fa2):
 
 def checkTw(tab,env):
     if ".com/home" in tab.url:
-        logger.info(f"{env.name}: 环境，登录推特成功")
+        logger.info(f"{env.name}: 登录推特成功")
     elif "account/access" in tab.url:
         tab.wait(3,5)
-        ele = tab.s_ele("@@type=submit@@value=Send email")
+        ele = tab.s_ele("@@type=submit@@value=Start")
         if ele:
             raise Exception(f"{env.name}: 该环境TW需要邮箱验证，请前往验证")
         else:
@@ -157,6 +157,12 @@ def checkTw(tab,env):
                 logger.info(f"{env.name}: TW验证码验证成功")
             else:
                 raise Exception(f"{env.name}: TW验证码元素未找到")
+    else:
+        tab.wait(2,3)
+        if ".com/home" in tab.url:
+            logger.info(f"{env.name}: 登录推特成功")
+        else:
+            raise Exception(f"{env.name}: TW 登录失败")
     return tab
 
 def LoginTW(chrome:ChromiumPage,env):
