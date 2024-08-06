@@ -146,7 +146,7 @@ def tw2faV(tab,fa2):
 def LoginTW(chrome:ChromiumPage,env):
     tab = chrome.get_tab(url=".com/i/flow/login")
     if tab is None:
-        tab = chrome.get_tab(url="x.com/login")
+        tab = chrome.get_tab(url=".com/login")
         if tab is None:
             tab = chrome.new_tab(url="https://x.com/home")
     chrome.wait(1,2)
@@ -169,7 +169,7 @@ def LoginTW(chrome:ChromiumPage,env):
             if "home" in tab.url:
                 logger.info(f"{env.name}: 登录TW成功")
         else:
-            logger.info(f"{env.name}: TW 账号为空，跳过登录")
+            raise Exception(f"{env.name}: 没有导入TW的账号信息")
         return get_Custome_Tab(tab)
 
 
@@ -191,7 +191,7 @@ def LoginDiscord(chrome:ChromiumPage,env):
                         tab.ele("@autocomplete=one-time-code").input(code)
                         tab.ele("@type=submit").click()
             else:
-                logger.info(f"{env.name}: DISCORD 账号为空，跳过登录")
+                raise Exception(f"{env.name}: 没有导入DISCORD 账号信息")
     if "channels" in tab.url:
         logger.info(f"{env.name}登录Discord成功！")
     return get_Custome_Tab(tab)
@@ -216,7 +216,7 @@ def LoginOutlook(chrome:ChromiumPage,env):
                         logger.info(f"{env.name}: 登录OUTLOOK成功")
                 else:
                     tab.close()
-                    logger.info(f"{env.name}: 邮箱格式不正确，关闭邮箱标签")
+                    logger.info(f"{env.name}: 邮箱格式不匹配，关闭邮箱标签,不登录邮箱")
                     return
             else:
                 logger.info(f"{env.name}: 邮箱 账号为空，跳过登录")
