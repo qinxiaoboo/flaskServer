@@ -143,6 +143,22 @@ def tw2faV(tab,fa2):
         tab.ele("@data-testid=ocfEnterTextTextInput").input(code)
         tab.ele("@@type=button@@text()=Next").click()
 
+def checkTw(tab,env):
+    if ".com/home" in tab.url:
+        logger.info(f"{env.name}: 环境，登录推特成功")
+    elif "account/access" in tab.url:
+        tab.wait(3,5)
+        ele = tab.s_ele("@@type=submit@@value=Send email")
+        if ele:
+            raise Exception(f"{env.name}: 该环境TW需要邮箱验证，请前往验证")
+        else:
+            ele = tab.ele("@@type=submit@@value=Continue to X")
+            if ele:
+                logger.info(f"{env.name}: TW验证码验证成功")
+            else:
+                raise Exception(f"{env.name}: TW验证码元素未找到")
+    return tab
+
 def LoginTW(chrome:ChromiumPage,env):
     tab = chrome.get_tab(url=".com/i/flow/login")
     if tab is None:
@@ -153,24 +169,19 @@ def LoginTW(chrome:ChromiumPage,env):
     if "logout" in tab.url or "login" in tab.url:
         logger.info(f"{env.name}: 开始登录 TW 账号")
         tab.get(url="https://x.com/i/flow/login")
-    else:
-        logger.info(f"{env.name}: 登录TW成功")
-        return get_Custome_Tab(tab)
-    with app.app_context():
-        tw:Account = Account.query.filter_by(id=env.tw_id).first()
-        if tw:
-            tab.ele("@autocomplete=username").input(tw.name)
-            tab.ele("@@type=button@@text()=Next").click()
-            tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
-            tab.ele("@@type=button@@text()=Log in").click()
-            fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
-            if "login" in tab.url and len(fa2) > 10:
-                tw2faV(tab,fa2)
-            if "home" in tab.url:
-                logger.info(f"{env.name}: 登录TW成功")
-        else:
-            raise Exception(f"{env.name}: 没有导入TW的账号信息")
-        return get_Custome_Tab(tab)
+        with app.app_context():
+            tw:Account = Account.query.filter_by(id=env.tw_id).first()
+            if tw:
+                tab.ele("@autocomplete=username").input(tw.name)
+                tab.ele("@@type=button@@text()=Next").click()
+                tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                tab.ele("@@type=button@@text()=Log in").click()
+                fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                if "login" in tab.url and len(fa2) > 10:
+                    tw2faV(tab,fa2)
+            else:
+                raise Exception(f"{env.name}: 没有导入TW的账号信息")
+    return checkTw(get_Custome_Tab(tab),env)
 
 
 def LoginDiscord(chrome:ChromiumPage,env):
