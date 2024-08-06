@@ -1,10 +1,31 @@
-from loguru import logger
+import random
 
-from flaskServer.config.config import CHROME_VERSION
+from loguru import logger
+from flaskServer.config.config import CHROME_VERSION,RANDOM_ORDER
 from flaskServer.config.connect import db, app
 from flaskServer.mode.env import Env
+from flaskServer.mode.proxy import Proxy
 from flaskServer.utils.envutil import getUserAgent
 
+def getAllEnvs():
+    with app.app_context():
+        envs = Env.query.all()
+        if RANDOM_ORDER:
+            random.shuffle(envs)
+        return envs
+
+def getChoiceEnvs():
+    num = random.choice([i for i in range(5)])
+    with app.app_context():
+        proxys = Proxy.query.all()
+        envs = []
+        # envs.append(Env.query.filter_by(name="Q-0").first())
+        for proxy in proxys:
+            env = Env.query.filter_by(t_proxy_id=proxy.id).all()[num]
+            envs.append(env)
+        if RANDOM_ORDER:
+            random.shuffle(envs)
+        return envs
 
 def getEnvByName(name):
     with app.app_context():

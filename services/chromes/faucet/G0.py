@@ -3,8 +3,7 @@ import random
 from loguru import logger
 
 from flaskServer.config.connect import app
-from flaskServer.mode.env import Env
-from flaskServer.mode.proxy import Proxy
+from flaskServer.services.dto.env import getChoiceEnvs
 from flaskServer.mode.wallet import Wallet
 from flaskServer.services.chromes.login import NoAccountChrome
 from flaskServer.services.chromes.worker import submit
@@ -32,15 +31,8 @@ def worker(env):
 
 # 任务调度
 def toDo():
-    num = random.choice([ i for i in range(5)])
-    with app.app_context():
-        proxys = Proxy.query.all()
-        envs = []
-        envs.append(Env.query.filter_by(name="Q-0").first())
-        for proxy in proxys:
-            env = Env.query.filter_by(t_proxy_id=proxy.id).all()[num]
-            envs.append(env)
-        submit(worker,envs)
+    envs = getChoiceEnvs()
+    submit(worker,envs)
 
 
 if __name__ == '__main__':
