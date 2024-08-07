@@ -26,6 +26,7 @@ def wait_pages(chrome,wait_page_list):
                     continue
         if len(wait_page_list) > 0:
             chrome.wait(1,2)
+            refreshInitTab(chrome)
             count-= 1
         else:
             break
@@ -35,6 +36,14 @@ def wait_pages(chrome,wait_page_list):
 def setTitle(chrome,env):
     tab = chrome.get_tab(url="whoer.com")
     tab.run_js(f"document.title='{env.name}'")
+
+def refreshInitTab(chrome):
+    tab = chrome.get_tab(title="www.okx.com")
+    if tab:
+        tab.refresh()
+    okx = chrome.get_tab(title="OKX Wallet")
+    if okx:
+        okx.refresh()
 
 def closeInitTab(chrome):
     tab = chrome.get_tab(title="Welcome to OKX")
