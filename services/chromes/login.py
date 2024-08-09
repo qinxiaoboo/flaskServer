@@ -152,6 +152,7 @@ def checkTw(tab,env):
         start = tab.s_ele("@@type=submit@@value=Start")
         if start:
             tab.ele("@@type=submit@@value=Start").click()
+            chrome.wait(1,2)
             send = tab.s_ele("@@type=submit@@value=Send email")
             if send:
                 raise Exception(f"{env.name}: 该环境TW需要邮箱验证，请前往验证")
@@ -159,7 +160,7 @@ def checkTw(tab,env):
                 reload = tab.s_ele("Reload Challenge")
                 if reload:
                     tab.ele("Reload Challenge").click()
-                ele = tab.ele("@@type=submit@@value=Continue to X")
+                ele = tab.ele("@@type=submit@@value=Continue to X",timeout=120).click()
                 if ele:
                     logger.info(f"{env.name}: TW验证码验证成功")
                 else:
@@ -168,6 +169,13 @@ def checkTw(tab,env):
         tab.wait(2,3)
         if ".com/home" in tab.url:
             logger.info(f"{env.name}: 登录推特成功")
+            sheetDialog = tab.s_ele("@data-testid=sheetDialog")
+            if sheetDialog:
+                logger.info(f"{env.name}: 推特出现弹窗需要处理！")
+                confram = tab.ele("@data-testid=sheetDialog").ele("@role=button")
+                if "Yes" in confram.text:
+                    logger.info(f"{env.name}: 弹窗中包含yes的按钮：{confram.text} 点击")
+                    confram.click()
         else:
             raise Exception(f"{env.name}: TW 登录失败")
     return tab
