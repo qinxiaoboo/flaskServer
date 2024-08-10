@@ -161,8 +161,10 @@ def checkTw(tab,env):
                 reload = tab.s_ele("Reload Challenge")
                 if reload:
                     tab.ele("Reload Challenge").click()
-                ele = tab.ele("@@type=submit@@value=Continue to X",timeout=120).click(by_js=True)
+                ele = tab.ele("@@type=submit@@value=Continue to X",timeout=120)
                 if ele:
+                    chrome.wait(3, 4)
+                    ele.click(by_js=True)
                     logger.info(f"{env.name}: TW验证码验证成功")
                 else:
                     raise Exception(f"{env.name}: TW验证码元素未找到")
