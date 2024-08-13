@@ -235,20 +235,6 @@ def getSolidviolet(chrome,env):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 def toDo(env):
     with app.app_context():
         logger.info(f"======开始执行{env.name}环境")
