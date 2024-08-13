@@ -225,7 +225,6 @@ def getSolidviolet(chrome,env):
     tab.ele('@class=chakra-button css-4i7hvg').click()
     chrome.wait(3, 5)
     chrome.get_tab(title="OKX Wallet").ele("@type=button").next().click()
-        #.for_new_tab().ele("@type=button").next().click()
 
 
 
