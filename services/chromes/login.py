@@ -144,14 +144,16 @@ def tw2faV(tab,fa2):
         tab.ele("@@type=button@@text()=Next").click()
 
 def checkTw(tab,env):
-    tab.wait(2,3)
+    print(f"{env.name}: {tab.url}")
     if ".com/home" in tab.url:
         logger.info(f"{env.name}: 登录推特成功")
+        endCheckTW(tab,env)
     elif "account/access" in tab.url:
         tab.wait(1,2)
         start = tab.s_ele("@@type=submit@@value=Start")
         if start:
-            tab.ele("@@type=submit@@value=Start").click()
+            tab.ele("@@type=submit@@value=Start").click(by_js=True)
+            chrome.wait(1,2)
             send = tab.s_ele("@@type=submit@@value=Send email")
             if send:
                 raise Exception(f"{env.name}: 该环境TW需要邮箱验证，请前往验证")
@@ -159,26 +161,44 @@ def checkTw(tab,env):
                 reload = tab.s_ele("Reload Challenge")
                 if reload:
                     tab.ele("Reload Challenge").click()
-                ele = tab.ele("@@type=submit@@value=Continue to X")
+                ele = tab.ele("@@type=submit@@value=Continue to X",timeout=120)
                 if ele:
+                    chrome.wait(3, 4)
+                    ele.click(by_js=True)
                     logger.info(f"{env.name}: TW验证码验证成功")
                 else:
                     raise Exception(f"{env.name}: TW验证码元素未找到")
     else:
-        tab.wait(2,3)
+        tab.wait(1,2)
         if ".com/home" in tab.url:
             logger.info(f"{env.name}: 登录推特成功")
+            endCheckTW(tab,env)
         else:
             raise Exception(f"{env.name}: TW 登录失败")
     return tab
 
-def LoginTW(chrome:ChromiumPage,env):
+def endCheckTW(tab,env):
+    sheetDialog = tab.s_ele("@data-testid=sheetDialog")
+    if sheetDialog:
+        logger.info(f"{env.name}: 推特出现弹窗需要处理！")
+        confram = tab.ele("@data-testid=sheetDialog").ele("@role=button")
+        if "Yes" in confram.text:
+            logger.info(f"{env.name}: 弹窗中包含yes的按钮：{confram.text} 点击")
+            confram.click()
+        else:
+            logger.warning(f"{env.name}: 弹窗不包含Yes，没有点击")
+
+def preCheckTW(chrome,env):
     tab = chrome.get_tab(url=".com/i/flow/login")
     if tab is None:
         tab = chrome.get_tab(url=".com/login")
         if tab is None:
             tab = chrome.new_tab(url="https://x.com/home")
-    chrome.wait(1,2)
+    chrome.wait(1, 2)
+    return tab
+
+def LoginTW(chrome:ChromiumPage,env):
+    tab = preCheckTW(chrome,env)
     if "logout" in tab.url or "login" in tab.url:
         logger.info(f"{env.name}: 开始登录 TW 账号")
         tab.get(url="https://x.com/i/flow/login")
@@ -216,7 +236,7 @@ def LoginDiscord(chrome:ChromiumPage,env):
                         tab.ele("@type=submit").click()
             else:
                 raise Exception(f"{env.name}: 没有导入DISCORD 账号信息")
-    if "channels" in tab.url:
+    if "channels" in tab.url or ".com/app" in tab.url:
         logger.info(f"{env.name}登录Discord成功！")
     return get_Custome_Tab(tab)
 

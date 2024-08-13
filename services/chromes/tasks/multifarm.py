@@ -4,6 +4,7 @@ from flaskServer.mode.env import Env
 from flaskServer.mode.task_record import TaskRecord
 from flaskServer.services.chromes.login import OKXChrome,LoginTW,AuthTW, ConfirmOKXWallet
 from flaskServer.services.dto.task_record import updateTaskRecord
+from flaskServer.services.dto.env import getAllEnvs
 from sqlalchemy import and_
 from loguru import logger
 # 任务名称
@@ -15,7 +16,7 @@ def toDo(env):
         logger.info(f"======开始执行{env.name}环境")
         try:
             record = TaskRecord.query.filter(and_(TaskRecord.env_name==env.name,TaskRecord.name==name)).first()
-            if record and record.status == 0:
+            if record and record.status == 1:
                 return
             chrome = OKXChrome(env)
             LoginTW(chrome,env)
@@ -34,7 +35,6 @@ def toDo(env):
             for button in buttons:
                 button.click()
                 tw = tab.ele("@class= flex gap-2 items-center ").click.for_new_tab()
-                print(tw)
                 tw.close()
             while tab.eles("@class: max-lg:mr-3 h-[29.43px] uppercase w-[110px] tablet:h-[1.667vw] tablet:w-[7.2vw] flex justify-center items-center font-akiraExpanded font-extrabold tracking-widest text-center text-[9.207px] tablet:text-[0.521vw] rounded-[3.06px] transition-all   text-yellow hover:bg-[#FFCC3E] hover:text-[#0B0B0B] border-[0.04vw] outline-none border-[#FFCC3E] cursor-not-allowed"):
                 chrome.wait(2,3)
@@ -50,5 +50,5 @@ if __name__ == '__main__':
     from flaskServer.services.chromes.worker import submit
     with app.app_context():
         # env = Env.query.filter_by(name="Q-0").first()
-        envs = Env.query.all()
+        envs = getAllEnvs()
         submit(toDo,envs)
