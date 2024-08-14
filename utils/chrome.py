@@ -8,10 +8,10 @@ from flaskServer.services.dto.env import updateEnvStatus
 
 
 def get_Custome_Tab(tab):
-    if OFF_VIDEO:
-        tab.set.blocked_urls(('*f=MP4*','*.m4s*','*.mp4*', '*.m3u8*','*ext_tw_video*','*amplify_video*'))
-    if OFF_IMG:
-        tab.set.blocked_urls(('*f=JPEG*','*f=PNG*','*f=JPG*','*.png*','*.jpg*','*.gif*','*images*'))
+    # if OFF_VIDEO:
+    #     tab.set.blocked_urls(('*f=MP4*','*.m4s*','*.mp4*', '*.m3u8*','*ext_tw_video*','*amplify_video*'))
+    # if OFF_IMG:
+    #     tab.set.blocked_urls(('*f=JPEG*','*f=PNG*','*f=JPG*','*.png*','*.jpg*','*.gif*','*images*'))
     return tab
 
 def wait_pages(chrome,wait_page_list):
@@ -33,7 +33,7 @@ def wait_pages(chrome,wait_page_list):
 
 
 def setTitle(chrome,env):
-    tab = chrome.get_tab(url="whoer.com")
+    tab = chrome.get_tab(title=f"IP Info")
     tab.run_js(f"document.title='{env.name}'")
 
 def refreshInitTab(chrome):
@@ -79,7 +79,7 @@ def getChrome(proxy,env):
     try:
         chrome = getChromiumPage(env,proxy)
         # chrome.set.auto_handle_alert(accept=False,all_tabs=True)
-        chrome.get(f'{WORK_PATH}\\flaskServer\utils\pages\index.html?env=' + env.name)
+        chrome.get(fr'file:///{WORK_PATH}\flaskServer\utils\pages\index.html?env={env.name}')
         wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
         flag = wait_pages(chrome, wait_page_list)
         if flag:
