@@ -3,16 +3,15 @@ from DrissionPage import ChromiumPage
 from DrissionPage import ChromiumOptions
 from DrissionPage.errors import *
 from flaskServer.config.chromiumOptions import initChromiumOptions
-from flaskServer.config.config import HEADLESS,get_ini_path,MUTE,OFF_VIDEO,OFF_IMG
+from flaskServer.config.config import HEADLESS,get_ini_path,MUTE,OFF_VIDEO,OFF_IMG,WORK_PATH
 from flaskServer.services.dto.env import updateEnvStatus
 
 
 def get_Custome_Tab(tab):
     if OFF_VIDEO:
-        tab.set.blocked_urls("*.m4s")
-        tab.set.blocked_urls("*.mp4")
+        tab.set.blocked_urls(('*f=MP4*','*.m4s*','*.mp4*', '*.m3u8*','*ext_tw_video*','*amplify_video*'))
     if OFF_IMG:
-        tab.set.blocked_urls("*.jpg")
+        tab.set.blocked_urls(('*f=JPEG*','*f=PNG*','*f=JPG*','*.png*','*.jpg*','*.gif*','*images*'))
     return tab
 
 def wait_pages(chrome,wait_page_list):
@@ -79,7 +78,8 @@ def getChrome(proxy,env):
     chrome = None
     try:
         chrome = getChromiumPage(env,proxy)
-        chrome.get("https://whoer.com/zh?env=" + env.name)
+        # chrome.set.auto_handle_alert(accept=False,all_tabs=True)
+        chrome.get(f'{WORK_PATH}\\flaskServer\utils\pages\index.html?env=' + env.name)
         wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
         flag = wait_pages(chrome, wait_page_list)
         if flag:
