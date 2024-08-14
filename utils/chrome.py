@@ -33,7 +33,7 @@ def wait_pages(chrome,wait_page_list):
 
 
 def setTitle(chrome,env):
-    tab = chrome.get_tab(title=f"IP Info")
+    tab = chrome.get_tab(title=f"Browser Fingerprint")
     tab.run_js(f"document.title='{env.name}'")
 
 def refreshInitTab(chrome):
