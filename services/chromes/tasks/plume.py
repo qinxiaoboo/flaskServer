@@ -468,34 +468,23 @@ def getSilverkoi(chrome,env):
         logger.info(f"{env.name}: Silverkoi 网络延迟太大，执行失败")
     tab.close()
 
-def toDo(env):
-    with app.app_context():
-        logger.info(f"======开始执行{env.name}环境")
-        try:
-            chrome: ChromiumPage = OKXChrome(env)
-            getTab(chrome, env)
-            getSwapTab(chrome, env)
-            getStake(chrome, env)
-            getArc(chrome, env)
-            getCultured(chrome, env)
-            getSolidviolet(chrome,env)
-            getKuma(chrome,env)
-            getSilverkoi(chrome, env)
-            time.sleep(5)
-            logger.info(f"{env.name}: 任务执行完成退出浏览器")
-            chrome.quit()
-
-        except Exception as e:
-            logger.error(f"{env.name} 执行异常：{e}")
-            raise e
-
+def toDo(chrome,env):
+    logger.info(f"======开始执行{env.name}环境")
+    getTab(chrome, env)
+    getSwapTab(chrome, env)
+    getStake(chrome, env)
+    getArc(chrome, env)
+    getCultured(chrome, env)
+    getSolidviolet(chrome,env)
+    getKuma(chrome,env)
+    getSilverkoi(chrome, env)
+    time.sleep(5)
 
 def toDoPlumeTaskAll(env):
     with app.app_context():
-        chrome = None
         try:
-            logger.info(f"{env.name}: 开始执行银河任务")
-            chrome = toDo(env)
+            chrome: ChromiumPage = OKXChrome(env)
+            toDo(chrome,env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
             chrome.quit()
         except Exception as e:
