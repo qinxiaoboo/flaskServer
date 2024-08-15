@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="script.js" ></script>
+    <title>表格页面</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .container {
+            padding: 20px;
+        }
+        .batch-actions {
+            margin-bottom: 10px;
+        }
+        .checkbox {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="batch-actions">
+            <button id="reset-chrome-setting">重置</button>
+            <button id="debug-action-button">调试</button>
+            <button id="init-action-button">初始化</button>
+        </div>
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="select-all" /></th>
+                    <th>分组</th>
+                    <th>环境名称</th>
+                    <th>推特名称</th>
+                    <th>Discord名称</th>
+                    <th>邮箱名称</th>
+                    <th>IP地址</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 数据行将通过 JavaScript 添加 -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let lastChecked = null;
+
+        // Function to fetch data and populate the table
+        function fetchData() {
+            fetch('http://localhost:9000/envs/info')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                data = data.data;
+                const tableBody = document.querySelector('#data-table tbody');
+                tableBody.innerHTML = ''; // Clear existing rows
+
+                data.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><input type="checkbox" class="row-checkbox" value="${item.id}" /></td>
+                        <td>${item.group}</td>
+                        <td>${item.env}</td>
+                        <td>${item.tw}</td>
+                        <td>${item.discord}</td>
+                        <td>${item.outlook}</td>
+                        <td>${item.ip}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            }).catch(error => {
+                console.error('Error fetching data:', error);
+            });
+        }
+
+        // Event listener for batch action buttons
+        document.getElementById('reset-chrome-setting').addEventListener('click', handleRestOperation);
+        document.getElementById('debug-action-button').addEventListener('click', handleDebugOperation);
+        document.getElementById('init-action-button').addEventListener('click', handleInitOperation);
+
+        // Event listener for select all checkbox
+        document.getElementById('select-all').addEventListener('change', (event) => {
+            const checked = event.target.checked;
+            document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = checked);
+        });
+
+        // Event listener for row checkboxes
+        document.querySelector('#data-table').addEventListener('click', function(event) {
+            if (event.target.type === 'checkbox' && event.target.classList.contains('row-checkbox')) {
+                const currentCheckbox = event.target;
+                if (event.shiftKey && lastChecked) {
+                    const checkboxes = Array.from(document.querySelectorAll('.row-checkbox'));
+                    const start = checkboxes.indexOf(lastChecked);
+                    const end = checkboxes.indexOf(currentCheckbox);
+
+                    if (start > end) {
+                        [start, end] = [end, start];
+                    }
+
+                    for (let i = start; i <= end; i++) {
+                        checkboxes[i].checked = lastChecked.checked;
+                    }
+                }
+
+                lastChecked = currentCheckbox;
+            }
+        });
+
+        // Initial data fetch
+        fetchData();
+    </script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+import json
 import random
 
 from loguru import logger
@@ -6,6 +7,9 @@ from flaskServer.config.connect import db, app
 from flaskServer.mode.env import Env
 from flaskServer.mode.proxy import Proxy
 from flaskServer.utils.envutil import getUserAgent
+from flaskServer.dao.envAccount import EnvAccountInfo
+from flaskServer.services.dto.account import Account
+from flaskServer.services.dto.proxy import Proxy
 
 def getAllEnvs():
     with app.app_context():
@@ -14,9 +18,31 @@ def getAllEnvs():
             random.shuffle(envs)
         return envs
 
+def getEnvsInfo():
+    envs_json = []
+    with app.app_context():
+        envs = Env.query.order_by(Env.name).all()
+        for env in envs:
+            tw = Account.query.filter_by(id=env.tw_id).first()
+            discord = Account.query.filter_by(id=env.discord_id).first()
+            outlook = Account.query.filter_by(id=env.outlook_id).first()
+            ip = Proxy.query.filter_by(id=env.t_proxy_id).first()
+            env_json = EnvAccountInfo(id=env.id,group=env.group,env=env.name,tw=tw.name,discord=discord.name,
+                                      outlook=outlook.name,ip=ip.ip if ip else "").to_dict()
+            envs_json.append(env_json)
+    return envs_json
+
+
 def getEnvsByGroup(group):
     with app.app_context():
         envs = Env.query.filter_by(group=group).all()
+        if RANDOM_ORDER:
+            random.shuffle(envs)
+        return envs
+
+def getEnvsByIds(ids):
+    with app.app_context():
+        envs = Env.query.filter(Env.id.in_(ids)).all()
         if RANDOM_ORDER:
             random.shuffle(envs)
         return envs
@@ -97,3 +123,6 @@ def getId(object):
         return object.id
     else:
         return 0
+
+if __name__ == '__main__':
+    print(getEnvsInfo())

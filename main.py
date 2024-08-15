@@ -4,9 +4,6 @@ import sys
 from loguru import logger
 from flaskServer.config.connect import app
 from gevent import pywsgi
-from flask import request
-from flaskServer.services.system.dict import getInfo
-from flaskServer.services.system.dict import updateInfo
 from flaskServer.config.scheduler import scheduler
 from flaskServer.mode.env import Env
 from flaskServer.services.chromes.login import toLoginAll
@@ -17,8 +14,10 @@ from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGro
 from flaskServer.services.internal.tasks.spaces_stats import todo as countPoints
 from flaskServer.services.chromes.galxe.login import debugGalxeTask,toDoGalxeTaskAll
 from threading import Thread
-from flaskServer.services.chromes.tasks.plume import toDoPlumeTaskAll
-
+from flaskServer.routes import env
+from flask_cors import CORS
+# from flaskServer.services.chromes.tasks.plume import toDoPlumeTaskAll
+app.register_blueprint(env.bp)
 logger.remove()
 logger.add(sys.stderr, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | '
                               '<level>{level: <7}</level> | '
@@ -30,6 +29,7 @@ result = {"code": 0, 'msg': "success"}
 @app.route("/chromes/reset")
 def reset ():
     updateAllStatus(0)
+    logger.info(f"所有环境配置初始化成功，下次登录环境重新加载配置文件")
     return "success"
 
 # @app.route('/system/setting/get')
@@ -90,16 +90,17 @@ def taskSign(name):
         Thread(target=debugGalxeTask, args=(env,)).start()
     return "success"
 
-@app.route("/task/plume/all")
-def taskPlume ():
-    with app.app_context():
-        envs = getAllEnvs()
-        Thread(target=submit, args=(toDoPlumeTaskAll, envs,)).start()
-    return "success"
+# @app.route("/task/plume/all")
+# def taskPlume ():
+#     with app.app_context():
+#         envs = getAllEnvs()
+#         Thread(target=submit, args=(toDoPlumeTaskAll, envs,)).start()
+#     return "success"
 
 
 if __name__ == '__main__':
     scheduler.init_app(app)
     scheduler.start()
+    CORS(app)
     server = pywsgi.WSGIServer(("0.0.0.0",9000),app)
     server.serve_forever()

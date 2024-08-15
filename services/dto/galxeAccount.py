@@ -6,7 +6,7 @@ from flaskServer.mode.account import Account
 from eth_account import Account as ETHAccount
 from flaskServer.dao.galxeAccount import AccountInfo
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
-
+# 获取银河账号信息，通过ENV
 def getAccountByEnv(env:Env):
     with app.app_context():
         proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()

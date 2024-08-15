@@ -3,19 +3,20 @@ import datetime
 from flaskServer.mode.task_record import TaskRecord
 from flaskServer.config.connect import db,app
 from sqlalchemy import and_
-
+# 获取任务记录通过环境和任务名称
 def getTaskRecord(env,name):
     with app.app_context():
         taskRecord = TaskRecord.query.filter(and_(TaskRecord.env_name==env,TaskRecord.name==name)).first()
         return taskRecord
 
-
+# 检查任务状态
 def checkTaskStatus(env,name):
     taskRecord = getTaskRecord(env,name)
     if taskRecord:
         return (taskRecord.status == 1)
     return False
 
+# 更新任务记录
 def updateTaskRecord(env,name,status):
     taskRecord = getTaskRecord(env,name)
     with app.app_context():
@@ -31,6 +32,7 @@ def updateTaskRecord(env,name,status):
         print(f"{env}新增一条{name}任务记录,状态：'{'完成' if status == 1 else '未完成'}'，id：{taskRecord.id if taskRecord else ''}")
         return taskRecord
 
+# 更新任务状态
 def updateTaskStatus(name,status):
     with app.app_context():
         db.session.query(TaskRecord).filter(TaskRecord.name==name).update({TaskRecord.status:status,TaskRecord.updatetime:datetime.datetime.now()})

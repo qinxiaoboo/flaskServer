@@ -1,16 +1,17 @@
 from flaskServer.mode.proxy import Proxy
 from flaskServer.config.connect import db,app
 from sqlalchemy import and_
-
+# 获取代理通过IP
 def getProxyByIp(ip):
     with app.app_context():
         proxy = Proxy.query.filter_by(ip=ip).first()
         return proxy
+# 获取代理对象通过代理ID
 def getProxyByID(_id):
     with app.app_context():
         proxy = Proxy.query.filter_by(id=_id).first()
         return proxy
-
+# 更新代理信息
 def update(ip,port,user,pwd):
     proxy = getProxyByIp(ip)
     with app.app_context():
