@@ -13,11 +13,10 @@ from flaskServer.services.chromes.login import toLoginAll
 from flaskServer.services.chromes.login import DebugChrome
 from flaskServer.services.chromes.worker import submit, executor
 from flaskServer.services.chromes.tasks.multifarm import toDo as toDoMultifarm
-from flaskServer.services.dto.env import updateAllStatus,getAllEnvs
+from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGroup
 from flaskServer.services.internal.tasks.spaces_stats import todo as countPoints
 from flaskServer.services.chromes.galxe.login import debugGalxeTask,toDoGalxeTaskAll
 from threading import Thread
-from flaskServer.services.chromes.tasks.plume import toDoPlumeTaskAll
 
 logger.remove()
 logger.add(sys.stderr, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | '
@@ -41,12 +40,18 @@ def reset ():
 # def systemSettingSet():
 #     updateInfo(request.get_json())
 #     return "success"
-
 # 初始化所有环境
 @app.route("/init/all")
 def loginAll ():
     with app.app_context():
         envs = getAllEnvs()
+        Thread(target=submit, args=(toLoginAll, envs,)).start()
+    return "success"
+
+@app.route("/init/group/<name>")
+def loginEnvsByGroup (name):
+    with app.app_context():
+        envs = getEnvsByGroup(name)
         Thread(target=submit, args=(toLoginAll, envs,)).start()
     return "success"
 
@@ -57,7 +62,6 @@ def login(name):
         env = Env.query.filter_by(name=name).first()
         Thread(target=DebugChrome,args=(env,)).start()
     return "success"
-
 # 0g官网任务
 @app.route("/todo/multifarm")
 def multifarm ():
@@ -65,13 +69,11 @@ def multifarm ():
         envs = getAllEnvs()
         Thread(target=submit, args=(toDoMultifarm, envs,)).start()
     return "success"
-
 # 银河任务统计
 @app.route("/galxe/countpoints")
 def countpoints():
     Thread(target=countPoints, args=()).start()
     return "success"
-
 # 执行全量银河任务
 @app.route("/galxe/task/all")
 def galxeAll ():
@@ -79,7 +81,6 @@ def galxeAll ():
         envs = getAllEnvs()
         Thread(target=submit, args=(toDoGalxeTaskAll,envs,)).start()
     return "success"
-
 # 单个执行银河任务
 @app.route("/galxe/task/<name>")
 def taskSign(name):
@@ -87,16 +88,6 @@ def taskSign(name):
         env = Env.query.filter_by(name=name).first()
         Thread(target=debugGalxeTask, args=(env,)).start()
     return "success"
-
-# 执行Plume任务
-@app.route("/task/plume/all")
-def taskPlume ():
-    with app.app_context():
-        envs = getAllEnvs()
-        Thread(target=submit, args=(toDoPlumeTaskAll, envs,)).start()
-    return "success"
-
-
 
 if __name__ == '__main__':
     scheduler.init_app(app)
