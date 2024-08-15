@@ -46,7 +46,7 @@ for index, row in df.iterrows():
         if init:
             word, address = init.split(",")
             INIT = updateWallt(env, word, address, "INIT")
-        updateEnv(env, chrom_port, cookies, PROXY, TW, DISCORD, OUTLOOK, OKX, INIT, BITLIGHT,userAgent)
+        updateEnv(env,group, chrom_port, cookies, PROXY, TW, DISCORD, OUTLOOK, OKX, INIT, BITLIGHT,userAgent)
 
 if __name__ == '__main__':
     pass

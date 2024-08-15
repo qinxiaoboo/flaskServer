@@ -14,6 +14,14 @@ def getAllEnvs():
             random.shuffle(envs)
         return envs
 
+def getEnvsByGroup(group):
+    with app.app_context():
+        envs = Env.query.filter_by(group=group).all()
+        if RANDOM_ORDER:
+            random.shuffle(envs)
+        return envs
+
+
 def getChoiceEnvs():
     num = random.choice([i for i in range(5)])
     with app.app_context():
@@ -48,12 +56,14 @@ def updateAllStatus(status):
         db.session.query(Env).update({Env.status: status})
         db.session.commit()
 
-def updateEnv(env,port,cookies,proxy,tw,discord,outlook,okx,init,bitlight,userAgent):
+def updateEnv(env,group,port,cookies,proxy,tw,discord,outlook,okx,init,bitlight,userAgent):
     ENV = getEnvByName(env)
     with app.app_context():
         if ENV:
             if ENV.cookies != cookies and cookies:
                 ENV.cookies = ENV.cookies
+            if ENV.group != group and group:
+                ENV.group = group
             if proxy and ENV.t_proxy_id != proxy.id:
                 ENV.t_proxy_id = proxy.id
             if tw and ENV.tw_id != tw.id:
@@ -74,7 +84,7 @@ def updateEnv(env,port,cookies,proxy,tw,discord,outlook,okx,init,bitlight,userAg
                 ENV.user_agent = getUserAgent(userAgent)
             print("更新一条环境信息，id：", ENV.id)
         else:
-            ENV = Env(name=env,port=port,user_agent=getUserAgent(userAgent),cookies=cookies,t_proxy_id=getId(proxy)
+            ENV = Env(name=env,group=group,port=port,user_agent=getUserAgent(userAgent),cookies=cookies,t_proxy_id=getId(proxy)
                       ,tw_id=getId(tw),discord_id=getId(discord),outlook_id=getId(outlook),okx_id=getId(okx),
                       init_id=getId(init),bitlight_id=getId(bitlight))
             print("新增一条环境信息，id：", ENV.id)

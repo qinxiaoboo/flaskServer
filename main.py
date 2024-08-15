@@ -13,7 +13,7 @@ from flaskServer.services.chromes.login import toLoginAll
 from flaskServer.services.chromes.login import DebugChrome
 from flaskServer.services.chromes.worker import submit, executor
 from flaskServer.services.chromes.tasks.multifarm import toDo as toDoMultifarm
-from flaskServer.services.dto.env import updateAllStatus,getAllEnvs
+from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGroup
 from flaskServer.services.internal.tasks.spaces_stats import todo as countPoints
 from flaskServer.services.chromes.galxe.login import debugGalxeTask,toDoGalxeTaskAll
 from threading import Thread
@@ -47,6 +47,14 @@ def loginAll ():
         envs = getAllEnvs()
         Thread(target=submit, args=(toLoginAll, envs,)).start()
     return "success"
+
+@app.route("/init/group/<name>")
+def loginEnvsByGroup (name):
+    with app.app_context():
+        envs = getEnvsByGroup(name)
+        Thread(target=submit, args=(toLoginAll, envs,)).start()
+    return "success"
+
 # 初始化单个环境
 @app.route("/init/<name>")
 def login(name):
