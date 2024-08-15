@@ -144,6 +144,7 @@ def tw2faV(tab,fa2):
         tab.ele("@@type=button@@text()=Next").click()
 
 def checkTw(tab,env):
+    tab.wait(2,3)
     print(f"{env.name}: {tab.url}")
     if ".com/home" in tab.url:
         logger.info(f"{env.name}: 登录推特成功")

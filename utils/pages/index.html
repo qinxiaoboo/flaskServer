@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser Fingerprint</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .fingerprint { margin-bottom: 10px; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@fingerprintjs/fingerprintjs@latest/dist/fp.min.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <h1>Browser Fingerprint</h1>
+    <div class="fingerprint" id="user-agent"></div>
+    <div class="fingerprint" id="platform"></div>
+    <div class="fingerprint" id="language"></div>
+    <div class="fingerprint" id="screen-size"></div>
+    <div class="fingerprint" id="color-depth"></div>
+    <div class="fingerprint" id="timezone"></div>
+    <div class="fingerprint" id="device-memory"></div>
+    <div class="fingerprint" id="hardware-concurrency"></div>
+    <div class="fingerprint" id="screen-orientation"></div>
+    <div class="fingerprint" id="viewport-size"></div>
+    <div class="fingerprint" id="pixel-ratio"></div>
+    <div class="fingerprint" id="fingerprint"></div>
+    <h1>IP 信息</h1>
+    <p id="result">正在获取 IP 信息...</p>
+    <div id="details"></div>
+</body>
+</html>

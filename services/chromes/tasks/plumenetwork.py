@@ -1,14 +1,12 @@
-import random
-
 from DrissionPage import ChromiumPage
 from loguru import logger
 
 from flaskServer.config.connect import app
 from flaskServer.mode.env import Env
-from flaskServer.mode.proxy import Proxy
+from flaskServer.services.chromes.login import OKXChrome
 from flaskServer.services.chromes.worker import submit
 from flaskServer.services.content import Content
-from flaskServer.services.chromes.login import OKXChrome
+from flaskServer.services.dto.env import getChoiceEnvs
 
 # 任务名称
 name = "plume_network"
@@ -53,6 +51,7 @@ def getTab(chrome,env):
             except Exception as e:
                 logger.info(f"{env.name}: 进入plume页面")
     return tab
+
 def getFaucetTab(chrome,env):
     tab = chrome.new_tab(url=fauct_url)
     s_ele = tab.s_ele("@@type=button@@data-testid=rk-connect-button")
@@ -105,15 +104,7 @@ def worker(env,type):
             chrome.quit()
 
 def toDoFaucet(type):
-    num = random.choice([i for i in range(5)])
-    with app.app_context():
-        proxys = Proxy.query.all()
-        envs = []
-        envs.append(Env.query.filter_by(name="Q-0").first())
-        for proxy in proxys:
-            env = Env.query.filter_by(t_proxy_id=proxy.id).all()[num]
-            envs.append(env)
-        submit(worker, envs, type)
+    submit(worker, getChoiceEnvs(), type)
 
 
 def toDo(env):

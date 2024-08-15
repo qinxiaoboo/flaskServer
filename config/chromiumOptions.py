@@ -1,6 +1,6 @@
 from DrissionPage import ChromiumOptions
 from flaskServer.config.config import CHROME_EXEC_PATH,CHROME_EXTEND,CHROME_EXTEND_PATH,DEFAULT_OPEN_PAGE,DEFAULT_REMOVE_PAGE
-from flaskServer.config.config import CHROME_USER_DATA_PATH
+from flaskServer.config.config import CHROME_USER_DATA_PATH, OFF_IMG
 from loguru import logger
 from pathlib import Path
 CHROME_USER_DATA_PATH = Path(CHROME_USER_DATA_PATH)
@@ -51,6 +51,9 @@ def initChromiumOptions(env,port,useragent,proxy_server):
     # 禁用的功能列表
     co.set_argument("--disable-features","FlashDeprecationWarning,EnablePasswordsAccountStorage")
     co.set_argument("--enable-blink-features","IdleDetection,Fledge,Parakeet")
+
+    # # 是否禁止图片
+    # co.no_imgs(on_off=OFF_IMG)
 
     # 不打开的页面
     for rem in DEFAULT_REMOVE_PAGE:
