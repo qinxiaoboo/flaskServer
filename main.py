@@ -17,6 +17,7 @@ from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGro
 from flaskServer.services.internal.tasks.spaces_stats import todo as countPoints
 from flaskServer.services.chromes.galxe.login import debugGalxeTask,toDoGalxeTaskAll
 from threading import Thread
+from flaskServer.services.chromes.tasks.plume import toDoPlumeTaskAll
 
 logger.remove()
 logger.add(sys.stderr, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | '
@@ -88,6 +89,14 @@ def taskSign(name):
         env = Env.query.filter_by(name=name).first()
         Thread(target=debugGalxeTask, args=(env,)).start()
     return "success"
+
+@app.route("/task/plume/all")
+def taskPlume ():
+    with app.app_context():
+        envs = getAllEnvs()
+        Thread(target=submit, args=(toDoPlumeTaskAll, envs,)).start()
+    return "success"
+
 
 if __name__ == '__main__':
     scheduler.init_app(app)
