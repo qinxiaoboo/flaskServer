@@ -489,14 +489,30 @@ def toDo(env):
             logger.error(f"{env.name} 执行异常：{e}")
             raise e
 
-if __name__ == '__main__':
-    with app.app_context():
-        env = Env.query.filter_by(name="SYL-12").first()
-        toDo(env)
 
-        # for i in range(37,76):
-        #     env = Env.query.filter_by(name="SYL-{}".format(i)).first()
-        #     toDo(env)
+def toDoPlumeTaskAll(env):
+    with app.app_context():
+        chrome = None
+        try:
+            logger.info(f"{env.name}: 开始执行银河任务")
+            chrome = toDo(env)
+            logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
+            chrome.quit()
+        except Exception as e:
+            logger.error(f"{env.name}: {e}")
+            if chrome:
+                chrome.quit()
+
+
+
+if __name__ == '__main__':
+    # with app.app_context():
+    #     env = Env.query.filter_by(name="SYL-12").first()
+    #     toDo(env)
+
+    for i in range(37,76):
+        env = Env.query.filter_by(name="SYL-{}".format(i)).first()
+        toDo(env)
 
 
 
