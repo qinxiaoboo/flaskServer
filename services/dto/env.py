@@ -18,11 +18,30 @@ def getAllEnvs():
             random.shuffle(envs)
         return envs
 
-def getEnvsInfo():
+def getEnvsInfo(page,page_size,search,sortBy="env", sortOrder="asc"):
     envs_json = []
     with app.app_context():
-        envs = Env.query.order_by(Env.name).all()
-        for env in envs:
+        # 构建基本查询
+        envs_query = Env.query
+        if search:
+            search_term = f"%{search}%"
+            envs_query = envs_query.filter(
+                (Env.group.like(search_term))|
+                (Env.name.like(search_term))
+            )
+            # 动态设置排序
+        if sortBy not in ['group']:
+            sortBy = 'name'  # 默认排序字段
+        if sortOrder == 'desc':
+            sort_order = db.desc
+        else:
+            sort_order = db.asc
+
+        envs_query = envs_query.order_by(sort_order(getattr(Env, sortBy)))
+
+        # 分页
+        paginated_envs = envs_query.paginate(page=page, per_page=page_size, error_out=False)
+        for env in paginated_envs.items:
             tw = Account.query.filter_by(id=env.tw_id).first()
             discord = Account.query.filter_by(id=env.discord_id).first()
             outlook = Account.query.filter_by(id=env.outlook_id).first()
@@ -125,4 +144,4 @@ def getId(object):
         return 0
 
 if __name__ == '__main__':
-    print(getEnvsInfo())
+    print(getEnvsInfo(1,10,""))

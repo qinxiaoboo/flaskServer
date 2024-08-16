@@ -12,9 +12,14 @@ from loguru import logger
 bp = Blueprint('envs', __name__)
 
 @app.route("/envs/info")
-def envsInfo ():
+def envsInfo():
     result = {"code": 0, 'msg': "success"}
-    result["data"] = getEnvsInfo()
+    page = int(request.args.get('page',1))
+    page_size = int(request.args.get('pageSize', 10))
+    sortBy = request.args.get("sortBy","env")
+    sortOrder = request.args.get("sortOrder","asc")
+    search = request.args.get("search","")
+    result["data"] = getEnvsInfo(page, page_size, search, sortBy, sortOrder)
     return result
 
 @app.route("/envs/debug", methods=["POST"])
