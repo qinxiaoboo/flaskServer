@@ -44,10 +44,10 @@
                     <th><input type="checkbox" id="select-all" /></th>
                     <th onclick="sortData('group')">分组</th>
                     <th onclick="sortData('env')">环境名称</th>
-                    <th ">推特名称</th>
-                    <th ">Discord名称</th>
-                    <th ">邮箱名称</th>
-                    <th ">IP地址</th>
+                    <th >推特名称</th>
+                    <th >Discord名称</th>
+                    <th >邮箱名称</th>
+                    <th >IP地址</th>
                 </tr>
             </thead>
             <tbody>
@@ -57,14 +57,14 @@
         <div class="pagination">
             <button id="prev-page" onclick="changePage(-1)" disabled>上一页</button>
             <span id="page-info">第 1 页</span>
-            <button id="next-page" onclick="changePage(1)">下一页</button>
+            <button id="next-page" onclick="changePage(1)">下一页</button><span id="totalCount">Total Count: Loading...</span>
         </div>
     </div>
 
     <script>
         let lastChecked = null;
         let currentPage = 1;
-        const pageSize = 20; // 每页显示的条目数
+        const pageSize = 10; // 每页显示的条目数
 		let sortBy = 'env';
         let sortOrder = 'asc';
         let searchQuery = '';

@@ -49,7 +49,7 @@ def getEnvsInfo(page,page_size,search,sortBy="env", sortOrder="asc"):
             env_json = EnvAccountInfo(id=env.id,group=env.group,env=env.name,tw=tw.name,discord=discord.name,
                                       outlook=outlook.name,ip=ip.ip if ip else "").to_dict()
             envs_json.append(env_json)
-    return envs_json
+    return envs_json,paginated_envs.total
 
 
 def getEnvsByGroup(group):
@@ -96,9 +96,9 @@ def updateEnvStatus(name,status):
         db.session.add(ENV)
         db.session.commit()
 
-def updateAllStatus(status):
+def updateAllStatus(ids,status):
     with app.app_context():
-        db.session.query(Env).update({Env.status: status})
+        db.session.query(Env).filter(Env.id.in_(ids)).update({Env.status: status})
         db.session.commit()
 
 def updateEnv(env,group,port,cookies,proxy,tw,discord,outlook,okx,init,bitlight,userAgent):

@@ -2,9 +2,9 @@
 function fetchData() {
 	fetch(`http://localhost:9000/envs/info?page=${currentPage}&pageSize=${pageSize}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(searchQuery)}`)
 	.then(response => response.json())
-	.then(data => {
-		console.log(data);
-		data = data.data;
+	.then(res => {
+		console.log(res);
+		data = res.data;
 		const tableBody = document.querySelector('#data-table tbody');
 		tableBody.innerHTML = ''; // Clear existing rows
 
@@ -24,6 +24,8 @@ function fetchData() {
 		document.getElementById('page-info').textContent = `第 ${currentPage} 页`;
 		document.getElementById('prev-page').disabled = (currentPage === 1);
 		document.getElementById('next-page').disabled = (data.length < pageSize);
+		 // 更新数据总数
+        document.getElementById('totalCount').innerText = `Total Count: ${res.total}`;
 	}).catch(error => {
 		console.error('Error fetching data:', error);
 	});

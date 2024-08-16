@@ -25,12 +25,7 @@ logger.add(sys.stderr, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | '
 
 result = {"code": 0, 'msg': "success"}
 
-# 初始化 浏览器配置
-@app.route("/chromes/reset")
-def reset ():
-    updateAllStatus(0)
-    logger.info(f"所有环境配置初始化成功，下次登录环境重新加载配置文件")
-    return "success"
+
 
 # @app.route('/system/setting/get')
 # def systemSettingGet():
