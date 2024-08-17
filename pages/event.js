@@ -1,3 +1,9 @@
+// 监听输入框事件
+document.getElementById('search').addEventListener('input', (event) => {
+		// 获取输入框的值, 并赋值给全局变量
+		searchQuery = event.target.value;
+})
+
 
 // 监听表头点击事件
 document.getElementById('reset-chrome-setting').addEventListener('click', handleRestOperation);
@@ -9,13 +15,13 @@ document.getElementById('select-all').addEventListener('change', (event) => {
 	const checked = event.target.checked;
 	document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = checked);
 });
-// 监听查询提交事件
-document.getElementById('filter-form').addEventListener('submit', function(event) {
-	event.preventDefault();
-	searchQuery = document.getElementById('search').value;
-	console.log(searchQuery)
-	fetchData();
-});
+// // 监听查询提交事件
+// document.getElementById('filter-form').addEventListener('submit', function(event) {
+// 	event.preventDefault();
+// 	searchQuery = document.getElementById('search').value;
+// 	console.log(searchQuery)
+// 	fetchData();
+// });
 
 
 // 监听多选事件

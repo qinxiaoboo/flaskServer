@@ -1,3 +1,4 @@
+
 /**
  * 处理重置操作
  */
@@ -6,7 +7,7 @@ function handleRestOperation() {
     const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
     sendPostRequest(
         'http://localhost:9000/chromes/reset',
-        selectedIds,
+        { "ids": selectedIds },
         '重置操作成功',
         '重置操作失败'
     );
@@ -20,7 +21,7 @@ function handleDebugOperation() {
     const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
     sendPostRequest(
         'http://localhost:9000/envs/debug',
-        selectedIds,
+        { "ids": selectedIds },
         '调试操作成功',
         '调试操作失败'
     );
@@ -34,7 +35,7 @@ function handleInitOperation() {
     const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
     sendPostRequest(
         'http://localhost:9000/envs/init',
-        selectedIds,
+        { "ids": selectedIds },
         '初始化操作成功',
         '初始化操作失败'
     );
@@ -43,12 +44,12 @@ function handleInitOperation() {
 /**
  * 发送 POST 请求的通用函数
  * @param {string} url 请求的 URL
- * @param {Array<string>} ids 要发送的 ID 列表
+ * @param {Array<string>} body 要发送的 body
  * @param {string} successMessage 操作成功时的提示消息
  * @param {string} errorMessage 操作失败时的提示消息
  */
-function sendPostRequest(url, ids, successMessage, errorMessage) {
-    if (ids.length === 0) {
+function sendPostRequest(url, body, successMessage, errorMessage) {
+    if (body.ids.length === 0) {
         alert('请选择要操作的行');
         return;
     }
@@ -56,14 +57,18 @@ function sendPostRequest(url, ids, successMessage, errorMessage) {
     fetch(url, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json;charset=UTF-8',
         },
-        body: JSON.stringify({ ids: ids }),
+        body: JSON.stringify(body),
     })
     .then(response => response.json())
     .then(data => {
-        alert(successMessage);
         console.log(data);
+        if(data.code===0){
+            alert(data.msg);
+        }else {
+            alert(data.error)
+        }
     })
     .catch(error => {
         console.error('Error fetching data:', error);

@@ -1,9 +1,12 @@
 // Function to fetch data and populate the table
-function fetchData() {
-	fetch(`http://localhost:9000/envs/info?page=${currentPage}&pageSize=${pageSize}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(searchQuery)}`)
+function fetchData({page=0,size=0,search=undefined,label=""}={}) {
+	fetch(`http://localhost:9000/envs/info?page=${page===0?currentPage:page}&pageSize=${size===0?pageSize:size}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(search===undefined?searchQuery:search)}&label=${encodeURIComponent(label)}`,
+		{headers: {
+				'Content-Type': 'application/json;charset=UTF-8'
+				}
+		})
 	.then(response => response.json())
 	.then(res => {
-		console.log(res);
 		data = res.data;
 		const tableBody = document.querySelector('#data-table tbody');
 		tableBody.innerHTML = ''; // Clear existing rows
@@ -18,6 +21,8 @@ function fetchData() {
 				<td>${item.discord}</td>
 				<td>${item.outlook}</td>
 				<td>${item.ip}</td>
+				<td>${item.status}</td>
+				<td>${item.label}</td>
 			`;
 			tableBody.appendChild(row);
 		});
@@ -29,4 +34,8 @@ function fetchData() {
 	}).catch(error => {
 		console.error('Error fetching data:', error);
 	});
+}
+
+function fetchDataByLabel(){
+	fetchData({page:1,size:100000,search:"",label:searchQuery})
 }

@@ -13,3 +13,5 @@ class EnvAccountInfo:
     discord:str=""
     outlook:str=""
     ip:str=""
+    status:str=""
+    label:str=""

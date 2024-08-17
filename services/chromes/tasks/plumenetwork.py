@@ -54,12 +54,26 @@ def getTab(chrome,env):
 
 def getFaucetTab(chrome,env):
     tab = chrome.new_tab(url=fauct_url)
+    tab.ele("@class=hidden rounded-lg bg-gray-100 px-3 py-2 font-lufga sm:block").click()
     s_ele = tab.s_ele("@@type=button@@data-testid=rk-connect-button")
     if s_ele:
         tab.ele("@@type=button@@data-testid=rk-connect-button").click()
-        tab.ele("@@data-testid=rk-wallet-option-com.okex.wallet").click.for_new_tab().ele("@type=button").next().click()
+        tab.ele("OKX Wallet").click.for_new_tab().ele("@type=button").next().click()
     return tab
 
+######   消息积压替换   ######
+def Replace(chrome):
+    okx_wallet = chrome.get_tab(title=Content.OKX_TITLE)
+    if okx_wallet:
+        if okx_wallet.s_ele("@type=button"):
+            okx_wallet.ele("@type=button").next().click()
+            chrome.wait(1,2)
+            if okx_wallet.s_ele("@class=okui-dialog-container"):
+                okx_wallet.ele('@data-testid=okd-dialog-confirm-btn').click()
+                okx_wallet.wait(1,2)
+                okx_wallet.ele('@data-testid=okd-dialog-confirm-btn').click()
+                chrome.wait(1,2)
+                Replace(chrome)
 
 def getFaucet(chrome,env,type):
     tab = getFaucetTab(chrome,env)
@@ -74,14 +88,16 @@ def getFaucet(chrome,env,type):
         logger.info(env.name + f": {text}")
         return
     ele = chrome.get_tab(title=Content.OKX_TITLE).ele("@type=button").next()
-    if (ele.text == "Claim via faucet"):
+    if (ele.text == "Fill up PlumeTest_ETH"):
         logger.info(f"{env.name}:{type}不足无法领取测试币")
     else:
+        # Replace(chrome)
         text = tab.s_ele("@class=flex w-[300px] flex-col justify-center py-2").text
         if "Working on it" in text:
             logger.info(f" {env.name}: 正在领取{type}测试币, {text}")
             chrome.wait(3)
             ele.click()
+            Replace(chrome)
             chrome.wait(3)
             text = tab.s_ele("@class=flex w-[300px] flex-col justify-center py-2").text
             if "Mission accomplished" in text:
@@ -122,7 +138,7 @@ def toDo(env):
             raise e
 
 if __name__ == '__main__':
-    # toDoFaucet("ETH")
-    with app.app_context():
-        env = Env.query.filter_by(name="Q-2").first()
-        toDo(env)
+    toDoFaucet("ETH")
+    # with app.app_context():
+    #     env = Env.query.filter_by(name="Q-1-3").first()
+    #     toDo(env)

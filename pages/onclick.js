@@ -13,3 +13,44 @@ function sortData(field) {
 	fetchData();
 }
 
+/**
+ * 处置设置标签操作
+ */
+function restsLabel() {
+    const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+    sendPostRequest(
+        'http://localhost:9000/envs/set/label',
+        { "ids": selectedIds, "label": searchQuery },
+        '设置标签操作成功',
+        '设置标签操作失败'
+    );
+	fetchData({search:""})
+}
+/**
+ * 处置设置标签操作
+ */
+function addLabel() {
+    const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+    sendPostRequest(
+        'http://localhost:9000/envs/add/label',
+        { "ids": selectedIds, "label": searchQuery },
+        '追加标签操作成功',
+        '追加标签操作失败'
+    );
+	fetchData({search:""})
+}
+/**
+ * 重置全局变量
+ */
+function resetLocal(){
+        lastChecked = null;
+        currentPage = 1;
+        pageSize = 12; // 每页显示的条目数
+		sortBy = 'env';
+        sortOrder = 'asc';
+        document.getElementById('search').value=""
+		searchQuery=""
+		fetchData()
+}
