@@ -3,7 +3,7 @@ from flaskServer.config.connect import db,app
 from flaskServer.mode.env import Env
 from flaskServer.mode.task_record import TaskRecord
 from flaskServer.services.chromes.login import OKXChrome,LoginTW,AuthTW, ConfirmOKXWallet
-from flaskServer.services.dto.task_record import updateTaskRecord
+from flaskServer.services.dto.task_record import updateTaskRecord,updateTaskStatus
 from flaskServer.services.dto.env import getAllEnvs
 from sqlalchemy import and_
 from loguru import logger
@@ -21,7 +21,7 @@ def toDo(env):
             chrome = OKXChrome(env)
             LoginTW(chrome,env)
             tab = chrome.new_tab(url="http://www.multifarm.io/?r=37JUJ4")
-            tab.ele("get started").click()
+            tab.ele("GET STARTED").click()
             s = tab.s_ele("sign in to x")
             print(s)
             if s:
@@ -49,6 +49,7 @@ def toDo(env):
 if __name__ == '__main__':
     from flaskServer.services.chromes.worker import submit
     with app.app_context():
-        # env = Env.query.filter_by(name="Q-0").first()
-        envs = getAllEnvs()
-        submit(toDo,envs)
+        env = Env.query.filter_by(name="Q-5-3").first()
+        toDo(env)
+        # envs = getAllEnvs()
+        # submit(toDo,envs)

@@ -1,5 +1,18 @@
 
 /**
+ * 通用表头操作
+ */
+function handleOperation(url) {
+    const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+    sendPostRequest(
+        url,
+        { "ids": selectedIds },
+        '重置操作成功',
+        '重置操作失败'
+    );
+}
+/**
  * 处理重置操作
  */
 function handleRestOperation() {

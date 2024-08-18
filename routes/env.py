@@ -1,15 +1,15 @@
 from threading import Thread
 
-from flask import Blueprint, request,jsonify
+from flask import Blueprint, request
+from loguru import logger
 
 from flaskServer.config.connect import app
 from flaskServer.services.chromes.login import toLoginAll, DebugChrome
 from flaskServer.services.chromes.worker import submit
-from flaskServer.services.dto.env import getEnvsInfo
 from flaskServer.services.dto.env import getEnvsByIds
-from flaskServer.services.dto.env import updateAllStatus,updateLabel, addLabel
+from flaskServer.services.dto.env import getEnvsInfo
+from flaskServer.services.dto.env import updateAllStatus, updateLabel, addLabel
 from flaskServer.utils.envutil import can_be_list
-from loguru import logger
 
 bp = Blueprint('envs', __name__)
 

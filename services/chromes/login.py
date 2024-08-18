@@ -169,6 +169,8 @@ def checkTw(tab,env):
                     logger.info(f"{env.name}: TW验证码验证成功")
                 else:
                     raise Exception(f"{env.name}: TW验证码元素未找到")
+        else:
+            logger.error(f"{env.name}: 需要验证 TW 登录失败")
     else:
         tab.wait(1,2)
         if ".com/home" in tab.url:
