@@ -22,13 +22,13 @@ def galxesInfo():
 
 # 银河任务统计
 @app.route("/galxe/countpoints", methods=["POST"])
-def countpoints():
+def p_countpoints():
     result = {"code": 0, 'msg': "success"}
     Thread(target=countPoints, args=()).start()
     return result
 # 执行全量银河任务
-@app.route("/galxe/task/all")
-def galxeAll ():
+@app.route("/galxe/task/all", methods=["POST"])
+def p_galxeAll ():
     with app.app_context():
         result = {"code": 0, 'msg': "success"}
         data = request.get_json()

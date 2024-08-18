@@ -16,8 +16,8 @@ def toDo(env):
         logger.info(f"======开始执行{env.name}环境")
         try:
             record = TaskRecord.query.filter(and_(TaskRecord.env_name==env.name,TaskRecord.name==name)).first()
-            if record and record.status == 1:
-                return
+            # if record and record.status == 1:
+            #     return
             chrome = OKXChrome(env)
             LoginTW(chrome,env)
             tab = chrome.new_tab(url="http://www.multifarm.io/?r=37JUJ4")

@@ -20,7 +20,7 @@ def tasksInfo():
     return result
 
 @app.route("/todo/multifarm", methods=["POST"])
-def multifarm ():
+def p_multifarm ():
     result = {"code": 0, 'msg': "success"}
     data = request.get_json()
     ids = data.get('ids', [])
