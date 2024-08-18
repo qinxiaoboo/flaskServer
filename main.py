@@ -14,10 +14,12 @@ from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGro
 from flaskServer.services.internal.tasks.spaces_stats import todo as countPoints
 from flaskServer.services.chromes.galxe.login import debugGalxeTask,toDoGalxeTaskAll
 from threading import Thread
-from flaskServer.routes import env
+from flaskServer.routes import env,task,galxe
 from flask_cors import CORS
 from flaskServer.services.chromes.tasks.plume import toDoPlumeTaskAll
 app.register_blueprint(env.bp)
+app.register_blueprint(task.bp)
+app.register_blueprint(galxe.bp)
 logger.remove()
 logger.add(sys.stderr, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | '
                               '<level>{level: <7}</level> | '
@@ -26,16 +28,6 @@ logger.add(sys.stderr, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | '
 result = {"code": 0, 'msg': "success"}
 
 
-
-# @app.route('/system/setting/get')
-# def systemSettingGet():
-#     result["data"] = getInfo(request.args)
-#     return result
-# #
-# @app.route("/system/setting/update")
-# def systemSettingSet():
-#     updateInfo(request.get_json())
-#     return "success"
 # 初始化所有环境
 @app.route("/init/all")
 def loginAll ():

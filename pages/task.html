@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务列表</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>任务列表</h1>
+    <table id="dynamicTable">
+        <!-- Table header and content will be generated here -->
+    </table>
+
+    <script>
+        let data = []
+        function fetchTasksInfo(){
+            fetch(`http://localhost:9000/tasks/info`,
+            {headers: {
+                    'Content-Type': 'application/json;charset=UTF-8'
+                    }
+            })
+            .then(response => response.json())
+            .then(res => {
+                data = res.data;
+                generateTable(data)
+            })
+        }
+
+        function generateTable(data) {
+            console.log(data)
+
+            const table = document.getElementById('dynamicTable');
+
+            // Get all unique keys from the data for table headers
+            const headers = Array.from(new Set(data.flatMap(Object.keys)));
+
+            // Create table header
+            const header = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                headerRow.appendChild(th);
+            });
+            header.appendChild(headerRow);
+            table.appendChild(header);
+
+            // Create table body
+            const body = document.createElement('tbody');
+            data.forEach(rowData => {
+                const row = document.createElement('tr');
+                headers.forEach(headerText => {
+                    const td = document.createElement('td');
+                    td.textContent = rowData[headerText] || ''; // Add empty string if key doesn't exist
+                    row.appendChild(td);
+                });
+                body.appendChild(row);
+            });
+            table.appendChild(body);
+        }
+
+        // Generate table with example data
+        fetchTasksInfo();
+    </script>
+</body>
+</html>

@@ -6,6 +6,7 @@ import loguru
 
 from flaskServer.config.config import WORK_PATH
 from flaskServer.config.config import CHROME_VERSION
+from flaskServer.config.config import EXCLUDE_TASK_LIST
 
 s = list()
 # 读取UserAgent文件
@@ -56,6 +57,12 @@ def to_be_list(string):
     except Exception as e:
         loguru.logger.error(e)
         return []
+
+def to_be_exclude(string):
+    for exclude in EXCLUDE_TASK_LIST:
+        if exclude in string:
+            return True
+    return False
 
 if __name__ == '__main__':
     useragent = getUserAgent("UserAgent：Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Config/92.2.2788.20")

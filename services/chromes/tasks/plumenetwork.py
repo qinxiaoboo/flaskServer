@@ -73,7 +73,7 @@ def Replace(chrome):
                 okx_wallet.wait(1,2)
                 okx_wallet.ele('@data-testid=okd-dialog-confirm-btn').click()
                 chrome.wait(1,2)
-                Replace(chrome)
+            Replace(chrome)
 
 def getFaucet(chrome,env,type):
     tab = getFaucetTab(chrome,env)
@@ -138,7 +138,7 @@ def toDo(env):
             raise e
 
 if __name__ == '__main__':
-    toDoFaucet("ETH")
+    toDoFaucet("GOON")
     # with app.app_context():
     #     env = Env.query.filter_by(name="Q-1-3").first()
     #     toDo(env)
