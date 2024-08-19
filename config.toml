@@ -3,9 +3,9 @@ ENV_PATH = 'D:\data\initData\env.xlsx'
 # 线程池并发数
 THREAD_POOL_NUM = 2
 # 协程数量
-THREADS_NUM = 1
-RANDOM_ORDER = true
-SKIP_FIRST_ACCOUNTS = 45
+THREADS_NUM = 5
+RANDOM_ORDER = false
+SKIP_FIRST_ACCOUNTS = 0
 WAIT_BETWEEN_ACCOUNTS = [0,0]
 # 浏览器执行器
 CHROME_EXEC_PATH = 'C:\Program Files\Google\Chrome\Application\chrome.exe'
@@ -28,9 +28,9 @@ HEADLESS = false
 # 是否静音
 MUTE = true
 # 是否禁止视频
-OFF_VIDEO = true
+OFF_VIDEO = false
 # 是否禁止图片
-OFF_IMG = true
+OFF_IMG = false
 # 钱包默认初始密码
 WALLET_PASSWORD = ""
 TEXT_PASSWORD = ""
@@ -49,6 +49,9 @@ GALXE_CAMPAIGN_IDS = [
 ]
 GALXE_CAMPAIGN_URLS = [
     "PlumeNetwork/GC8kztvs3p"
+]
+EXCLUDE_TASK_LIST = [
+    "Mystiko"
 ]
 HIDE_UNSUPPORTED = false
 CAPTCHA_ON = true

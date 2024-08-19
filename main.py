@@ -4,9 +4,6 @@ import sys
 from loguru import logger
 from flaskServer.config.connect import app
 from gevent import pywsgi
-from flask import request
-from flaskServer.services.system.dict import getInfo
-from flaskServer.services.system.dict import updateInfo
 from flaskServer.config.scheduler import scheduler
 from flaskServer.mode.env import Env
 from flaskServer.services.chromes.login import toLoginAll
@@ -17,8 +14,12 @@ from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGro
 from flaskServer.services.internal.tasks.spaces_stats import todo as countPoints
 from flaskServer.services.chromes.galxe.login import debugGalxeTask,toDoGalxeTaskAll
 from threading import Thread
+from flaskServer.routes import env,task,galxe
+from flask_cors import CORS
 from flaskServer.services.chromes.tasks.plume import toDoPlumeTaskAll
-
+app.register_blueprint(env.bp)
+app.register_blueprint(task.bp)
+app.register_blueprint(galxe.bp)
 logger.remove()
 logger.add(sys.stderr, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | '
                               '<level>{level: <7}</level> | '
@@ -26,21 +27,7 @@ logger.add(sys.stderr, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | '
 
 result = {"code": 0, 'msg': "success"}
 
-# 初始化 浏览器配置
-@app.route("/chromes/reset")
-def reset ():
-    updateAllStatus(0)
-    return "success"
 
-# @app.route('/system/setting/get')
-# def systemSettingGet():
-#     result["data"] = getInfo(request.args)
-#     return result
-# #
-# @app.route("/system/setting/update")
-# def systemSettingSet():
-#     updateInfo(request.get_json())
-#     return "success"
 # 初始化所有环境
 @app.route("/init/all")
 def loginAll ():
@@ -101,5 +88,6 @@ def taskPlume ():
 if __name__ == '__main__':
     scheduler.init_app(app)
     scheduler.start()
+    CORS(app)
     server = pywsgi.WSGIServer(("0.0.0.0",9000),app)
     server.serve_forever()

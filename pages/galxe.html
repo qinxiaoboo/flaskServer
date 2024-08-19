@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>银河任务点数统计</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f4f4f4;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>银河任务点数排名详情</h1>
+    <table>
+        <thead id="table-head">
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+    </table>
+
+    <script>
+        let data = []
+        function fetchGalxesInfo(){
+            fetch(`http://localhost:9000/galxes/info`,
+            {headers: {
+                    'Content-Type': 'application/json;charset=UTF-8'
+                    }
+            })
+            .then(response => response.json())
+            .then(res => {
+                data = res.data;
+                generateTable(data)
+            })
+        }
+        function generateTable(data) {
+            const tableHead = document.getElementById('table-head');
+            const tableBody = document.getElementById('table-body');
+
+            // Generate table headers
+            const headers = Object.keys(data[0]);
+            let theadRow = document.createElement('tr');
+            headers.forEach(header => {
+                let th = document.createElement('th');
+                th.textContent = header;
+                theadRow.appendChild(th);
+            });
+            tableHead.appendChild(theadRow);
+
+            // Generate table rows
+            data.forEach(row => {
+                let tr = document.createElement('tr');
+                headers.forEach(header => {
+                    let td = document.createElement('td');
+                    td.textContent = row[header];
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+        }
+    fetchGalxesInfo()
+
+    </script>
+</body>
+</html>

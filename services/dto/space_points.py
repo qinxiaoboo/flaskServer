@@ -2,12 +2,12 @@ from flaskServer.config.connect import app,db
 from flaskServer.mode.space_points import SpacePoints
 from sqlalchemy import and_
 from loguru import  logger
-
+# 获取银河任务点
 def getSpacePoints(env,name,alia):
     with app.app_context():
         space = SpacePoints.query.filter(and_(SpacePoints.env_name==env,SpacePoints.name==name,SpacePoints.alia==alia)).first()
         return space
-
+# 更新银河任务点
 def updateSpacePoints(env_name,name,alia,points,ranking):
     space = getSpacePoints(env_name,name,alia)
     with app.app_context():

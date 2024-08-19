@@ -2,20 +2,43 @@ import datetime
 
 from flaskServer.mode.task_record import TaskRecord
 from flaskServer.config.connect import db,app
+from flaskServer.utils.envutil import to_be_exclude
 from sqlalchemy import and_
-
+# 获取任务记录通过环境和任务名称
 def getTaskRecord(env,name):
     with app.app_context():
         taskRecord = TaskRecord.query.filter(and_(TaskRecord.env_name==env,TaskRecord.name==name)).first()
         return taskRecord
 
-
+# 检查任务状态
 def checkTaskStatus(env,name):
     taskRecord = getTaskRecord(env,name)
     if taskRecord:
         return (taskRecord.status == 1)
     return False
 
+def getTaskRecordInfo():
+    datas = []
+    with app.app_context():
+        ts = db.session.query(TaskRecord).order_by(TaskRecord.env_name.asc()).all()
+        tasks = dict()
+        for t in ts:
+            if t.env_name in tasks:
+                tasks[t.env_name].append({f"{t.name}": "未完成" if t.status == 0 else "完成"})
+            else:
+                tasks[t.env_name] = [{f"{t.name}": "未完成" if t.status == 0 else "完成"}]
+        for key, value in tasks.items():
+            dicts = dict()
+            dicts["环境"] = key
+            for data in value:
+                for name, vv in data.items():
+                    if to_be_exclude(name):
+                        continue
+                    dicts[f"{name}"] = f"{vv}"
+            datas.append(dicts)
+    return datas
+
+# 更新任务记录
 def updateTaskRecord(env,name,status):
     taskRecord = getTaskRecord(env,name)
     with app.app_context():
@@ -31,6 +54,7 @@ def updateTaskRecord(env,name,status):
         print(f"{env}新增一条{name}任务记录,状态：'{'完成' if status == 1 else '未完成'}'，id：{taskRecord.id if taskRecord else ''}")
         return taskRecord
 
+# 更新任务状态
 def updateTaskStatus(name,status):
     with app.app_context():
         db.session.query(TaskRecord).filter(TaskRecord.name==name).update({TaskRecord.status:status,TaskRecord.updatetime:datetime.datetime.now()})

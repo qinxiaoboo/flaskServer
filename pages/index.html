@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="buttonoperation.js" ></script>
+	<script src="onclick.js" ></script>
+	<script src="event.js" defer></script>
+	<script src="query.js" ></script>
+    <title>表格页面</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            cursor: pointer;
+        }
+        .pagination {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <form id="filter-form">
+        <label for="search">输入框: </label>
+        <input type="text" id="search" name="查询">
+        <button onclick="fetchData()" type="button">查询</button>
+        <button onclick="fetchDataByLabel()" type="button">查询标签</button>
+        <button onclick="fetchData({page:1,size:10000})" type="button">查询所有</button>
+        <button onclick="restsLabel()" type="button">重置标签</button>
+        <button onclick="addLabel()" type="button">追加标签</button>
+        <button onclick="resetLocal()" type="button" >重置</button>
+    </form>
+    <div class="container">
+
+        <div class="batch-actions">
+            <button id="reset-chrome-setting">重置</button>
+            <button id="debug-action-button">调试</button>
+            <button id="init-action-button">初始化</button>
+            <button onclick="handleOperation('http://localhost:9000/galxe/task/all')" type="button">银河任务</button>
+            <button onclick="handleOperation('http://localhost:9000/galxe/countpoints')" type="button">银河统计</button>
+            <button onclick="handleOperation('http://localhost:9000/todo/multifarm')" type="button">multifarm</button>
+        </div>
+
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="select-all" /></th>
+                    <th onclick="sortData('group')">分组</th>
+                    <th onclick="sortData('env')">环境名称</th>
+                    <th >推特名称</th>
+                    <th >Discord名称</th>
+                    <th >邮箱名称</th>
+                    <th >IP地址</th>
+                    <th >状态</th>
+                    <th >标签</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 数据行将通过 JavaScript 添加 -->
+            </tbody>
+        </table>
+        <div class="pagination">
+            <button id="prev-page" onclick="changePage(-1)" disabled>上一页</button>
+            <span id="page-info">第 1 页</span>
+            <button id="next-page" onclick="changePage(1)">下一页</button><span id="totalCount">Total Count: Loading...</span>
+        </div>
+
+<!--        <div class="batch-actions">-->
+<!--            <button id="reset-chrome-setting">重置</button>-->
+<!--            <button id="debug-action-button">调试</button>-->
+<!--            <button id="init-action-button">初始化</button>-->
+<!--        </div>-->
+        <a href="task.html" target="_blank">任务详情</a>
+        <a href="galxe.html" target="_blank">银河任务详情</a>
+    </div>
+
+    <script>
+        let lastChecked = null;
+        let currentPage = 1;
+        let pageSize = 12; // 每页显示的条目数
+		let sortBy = 'env';
+        let sortOrder = 'asc';
+        let searchQuery = '';
+
+        // Initial data fetch
+        fetchData();
+    </script>
+</body>
+</html>

@@ -3,16 +3,18 @@ from flaskServer.config.connect import db,app
 from sqlalchemy import and_
 from flaskServer.utils.crypt import aesCbcPbkdf2EncryptToBase64
 
-
+# 获取账号信息，通过环境名称和账号类型，TW，OUTLOOK，DISCORD
 def getAccount(name,type):
     with app.app_context():
         account = Account.query.filter(and_(Account.name==name,Account.type==type)).first()
         return account
 
+# 获取账号通过账号ID
 def getAccountById(id):
     with app.app_context():
         return Account.query.filter_by(id=id).first()
 
+# 更新账号信息
 def updateAccount(name,pwd,fa2,type,email_name=None,email_pass=None):
     pwd = aesCbcPbkdf2EncryptToBase64(pwd)
     fa2 = aesCbcPbkdf2EncryptToBase64(fa2)
