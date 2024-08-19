@@ -40,6 +40,7 @@ silver_click_wallet_js = """
             const button  = document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-connect-view").shadowRoot.querySelector("wui-flex > w3m-wallet-login-list").shadowRoot.querySelector("wui-flex > w3m-connector-list").shadowRoot.querySelector("wui-flex > w3m-connect-injected-widget").shadowRoot.querySelector("wui-flex > wui-list-wallet").shadowRoot.querySelector("button");
             return button
             """
+
 #选择okx钱包并确定
 click_wallet_js = """
             const button  = document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-connect-view").shadowRoot.querySelector("wui-flex > w3m-wallet-login-list").shadowRoot.querySelector("wui-flex > w3m-connect-injected-widget").shadowRoot.querySelector("wui-flex > wui-list-wallet").shadowRoot.querySelector("button");
@@ -57,18 +58,16 @@ click_plume_js = """
             return button;
             """
 
+
 ######   调整数量   ######
 def Num(num):
     InputNum = 0
+    num = int(num)
     try:
-        if 0.2 < float(num) < 1000:
-            InputNum = num - 0.1
-
-        elif float(num) > 1000:
+        if 2 < num < 10:
+            InputNum = num - 1
+        elif 100 < num:
             InputNum = random.randint(60, 90)
-
-        elif float(num) < 0.2:
-            InputNum = 0
         else:
             InputNum = 0
     except ValueError as e:
@@ -193,6 +192,29 @@ def getTab(chrome,env):
                     logger.info(f"{env.name}: 进入plume页面")
     return tab
 
+######   数据统计   ######
+def getCount(chrome, env):
+    try:
+        tab = chrome.new_tab(url="https://miles.plumenetwork.xyz/")
+        chrome.wait(4)
+        tab.ele('@class=chakra-button css-1mlwjgz').click(by_js=None)
+        miles = tab.s_ele('@class=chakra-text css-1c1e297')
+        tab.ele('@data-testid=passport-nav-link').click(by_js=None)
+        passport_list = tab.eles('@class=StyledIconBase-sc-ea9ulj-0 sRDPe chakra-icon css-k8603g')
+        tab.set.load_mode.normal()
+        tab.get(url='https://miles.plumenetwork.xyz/daily-checkin')
+        chrome.wait(4)
+        multiplier = tab.ele('@class=chakra-text css-1l3wnnl', index=2).text
+        env_name = env.name
+        miles_raw_text = miles.raw_text
+        passport_list = len(passport_list)
+        miles_multiplier = multiplier
+        with open('miles.txt', 'a') as file:
+            file.write(f"{env_name}          {miles_raw_text}        {passport_list}         {miles_multiplier}\n")
+    except Exception as e:
+        logger.info(f"{env.name}: 网络异常，统计失败")
+    return
+
 ######   Swap   ######
 def getSwapTab(chrome,env):
     # 访问Swap页面
@@ -239,7 +261,7 @@ def getStake(chrome,env):
     try:
         #stake
         balance = tab.ele("t:p@tx():Current balance").text.split( )[2].replace(',','')
-        tab.ele('@inputmode=decimal').input(Num(balance))
+        tab.ele('@inputmode=decimal').input(Num(int(balance)))
         if tab.ele('@class=chakra-text css-v50kqq'):
             logger.info(f"{env.name}: 以达到质押上限")
         else:
