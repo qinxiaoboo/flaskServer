@@ -1,7 +1,7 @@
 import random
 from random_words import RandomWords
 #pip install RandomWords
-from DrissionPage import ChromiumPage
+from DrissionPage import ChromiumPage,ChromiumOptions
 from loguru import logger
 import random
 # 连接数据库
@@ -513,8 +513,6 @@ def toDoPlumeTaskAll(env):
             logger.error(f"{env.name}: {e}")
             if chrome:
                 chrome.quit()
-
-
 
 if __name__ == '__main__':
     # with app.app_context():
