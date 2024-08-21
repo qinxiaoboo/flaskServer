@@ -93,21 +93,17 @@ def getFaucet(chrome,env,type):
 
     var = 1
     while var == 1:
-        print("进入循环")
         if chrome.get_tab(title="OKX Wallet").ele("t:div@tx():confirmations"):
-            print('识别到消息积压')
-            if chrome.get_tab(title="OKX Wallet").ele("@text=Third-party"):
+            if chrome.get_tab(title="OKX Wallet").ele("t:div@tx():Third-party"):
                 chrome.get_tab(title="OKX Wallet").ele("@type=button", index=1).click()
-                print('签名')
                 chrome.wait(2)
             else:
                 chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
-                print('确认签名')
                 chrome.wait(2)
         else:
             var = 0
-            print('积压消息处理完毕，推出循环')
-    if chrome.get_tab(title="OKX Wallet").ele("@text=Third-party"):
+
+    if chrome.get_tab(title="OKX Wallet").ele("t:div@tx():Third-party"):
         chrome.get_tab(title="OKX Wallet").ele("@data-testid=okd-button", index=1).click()
         chrome.wait(2)
     else:
