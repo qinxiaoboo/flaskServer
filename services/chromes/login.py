@@ -42,14 +42,17 @@ def LoginINITWallet(chrome,env):
 def ConfirmOKXWallet(chrome,tab,env):
     ele = tab.ele("@type=button").next()
     if ele.text == "Connect":
-        new = ele.click.for_new_tab()
+        ele.click()
+        chrome.wait(1,2)
+        new = chrome.get_tab(title=Content.OKX_TITLE)
         logger.info(f"{env.name}: 连接OKX钱包成功")
-        new.wait.load_start()
         try:
             new.ele("@type=button",timeout=8).next().click()
+            chrome.wait(2,3)
         except Exception as e:
             new = chrome.get_tab(title=Content.OKX_TITLE)
             new.ele("@type=button").next().click()
+            chrome.wait(2,3)
         logger.info(f"{env.name}: 确认OKX钱包成功")
     else:
         ele.click()

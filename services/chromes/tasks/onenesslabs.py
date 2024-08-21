@@ -27,15 +27,25 @@ home_page = 'https://task.onenesslabs.io/'
 
 def getOnenesslabs(chrome,env):
     tab = chrome.new_tab(home_page)
-    chrome.wait(5,7)
     #处理欢迎页面
-    if tab.ele('.relative ease-in-out duration-200 flex justify-center items-center select-none bg-100 bg-[#D6B635] mx-[40px] mt-[12px] h-[48px] rounded-full text-black font-[Bangers] text-[20px] hover:scale-[1.1] cursor-pointer'):
-        tab.ele('.relative ease-in-out duration-200 flex justify-center items-center select-none bg-100 bg-[#D6B635] mx-[40px] mt-[12px] h-[48px] rounded-full text-black font-[Bangers] text-[20px] hover:scale-[1.1] cursor-pointer').click()
-    chrome.wait(1, 2)
+    if tab.s_ele("I'm Ready to Fight!"):
+        tab.ele("I'm Ready to Fight!").click()
 
     #登录discord
-    if tab.ele('@type=button',index=1):
-        tab.ele('@type=button',index=1).click.for_new_tab().wait(5,6).ele('type=button').click()
+    if tab.s_ele('SIGN IN WITH DISCORD',index=1):
+        discord = tab.ele('SIGN IN WITH DISCORD',index=1).click.for_new_tab()
+        discord.ele("@@type=button@@text()=Authorize").click()
+    # 获取表头
+    headers = tab.ele("@class=flex justify-center items-center").eles("c:button")
+    # 移动到头像
+    tab.actions.move_to(headers[2])
+    # 点击连接钱包
+    if tab.s_ele("LINK YOUR WALLET"):
+        tab.ele("LINK YOUR WALLET").click()
+
+
+
+
         # chrome.wait(5, 6)
         # authorize = chrome.get_tab(url='discord.com')
         # chrome.wait(2,3)
@@ -72,7 +82,7 @@ def toDo(env):
 
 if __name__ == '__main__':
     with app.app_context():
-        env = Env.query.filter_by(name="ZLL-1").first()
+        env = Env.query.filter_by(name="Q-2").first()
         toDo(env)
 
 

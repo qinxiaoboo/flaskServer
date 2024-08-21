@@ -20,6 +20,11 @@ def loginGalxe(chrome,env,task):
         if back:
             logger.info(f"{env.name}: {tab.url}页面正在刷新")
             tab.refresh()
+    # 判断又没有钱包弹出连接
+    okx = chrome.get_tab(title=Content.OKX_TITLE)
+    if okx:
+        ConfirmOKXWallet(chrome,okx,env)
+        chrome.wait(3,4)
     # 判断钱包是否需要重新登录
     login = tab.s_ele("@@type=button@@text()=Log in")
     if login:
@@ -29,9 +34,13 @@ def loginGalxe(chrome,env,task):
             new_tab = ele.click.for_new_tab()
         except Exception as e:
             tab.ele("@@type=button@@text()=Log in").click()
-            new_tab = tab.ele("@@class=col-span-2 text-sm font-bold@@text():OKX").click.for_new_tab()
+            tab.ele("@@class=col-span-2 text-sm font-bold@@text():OKX").click()
+            new_tab = chrome.get_tab(title=Content.OKX_TITLE)
+        logger.info("登录钱包并确认钱包")
         ConfirmOKXWallet(chrome, new_tab, env)
         logger.info(f"{env.name}: 登录Galxe成功！当前任务：{task}")
+    if tab.s_ele("@@type=button@@text()=Close"):
+        tab.ele("@@type=button@@text()=Close").click()
     return tab
 
 def checkTW(chrome,tab,env):
@@ -116,13 +125,16 @@ def refreshRole(chrome,role,name):
 
 def claimPoints(chrome,env,tab,task):
     chrome.wait(2,3)
-    end = tab.ele("@class=flex items-center justify-end z-[2] w-full")
+    end = tab.ele("@class=flex items-center justify-end")
     end = end.ele("c:button")
     if "Points" in end.text:
         chrome.wait(1,2)
         tab.actions.move_to(end)
         end.click()
-        chrome.wait(5,8)
+        chrome.wait(1,2)
+        card = tab.s_ele("@class=w-full h-full flex flex-col items-start")
+        if card:
+            tab.ele("@class=w-full h-full flex flex-col items-start").ele("@src=https://b.galxestatic.com/new/s/a4837e5/_next/static/assets/smartSaving/payment-wallet.png").click()
         try:
             result = tab.ele("@class=text-size-18 font-extrabold sm:text-size-32 font-mona",timeout=10)
             if "Points" in result.text:
