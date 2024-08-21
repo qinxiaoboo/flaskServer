@@ -83,29 +83,56 @@ def getFaucet(chrome,env,type):
     chrome.wait(2,3)
     tab.ele("@data-testid=get-tokens-button").click()
     chrome.wait(7,8)
-    text = tab.s_ele("@class=flex w-[300px] flex-col justify-center py-2").text
-    if "Whoosh! Slow down!" in text:
-        logger.info(env.name + f": {text}")
-        return
-    ele = chrome.get_tab(title=Content.OKX_TITLE).ele("@type=button").next()
-    if (ele.text == "Fill up PlumeTest_ETH"):
-        logger.info(f"{env.name}:{type}不足无法领取测试币")
-    else:
-        # Replace(chrome)
+
+
+    if tab.s_ele("@class=flex w-[300px] flex-col justify-center py-2"):
         text = tab.s_ele("@class=flex w-[300px] flex-col justify-center py-2").text
-        if "Working on it" in text:
-            logger.info(f" {env.name}: 正在领取{type}测试币, {text}")
-            chrome.wait(3)
-            ele.click()
-            Replace(chrome)
-            chrome.wait(3)
+        if "Whoosh! Slow down!" in text:
+            logger.info(env.name + f": {text}")
+            return
+
+    var = 1
+    while var == 1:
+        print("进入循环")
+        if chrome.get_tab(title="OKX Wallet").ele("t:div@tx():confirmations"):
+            print('识别到消息积压')
+            if chrome.get_tab(title="OKX Wallet").ele("@text=Third-party"):
+                chrome.get_tab(title="OKX Wallet").ele("@type=button", index=1).click()
+                print('签名')
+                chrome.wait(2)
+            else:
+                chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+                print('确认签名')
+                chrome.wait(2)
+        else:
+            var = 0
+            print('积压消息处理完毕，推出循环')
+    if chrome.get_tab(title="OKX Wallet").ele("@text=Third-party"):
+        chrome.get_tab(title="OKX Wallet").ele("@data-testid=okd-button", index=1).click()
+        chrome.wait(2)
+    else:
+        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+
+    try:
+        ele = chrome.get_tab(title=Content.OKX_TITLE).ele("@type=button").next()
+        if (ele.text == "Fill up PlumeTest_ETH"):
+            logger.info(f"{env.name}:{type}不足无法领取测试币")
+        else:
+            # Replace(chrome)
             text = tab.s_ele("@class=flex w-[300px] flex-col justify-center py-2").text
-            if "Mission accomplished" in text:
-                logger.info(env.name + f": 领取{type}测试币成功")
-        elif "Whoosh! Slow down!" in text:
-            logger.info( env.name + f": {text}")
-
-
+            if "Working on it" in text:
+                logger.info(f" {env.name}: 正在领取{type}测试币, {text}")
+                chrome.wait(3)
+                ele.click()
+                Replace(chrome)
+                chrome.wait(3)
+                text = tab.s_ele("@class=flex w-[300px] flex-col justify-center py-2").text
+                if "Mission accomplished" in text:
+                    logger.info(env.name + f": 领取{type}测试币成功")
+            elif "Whoosh! Slow down!" in text:
+                logger.info( env.name + f": {text}")
+    except AttributeError as e:
+        logger.info(f" {env.name}: 由于消息积压严重，本次领水动作处理历史消息")
 
 def worker(env,type):
     logger.info(f"======开始执行{env.name}环境")
@@ -138,7 +165,7 @@ def toDo(env):
             raise e
 
 if __name__ == '__main__':
-    toDoFaucet("GOON")
-    # with app.app_context():
-    #     env = Env.query.filter_by(name="Q-1-3").first()
-    #     toDo(env)
+    # toDoFaucet("GOON")
+    with app.app_context():
+        env = Env.query.filter_by(name="zll-1").first()
+        toDo(env)
