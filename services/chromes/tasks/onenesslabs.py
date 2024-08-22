@@ -183,6 +183,7 @@ def Oneness(env):
                 chrome.quit()
 
 if __name__ == '__main__':
-    for i in range(9,11):
-        env = Env.query.filter_by(name="ZLL-{}".format(i)).first()
-        Oneness(env)
+    # for i in range(9,11):
+    #     env = Env.query.filter_by(name="ZLL-{}".format(i)).first()
+    #     Oneness(env)
+    submit(Oneness,getAllEnvs())
