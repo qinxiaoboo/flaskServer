@@ -490,6 +490,38 @@ def getSilverkoi(chrome,env):
         logger.info(f"{env.name}: Silverkoi 网络延迟太大，执行失败")
     tab.close()
 
+######   voting   ######
+def getVoting(chrome,env):
+    tab = chrome.new_tab(url='https://miles.plumenetwork.xyz/voting')
+    while True:
+            chrome.wait(2, 3)
+            voting_count = tab.s_ele('@class=css-yrzxkr').text
+            if 'h' in voting_count:
+                logger.info(f"{env.name}: 投票完成")
+                break
+
+            else:
+
+                tab.ele('@class=chakra-button css-2ew9hs', index=1).click()
+                chrome.wait(2, 3)
+                chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+                chrome.wait(6, 8)
+
+                var = 1
+                while var == 1:
+                    if chrome.get_tab(title="OKX Wallet"):
+                        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+                    else:
+                        var = 0
+
+                chrome.wait(3, 5)
+                tab.refresh()
+            continue
+    return
+
+
+
+
 def toDo(chrome,env):
     logger.info(f"======开始执行{env.name}环境")
     getTab(chrome, env)
