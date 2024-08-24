@@ -143,7 +143,7 @@ def tw2faV(tab,fa2):
     if res.ok:
         code = res.json().get("data").get("otp")
         print(tab.url)
-        tab.ele("@data-testid=ocfEnterTextTextInput").input(code)
+        tab.ele("@data-testid=ocfEnterTextTextInput").input(code,clear=True)
         tab.ele("@@type=button@@text()=Next").click()
 
 def checkTw(tab,env):

@@ -25,6 +25,8 @@ from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 from flaskServer.services.chromes.login import tw2faV
 from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGroup
 from threading import Thread
+from flaskServer.services.chromes.login import LoginDiscord
+
 
 
 name = "Onenesslabs"
@@ -39,20 +41,35 @@ click_wallet_js = """
 def getOnenesslabs(chrome,env):
     try:
         tab = chrome.new_tab(home_page)
+
         #处理欢迎页面
         if tab.s_ele("I'm Ready to Fight!"):
             tab.ele("I'm Ready to Fight!").click()
-
         #登录discord
         if tab.s_ele('SIGN IN WITH DISCORD',index=1):
             discord = tab.ele('SIGN IN WITH DISCORD',index=1).click.for_new_tab()
+            time.sleep(10)
             try:
-                discord.ele("@type=button",index=2).click()
-                logger.info(f"{env.name}: 登录discord完成")
+                if discord.s_ele('@class=text-md/medium_dc00ef label_ac2a99'):
+                    discord.ele("@type=button", index=2).click()
+                    chrome.wait(7,10)
+                    logger.info(f"{env.name}: Discord已登录，授权中")
+                    if tab.s_ele("SIGN IN WITH DISCORD"):
+                        logger.info(f"{env.name}: Discord 授权或者登录失败~")
+                        chrome.quit()
+                    else:
+                        logger.info(f"{env.name}: Discord 授权成功~")
+                else:
+                    logger.info(f"{env.name}: Discord未登录，尝试重新登录")
+                    discord.close()
+                    LoginDiscord(chrome,env)
+                    getOnenesslabs(chrome, env)
+
                 chrome.wait(7,9)
             except Exception as e:
-                logger.info(f"{env.name}: Discord未登录，账号注册失败")
+                logger.info(f"{env.name}: Discord未登录，账号登录失败")
                 chrome.quit()
+
 
         # 获取表头
         headers = tab.ele("@class=flex justify-center items-center").eles("c:button")
@@ -84,7 +101,6 @@ def Task(chrome,env):
         chrome.wait(4, 5)
         #点击task
         tab.ele("@@class=ant-badge flex justify-center items-center css-loyarq@@tx()=Reward").click()
-
         # 关注推特
         if tab.s_ele("@tx()=FOLLOW"):
             twitter = tab.ele("@tx()=FOLLOW").click.for_new_tab()
@@ -95,19 +111,20 @@ def Task(chrome,env):
                 with app.app_context():
                     tw: Account = Account.query.filter_by(id=env.tw_id).first()
                     if tw:
-                        twitter.ele("@autocomplete=username").input(tw.name)
+                        twitter.ele("@autocomplete=username").input(tw.name,clear=True)
                         twitter.ele("@@type=button@@text()=Next").click()
-                        twitter.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                        twitter.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd),clear=True)
                         twitter.ele("@@type=button@@text()=Log in").click()
                         fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
                         if "login" in twitter.url and len(fa2) > 10:
                             tw2faV(twitter, fa2)
                         twitter.ele('@type=button').click()
+                        chrome.wait(2)
                     else:
                         raise Exception(f"{env.name}: 没有导入TW的账号信息")
             else:
                 twitter.ele('@type=button').click()
-            chrome.wait(6,7)
+        else:
             logger.info(f"{env.name}: 关注推特已完成")
 
         #修改推特名称
@@ -146,7 +163,6 @@ def Task(chrome,env):
         else:
             logger.info(f"{env.name}: 今日下注已完成")
         chrome.wait(4, 5)
-        print(4)
         if tab.s_ele("ATTACK NOW"):
             # 定位其它
             tab.eles("@@class=ant-badge flex justify-center items-center css-loyarq@@tx()=ATTACK")[random.randint(1,5)].click()
@@ -197,13 +213,13 @@ def Oneness(env):
         try:
             chrome: ChromiumPage = OKXChrome(env)
 
-            #getOnenesslabs(chrome, env)
+            getOnenesslabs(chrome, env)
 
-            #Gem(chrome, env)
+            Gem(chrome, env)
 
             Task(chrome, env)
 
-            #Gem(chrome, env)
+            Gem(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
             chrome.quit()
         except Exception as e:
@@ -213,6 +229,6 @@ def Oneness(env):
 
 if __name__ == '__main__':
     with app.app_context():
-        env = Env.query.filter_by(name="ZL-103").first()
+        env = Env.query.filter_by(name="ZLL-112").first()
         Oneness(env)
     # submit(Oneness,getAllEnvs())
