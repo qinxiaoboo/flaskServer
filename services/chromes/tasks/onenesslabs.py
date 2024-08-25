@@ -228,7 +228,7 @@ def Oneness(env):
                 chrome.quit()
 
 if __name__ == '__main__':
-    with app.app_context():
-        env = Env.query.filter_by(name="ZLL-112").first()
-        Oneness(env)
-    # submit(Oneness,getAllEnvs())
+    # with app.app_context():
+    #     env = Env.query.filter_by(name="ZLL-112").first()
+    #     Oneness(env)
+    submit(Oneness,getAllEnvs())
