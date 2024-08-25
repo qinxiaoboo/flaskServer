@@ -24,6 +24,7 @@ def wait_captcha_page(tab,env):
             tab.wait(2,3)
         else:
             logger.error(f"{env.name}: 人机验证时间过长，验证失败， 请查看失败原因~")
+            break
     logger.info(f"{env.name}：人机验证成功")
 
 def wait_pages(chrome,wait_page_list):
