@@ -9,6 +9,9 @@ class Account(db.Model):
     email_pass = db.Column(db.String(120), unique=False, nullable=False)
     fa2 = db.Column(db.String(120), unique=False, nullable=False)
     type = db.Column(db.String(120), unique=False, nullable=False)
+    # 0: 未登录 1：登录异常 2：登录成功
+    status = db.Column(db.Integer, unique=False, nullable=False)
+    error = db.Column(db.String(120), unique=False, nullable=False)
 
 
     def to_json(self):

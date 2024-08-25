@@ -56,8 +56,9 @@ def getEnvsInfo(page,page_size,search, label, sortBy="env", sortOrder="asc"):
             discord = Account.query.filter_by(id=env.discord_id).first()
             outlook = Account.query.filter_by(id=env.outlook_id).first()
             ip = Proxy.query.filter_by(id=env.t_proxy_id).first()
-            env_json = EnvAccountInfo(id=env.id,group=env.group,env=env.name,tw=tw.name,discord=discord.name,
-                                      outlook=outlook.name,ip=ip.ip if ip else "",status=status_descriptions.get(env.status,"未知状态"),
+            env_json = EnvAccountInfo(id=env.id,group=env.group,env=env.name,tw=tw.name,tw_status=tw.status,tw_error=tw.error,discord=discord.name,
+                                      discord_status=discord.status,discord_error=discord.error,outlook_status=outlook.status,outlook_error=outlook.error,
+                                      outlook=outlook.name, ip=ip.ip if ip else "",status=status_descriptions.get(env.status,"未知状态"),
                                       label=env.label).to_dict()
             envs_json.append(env_json)
     return envs_json,paginated_envs.total - count

@@ -13,6 +13,7 @@ from flaskServer.services.dto.env import updateEnvStatus
 from flaskServer.utils.chrome import getChrome,get_Custome_Tab
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 from flaskServer.services.content import Content
+from flaskServer.services.dto.account import updateAccountStatus
 
 def LoginINITWallet(chrome,env):
     tab = chrome.get_tab(title="Initia Wallet")
@@ -160,6 +161,7 @@ def checkTw(tab,env):
             chrome.wait(1,2)
             send = tab.s_ele("@@type=submit@@value=Send email")
             if send:
+                updateAccountStatus(env.tw_id, 1, "该环境TW需要邮箱验证，请前往验证")
                 raise Exception(f"{env.name}: 该环境TW需要邮箱验证，请前往验证")
             else:
                 reload = tab.s_ele("Reload Challenge")
@@ -171,8 +173,10 @@ def checkTw(tab,env):
                     ele.click(by_js=True)
                     logger.info(f"{env.name}: TW验证码验证成功")
                 else:
+                    updateAccountStatus(env.tw_id, 1, "TW验证码元素未找到")
                     raise Exception(f"{env.name}: TW验证码元素未找到")
         else:
+            updateAccountStatus(env.tw_id, 1, "tw账号需要认证，请人工通过认证")
             logger.error(f"{env.name}: 需要验证 TW 登录失败")
     else:
         tab.wait(1,2)
@@ -180,6 +184,7 @@ def checkTw(tab,env):
             logger.info(f"{env.name}: 登录推特成功")
             endCheckTW(tab,env)
         else:
+            updateAccountStatus(env.tw_id, 1, "没有检测到登录页面的url为.com/home")
             raise Exception(f"{env.name}: TW 登录失败")
     return tab
 
@@ -193,6 +198,8 @@ def endCheckTW(tab,env):
             confram.click()
         else:
             logger.warning(f"{env.name}: 弹窗不包含Yes，没有点击")
+            return
+    updateAccountStatus(env.tw_id, 2)
 
 def preCheckTW(chrome,env):
     tab = chrome.get_tab(url=".com/i/flow/login")
@@ -219,6 +226,7 @@ def LoginTW(chrome:ChromiumPage,env):
                 if "login" in tab.url and len(fa2) > 10:
                     tw2faV(tab,fa2)
             else:
+                updateAccountStatus(env.tw_id, 1, "没有导入TW的账号信息")
                 raise Exception(f"{env.name}: 没有导入TW的账号信息")
     return checkTw(get_Custome_Tab(tab),env)
 
@@ -241,8 +249,10 @@ def LoginDiscord(chrome:ChromiumPage,env):
                         tab.ele("@autocomplete=one-time-code").input(code)
                         tab.ele("@type=submit").click()
             else:
+                updateAccountStatus(env.discord_id, 1, "没有导入DISCORD 的账号信息")
                 raise Exception(f"{env.name}: 没有导入DISCORD 账号信息")
     if "channels" in tab.url or ".com/app" in tab.url:
+        updateAccountStatus(env.discord_id, 2)
         logger.info(f"{env.name}登录Discord成功！")
     return get_Custome_Tab(tab)
 
@@ -270,6 +280,7 @@ def LoginOutlook(chrome:ChromiumPage,env):
                     return
             else:
                 logger.info(f"{env.name}: 邮箱 账号为空，跳过登录")
+    updateAccountStatus(env.outlook_id, 2)
     return get_Custome_Tab(tab)
 
 
