@@ -17,15 +17,21 @@ def get_Custome_Tab(tab):
 
 def wait_captcha_page(tab,env):
     count = 0
-    tab.ele('@title=reCAPTCHA')
-    while not tab.get_frame(1).attrs.get("data-hcaptcha-response"):
-        if count < 100:
-            count += 1
-            tab.wait(2,3)
-        else:
-            logger.error(f"{env.name}: 人机验证时间过长，验证失败， 请查看失败原因~")
-            break
-    logger.info(f"{env.name}：人机验证成功")
+    try:
+        tab.ele('@title=reCAPTCHA')
+        while not tab.get_frame(1).attrs.get("data-hcaptcha-response"):
+            if count < 100:
+                count += 1
+                tab.wait(2,3)
+            else:
+                logger.error(f"{env.name}: 人机验证时间过长，验证失败， 请查看失败原因~")
+                return False
+        logger.info(f"{env.name}：人机验证成功")
+        return True
+    except Exception as e:
+        logger.error(f"{env.name}: 人机验证失败，E：{e}")
+        return False
+
 
 def wait_pages(chrome,wait_page_list):
     count = 100
