@@ -211,6 +211,7 @@ def preCheckTW(chrome,env):
     return tab
 
 def LoginTW(chrome:ChromiumPage,env):
+    updateAccountStatus(env.tw_id, 0, "重置了TW登录状态")
     tab = preCheckTW(chrome,env)
     if "logout" in tab.url or "login" in tab.url:
         logger.info(f"{env.name}: 开始登录 TW 账号")
@@ -232,6 +233,7 @@ def LoginTW(chrome:ChromiumPage,env):
 
 
 def LoginDiscord(chrome:ChromiumPage,env):
+    updateAccountStatus(env.discord_id, 0, "重置了Discord登录状态")
     tab = chrome.new_tab(url="https://discord.com/app")
     if "login" in tab.url:
         logger.info(f"{env.name} 开始登录 Discord 账号")
@@ -257,6 +259,7 @@ def LoginDiscord(chrome:ChromiumPage,env):
     return get_Custome_Tab(tab)
 
 def LoginOutlook(chrome:ChromiumPage,env):
+    updateAccountStatus(env.outlook_id, 0, "重置了OutLook登录状态")
     tab = chrome.new_tab(url="https://outlook.live.com/mail/0/")
     chrome.wait(2,3)
     if "microsoft" in tab.url:
