@@ -14,6 +14,18 @@ def get_Custome_Tab(tab):
     #     tab.set.blocked_urls(('*f=JPEG*','*f=PNG*','*f=JPG*','*.png*','*.jpg*','*.gif*','*images*'))
     return tab
 
+
+def wait_captcha_page(tab,env):
+    count = 0
+    tab.ele('@title=reCAPTCHA')
+    while not tab.get_frame(1).attrs.get("data-hcaptcha-response"):
+        if count < 100:
+            count += 1
+            tab.wait(2,3)
+        else:
+            logger.error(f"{env.name}: 人机验证时间过长，验证失败， 请查看失败原因~")
+    logger.info(f"{env.name}：人机验证成功")
+
 def wait_pages(chrome,wait_page_list):
     count = 100
     while count:
