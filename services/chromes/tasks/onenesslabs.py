@@ -69,6 +69,7 @@ def getOnenesslabs(chrome,env):
         except Exception as e:
             logger.info(f"{env.name}: Discord未登录，账号登录失败")
             chrome.quit()
+
     # 获取表头
     headers = tab.ele("@class=flex justify-center items-center").eles("c:button")
     # 鼠标指针移动到头像
@@ -194,53 +195,60 @@ def Oneness(env):
         try:
             chrome: ChromiumPage = OKXChrome(env)
             a = 0
-            while a < 4:
-                try:
-                    getOnenesslabs(chrome, env)
-
-                except Exception as e:
-                    logger.info(f"{env.name}: {e} 开始重新执行~")
-                    a += 1
+            try:
+                getOnenesslabs(chrome, env)
+            except Exception as e:
+                logger.info(f"{env.name}: {e} 开始重新执行~")
+                a += 1
+                if a < 3:
                     chrome.refresh()
                     chrome.wait(3, 5)
                     chrome.close()
                     getOnenesslabs(chrome, env)
+                else:
+                    logger.info(f"{env.name}: {e} 超出重试次数")
 
             a = 0
-            while a < 4:
-                try:
-                    Gem(chrome, env)
-                except Exception as e:
-                    logger.info(f"{env.name}: {e} 开始重新执行~")
-                    a += 1
+            try:
+                Gem(chrome, env)
+            except Exception as e:
+                logger.info(f"{env.name}: {e} 开始重新执行~")
+                a += 1
+                if a < 3:
                     chrome.refresh()
                     chrome.wait(3, 5)
                     chrome.close()
                     Gem(chrome, env)
+                else:
+                    logger.info(f"{env.name}: {e} 超出重试次数")
 
             a = 0
-            while a < 4:
-                try:
+            try:
+                Task(chrome, env)
+            except Exception as e:
+                logger.info(f"{env.name}: {e} 开始重新执行~")
+                a += 1
+                if a < 3:
+                    chrome.refresh()
+                    chrome.wait(3, 5)
+                    chrome.close()
                     Task(chrome, env)
-                except Exception as e:
-                    logger.info(f"{env.name}: {e} 开始重新执行~")
-                    a += 1
-                    chrome.refresh()
-                    chrome.wait(3, 5)
-                    chrome.close()
-                    Task(chrome, env)
+                else:
+                    logger.info(f"{env.name}: {e} 超出重试次数")
 
             a = 0
-            while a < 4:
-                try:
-                    Gem(chrome, env)
-                except Exception as e:
-                    logger.info(f"{env.name}: {e} 开始重新执行~")
-                    a += 1
+            try:
+                Gem(chrome, env)
+            except Exception as e:
+                logger.info(f"{env.name}: {e} 开始重新执行~")
+                a += 1
+                if a < 3:
                     chrome.refresh()
                     chrome.wait(3, 5)
                     chrome.close()
                     Gem(chrome, env)
+                else:
+                    logger.info(f"{env.name}: {e} 超出重试次数")
 
 
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
@@ -249,10 +257,6 @@ def Oneness(env):
             logger.error(f"{env.name}: {e}")
             if chrome:
                 chrome.quit()
-
-
-##  测试comiit
-
 
 if __name__ == '__main__':
     # with app.app_context():

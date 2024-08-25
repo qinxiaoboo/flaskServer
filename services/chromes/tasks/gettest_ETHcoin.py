@@ -28,28 +28,42 @@ from threading import Thread
 from flaskServer.services.chromes.login import LoginDiscord
 from flaskServer.utils.chrome import wait_captcha_page
 
-
 url = "https://sepolia-faucet.pk910.de/#/"
-
 
 def Faucet(chrome,env):
     tab = chrome.new_tab(url)
-    # with open('C:/Users/Toka/Desktop/eth.txt', mode='r', encoding='utf-8') as f:
-    #     addr = f.readline()
-    #     line = addr[1:]
-    chrome.wait(3,4)
-    wait_captcha_page(tab, env)
+    with open('C:/Users/Toka/Desktop/eth.txt', mode='r', encoding='utf-8') as f:
+        addr = f.readline()
+        line = f.readlines()
+        line = line[0:]
 
-    print("验证结束")
+        chrome.wait(3,4)
+        if wait_captcha_page(tab, env):
+            tab.ele('.form-control').input(addr)
+            chrome.wait(3, 4)
+            tab.ele('Start Mining').click()
+            chrome.wait(15,20)
 
+            if tab.s_ele('Could not start session'):
+                print('地址：{}，Gitcoin分数不足请检查！'.format(addr))
+                f = open('C:/Users/Toka/Desktop/eth.txt', mode='w', encoding='utf-8')
+                f.writelines(line)
+                f.close()
+                chrome.quit()
 
+            if tab.s_ele('Your Mining Reward:'):
+                time.sleep(1200)
+                tab.ele('.btn btn-danger stop-action').click()
+                chrome.wait(15, 20)
+                tab.ele('.btn btn-success start-action').click()
+                chrome.wait(20, 30)
+                f = open('C:/Users/Toka/Desktop/eth.txt', mode='w', encoding='utf-8')
+                f.writelines(line)
+                f.close()
 
-
-
-
-
-
-
+        else:
+            print('钱包地址或是环境有问题')
+            chrome.quit()
 
 
 def Oneness(env):
@@ -57,16 +71,15 @@ def Oneness(env):
         try:
             chrome: ChromiumPage = OKXChrome(env)
             Faucet(chrome, env)
-
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
-            #chrome.quit()
+            chrome.quit()
         except Exception as e:
             logger.error(f"{env.name}: {e}")
             if chrome:
                 chrome.quit()
 
 if __name__ == '__main__':
-    with app.app_context():
-        env = Env.query.filter_by(name="ZLL-22").first()
-        Oneness(env)
-    # submit(Oneness,getAllEnvs())
+    # with app.app_context():
+    #     env = Env.query.filter_by(name="ZLL-26").first()
+    #     Oneness(env)
+    submit(Oneness,getAllEnvs())

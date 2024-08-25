@@ -1,5 +1,3 @@
-import re
-
 from loguru import logger
 from DrissionPage import ChromiumPage
 from DrissionPage import ChromiumOptions
@@ -30,7 +28,7 @@ def wait_captcha_page(tab,env):
     tab.ele('@title=reCAPTCHA')
     logger.info(f"{env.name}: 开始人机验证")
     while not get_captcha_response(tab.get_frame(1)):
-        if count < 100:
+        if count < 40:
             count += 1
             tab.wait(5, 6)
         else:
