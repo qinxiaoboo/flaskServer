@@ -24,9 +24,9 @@ def getTaskRecordInfo():
         tasks = dict()
         for t in ts:
             if t.env_name in tasks:
-                tasks[t.env_name].append({f"{t.name}": "未完成" if t.status == 0 else "完成"})
+                tasks[t.env_name].append({f"{t.name}": f"未完成{t.updatetime}" if t.status == 0 else f"完成{t.updatetime}"})
             else:
-                tasks[t.env_name] = [{f"{t.name}": "未完成" if t.status == 0 else "完成"}]
+                tasks[t.env_name] = [{f"{t.name}": f"未完成{t.updatetime}" if t.status == 0 else f"完成{t.updatetime}"}]
         for key, value in tasks.items():
             dicts = dict()
             dicts["环境"] = key

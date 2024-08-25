@@ -36,6 +36,21 @@ def updateAccount(name,pwd,fa2,type,email_name=None,email_pass=None):
         print("新增一条账号信息，id: ",account.id)
         return account
 
+# 更新账号信息
+def updateAccountStatus(account_id, status, error=""):
+    account = getAccountById(account_id)
+    with app.app_context():
+        if account:
+            if account.status != status and status:
+                account.status = status
+            if account.error != error:
+                account.error = error
+        else:
+            print(f"{type}账号：{name}：没找到该账号")
+        db.session.add(account)
+        db.session.commit()
+
+
 if __name__ == '__main__':
     name,pwd,fa2 = "brown_laur21244:VwiuMLt8lPqirZ4:".split(":")
     acc = updateAccount(name,pwd,fa2,"TW")

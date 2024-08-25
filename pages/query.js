@@ -1,3 +1,9 @@
+function getAccountColor(status){
+	return status === 0 ? 'gray' :
+		status === 1 ? 'red' :
+		status === 2 ? 'green' : 'black';
+}
+
 // Function to fetch data and populate the table
 function fetchData({page=0,size=0,search=undefined,label=""}={}) {
 	fetch(`http://localhost:9000/envs/info?page=${page===0?currentPage:page}&pageSize=${size===0?pageSize:size}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(search===undefined?searchQuery:search)}&label=${encodeURIComponent(label)}`,
@@ -17,9 +23,30 @@ function fetchData({page=0,size=0,search=undefined,label=""}={}) {
 				<td><input type="checkbox" class="row-checkbox" value="${item.id}" /></td>
 				<td>${item.group}</td>
 				<td>${item.env}</td>
-				<td>${item.tw}</td>
-				<td>${item.discord}</td>
-				<td>${item.outlook}</td>
+				<td>
+					<span 
+						style="color: ${getAccountColor(item.tw_status)};" 
+						title="${item.tw_error || ''}"
+					>
+						${item.tw}
+					</span>
+				</td>
+				<td>
+					<span 
+						style="color: ${getAccountColor(item.discord_status)};" 
+						title="${item.discord_error || ''}"
+					>
+						${item.discord}
+					</span>
+				</td>
+				<td>
+					<span 
+						style="color: ${getAccountColor(item.outlook_status)};" 
+						title="${item.outlook_error || ''}"
+					>
+						${item.outlook}
+					</span>
+				</td>
 				<td>${item.ip}</td>
 				<td>${item.status}</td>
 				<td>${item.label}</td>
