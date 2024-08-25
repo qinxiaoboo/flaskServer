@@ -26,6 +26,7 @@ from flaskServer.services.chromes.login import tw2faV
 from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGroup
 from threading import Thread
 from flaskServer.services.chromes.login import LoginDiscord
+from flaskServer.utils.chrome import wait_captcha_page
 
 
 url = "https://sepolia-faucet.pk910.de/#/"
@@ -36,15 +37,10 @@ def Faucet(chrome,env):
     # with open('C:/Users/Toka/Desktop/eth.txt', mode='r', encoding='utf-8') as f:
     #     addr = f.readline()
     #     line = addr[1:]
+    chrome.wait(3,4)
+    wait_captcha_page(tab, env)
 
-    chrome.wait(10)
-    a = 0
-    b = tab.ele('@title=reCAPTCHA')
-
-    iframe = tab.get_frame(1)
-    txt = iframe.ele('#recaptcha-accessible-status')
-    print(txt)
-
+    print("验证结束")
 
 
 
