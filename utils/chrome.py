@@ -1,3 +1,5 @@
+import re
+
 from loguru import logger
 from DrissionPage import ChromiumPage
 from DrissionPage import ChromiumOptions
@@ -14,23 +16,28 @@ def get_Custome_Tab(tab):
     #     tab.set.blocked_urls(('*f=JPEG*','*f=PNG*','*f=JPG*','*.png*','*.jpg*','*.gif*','*images*'))
     return tab
 
+def get_captcha_response(iframe):
+    if "data-hcaptcha-response" in iframe.attrs:
+        return iframe.attrs.get("data-hcaptcha-response")
+    elif 'id="recaptcha-token"' in iframe.html:
+        ele = iframe.ele("@class=rc-anchor-center-item rc-anchor-checkbox-holder").ele("@role=checkbox")
+        return ele.attrs.get("aria-checked") == "true"
+    else:
+        return False
 
 def wait_captcha_page(tab,env):
     count = 0
-    try:
-        tab.ele('@title=reCAPTCHA')
-        while not tab.get_frame(1).attrs.get("data-hcaptcha-response"):
-            if count < 100:
-                count += 1
-                tab.wait(2,3)
-            else:
-                logger.error(f"{env.name}: 人机验证时间过长，验证失败， 请查看失败原因~")
-                return False
-        logger.info(f"{env.name}：人机验证成功")
-        return True
-    except Exception as e:
-        logger.error(f"{env.name}: 人机验证失败，E：{e}")
-        return False
+    tab.ele('@title=reCAPTCHA')
+    logger.info(f"{env.name}: 开始人机验证")
+    while not get_captcha_response(tab.get_frame(1)):
+        if count < 100:
+            count += 1
+            tab.wait(5, 6)
+        else:
+            logger.error(f"{env.name}: 人机验证时间过长，验证失败， 请查看失败原因~")
+            return False
+    logger.info(f"{env.name}：人机验证成功")
+    return True
 
 
 def wait_pages(chrome,wait_page_list):
