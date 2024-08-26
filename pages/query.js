@@ -47,7 +47,13 @@ function fetchData({page=0,size=0,search=undefined,label=""}={}) {
 						${item.outlook}
 					</span>
 				</td>
-				<td>${item.ip}</td>
+				<td>
+					<span 
+						style="color: ${getAccountColor(item.ip_status)};" 
+					>
+						${item.ip}
+					</span>
+				</td>
 				<td>${item.status}</td>
 				<td>${item.label}</td>
 			`;

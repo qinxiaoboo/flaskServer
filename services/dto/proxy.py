@@ -29,5 +29,17 @@ def update(ip,port,user,pwd):
         print("新增一条代理信息，id：",proxy.id)
         return proxy
 
+def updateProxyStatus(env,status):
+    proxy = getProxyByID(env.t_proxy_id)
+    with app.app_context():
+        if proxy:
+            if proxy.status != status and status:
+                proxy.status = status
+                db.session.add(proxy)
+                db.session.commit()
+        else:
+            print(f"{env.name}没有查询到代理IP")
+
+
 if __name__ == '__main__':
     update("168.80.24.58","8099","oz2USP43","Pr382u")

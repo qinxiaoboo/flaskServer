@@ -19,5 +19,6 @@ class EnvAccountInfo:
     outlook_status:int=0
     outlook_error:str=""
     ip:str=""
+    ip_status:int=0
     status:str=""
     label:str=""

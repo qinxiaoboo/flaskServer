@@ -7,7 +7,8 @@ class Proxy(db.Model):
     pwd = db.Column(db.String(120), unique=False, nullable=False)
     ip = db.Column(db.String(120), unique=True, nullable=False)
     port = db.Column(db.String(120), unique=False, nullable=False)
-
+    # 0: 初始状态 1：连接异常 2：成功
+    status = db.Column(db.Integer, unique=False, nullable=False)
 
     def to_json(self):
         return {

@@ -5,6 +5,7 @@ from DrissionPage.errors import *
 from flaskServer.config.chromiumOptions import initChromiumOptions
 from flaskServer.config.config import HEADLESS,get_ini_path,MUTE,OFF_VIDEO,OFF_IMG,WORK_PATH
 from flaskServer.services.dto.env import updateEnvStatus
+from flaskServer.services.dto.proxy import updateProxyStatus
 
 
 def get_Custome_Tab(tab):
@@ -98,12 +99,23 @@ def getChromiumPage(env, proxy): # 获取一个ChromiumPage对象
             chrome.quit()
         raise e
 
-def getChrome(proxy,env):
+def checkIP(env,chrome):
+    while "正在获取 IP 信息..." in chrome.ele("#result").text:
+        chrome.wait(1)
+    print(f'{env.name}: {chrome.ele("#result").text}')
+    if "TypeError: Failed to fetch" in chrome.ele("#result").text:
+        updateProxyStatus(env, 1)
+        raise Exception(f"{env.name}: 代理IP连接失败")
+    else:
+        updateProxyStatus(env, 2)
+
+def getChrome(proxy, env):
     chrome = None
     try:
-        chrome = getChromiumPage(env,proxy)
+        chrome = getChromiumPage(env, proxy)
         # chrome.set.auto_handle_alert(accept=False,all_tabs=True)
         chrome.get(fr'file:///{WORK_PATH}\flaskServer\utils\pages\index.html?env={env.name}')
+        checkIP(env, chrome)
         wait_page_list = ["Initia Wallet", "Welcome to OKX", "OKX Wallet"]
         flag = wait_pages(chrome, wait_page_list)
         if flag:

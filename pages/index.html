@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -40,12 +40,18 @@
     <div class="container">
 
         <div class="batch-actions">
+            <span>环境操作: </span>
             <button id="reset-chrome-setting">重置</button>
             <button id="debug-action-button">调试</button>
             <button id="init-action-button">初始化</button>
+            <br>
+            <span>银河任务: </span>
             <button onclick="handleOperation('http://localhost:9000/galxe/task/all')" type="button">银河任务</button>
             <button onclick="handleOperation('http://localhost:9000/galxe/countpoints')" type="button">银河统计</button>
+            <br>
+            <span>其他任务: </span>
             <button onclick="handleOperation('http://localhost:9000/todo/multifarm')" type="button">multifarm</button>
+            <br>
         </div>
 
         <table id="data-table">
