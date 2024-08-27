@@ -217,10 +217,6 @@ def Lottery(chrome,env):
     tab = chrome.new_tab(home_page)
     tab.set.auto_handle_alert()
 
-    chrome.wait(4, 5)
-    tab.refresh()
-    chrome.wait(4, 5)
-
     if tab.s_ele(
             '.relative ease-in-out duration-200 flex justify-center items-center select-none bg-100 font-[Bangers] text-[20px] flex-1 bg-[#D6B635] text-black h-[48px] rounded-full mt-[30px] hover:scale-[1.1] cursor-pointer'):
         tab.ele(
