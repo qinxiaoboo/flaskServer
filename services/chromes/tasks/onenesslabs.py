@@ -44,13 +44,22 @@ def getOnenesslabs(chrome,env):
 
     # 设置全屏
     tab.set.window.full()
-
-    # 自动处理弹窗
-    tab.set.auto_handle_alert()
+    chrome.wait(3,4)
+    tab.refresh()
+    chrome.wait(3, 4)
 
     #处理欢迎页面
     if tab.s_ele("I'm Ready to Fight!"):
         tab.ele("I'm Ready to Fight!").click()
+    #处理弹窗
+    if tab.s_ele(
+            '.relative ease-in-out duration-200 flex justify-center items-center select-none bg-100 font-[Bangers] text-[20px] flex-1 bg-[#D6B635] text-black h-[48px] rounded-full mt-[30px] hover:scale-[1.1] cursor-pointer'):
+        tab.ele(
+            '.relative ease-in-out duration-200 flex justify-center items-center select-none bg-100 font-[Bangers] text-[20px] flex-1 bg-[#D6B635] text-black h-[48px] rounded-full mt-[30px] hover:scale-[1.1] cursor-pointer').click()
+    #处理弹窗
+    if tab.s_ele('@alt=close-icon.png',index=2):
+        tab.ele('@alt=close-icon.png',index=2).click()
+
     #登录discord
     if tab.s_ele('SIGN IN WITH DISCORD',index=1):
         discord = tab.ele('SIGN IN WITH DISCORD',index=1).click.for_new_tab()
@@ -207,7 +216,33 @@ def Gem(chrome,env):
 def Lottery(chrome,env):
     tab = chrome.new_tab(home_page)
     tab.set.auto_handle_alert()
+
     chrome.wait(4, 5)
+    tab.refresh()
+    chrome.wait(4, 5)
+
+    if tab.s_ele(
+            '.relative ease-in-out duration-200 flex justify-center items-center select-none bg-100 font-[Bangers] text-[20px] flex-1 bg-[#D6B635] text-black h-[48px] rounded-full mt-[30px] hover:scale-[1.1] cursor-pointer'):
+        tab.ele(
+            '.relative ease-in-out duration-200 flex justify-center items-center select-none bg-100 font-[Bangers] text-[20px] flex-1 bg-[#D6B635] text-black h-[48px] rounded-full mt-[30px] hover:scale-[1.1] cursor-pointer').click()
+
+    # 获取表头
+    headers = tab.ele("@class=flex justify-center items-center").eles("c:button")
+    # 鼠标指针移动到头像
+    tab.actions.move_to(headers[2])
+
+    # 连接钱包
+    if tab.s_ele("LINK YOUR WALLET"):
+        tab.ele("LINK YOUR WALLET").click()
+        chrome.wait(1, 2)
+        okxbutton = tab.run_js(click_wallet_js)
+        logger.info(f"{env.name}: 链接钱包")
+        okxbutton.click.for_new_tab().wait(2,3).ele("@type=button").next().click()
+        chrome.wait(2,3)
+        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+        chrome.wait(2, 3)
+        logger.info(f"{env.name}: 钱包链接完成")
+
     if tab.s_ele('.relative ease-in-out duration-200 flex justify-center items-center select-none bg-100 font-[Bangers] text-[20px] flex-1 bg-[#D6B635] text-black h-[48px] rounded-full mt-[30px] hover:scale-[1.1] cursor-pointer'):
         tab.ele('.relative ease-in-out duration-200 flex justify-center items-center select-none bg-100 font-[Bangers] text-[20px] flex-1 bg-[#D6B635] text-black h-[48px] rounded-full mt-[30px] hover:scale-[1.1] cursor-pointer').click()
     if tab.s_ele('You have no raffle tickets allocated based on earthquake attack gameplay'):
@@ -300,14 +335,14 @@ def Oneness(env):
                 if a < 3:
                     chrome.refresh()
                     chrome.wait(3, 5)
-                    chrome.close()
+                    # chrome.close()
                     Lottery(chrome, env)
                 else:
                     logger.info(f"{env.name}: {e} 超出重试次数")
 
 
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
-            chrome.quit()
+            # chrome.quit()
         except Exception as e:
             logger.error(f"{env.name}: {e}")
             if chrome:
@@ -315,6 +350,6 @@ def Oneness(env):
 
 if __name__ == '__main__':
     with app.app_context():
-        env = Env.query.filter_by(name="ZLL-185").first()
+        env = Env.query.filter_by(name="ZLL-195").first()
         Oneness(env)
-    #submit(Oneness,getAllEnvs())
+    # submit(Oneness,getAllEnvs())
