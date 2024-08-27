@@ -42,6 +42,12 @@ def getOnenesslabs(chrome,env):
 
     tab = chrome.new_tab(home_page)
 
+    # 设置全屏
+    tab.set.window.full()
+
+    # 自动处理弹窗
+    tab.set.auto_handle_alert()
+
     #处理欢迎页面
     if tab.s_ele("I'm Ready to Fight!"):
         tab.ele("I'm Ready to Fight!").click()
@@ -70,6 +76,10 @@ def getOnenesslabs(chrome,env):
             logger.info(f"{env.name}: Discord未登录，账号登录失败")
             chrome.quit()
 
+    # 处理授权成功后的弹窗
+
+
+
     # 获取表头
     headers = tab.ele("@class=flex justify-center items-center").eles("c:button")
     # 鼠标指针移动到头像
@@ -91,6 +101,8 @@ def getOnenesslabs(chrome,env):
 #完成任务
 def Task(chrome,env):
     tab = chrome.new_tab(home_page)
+
+    tab.set.auto_handle_alert()
     chrome.wait(4, 5)
     #点击task
     tab.ele("@@class=ant-badge flex justify-center items-center css-loyarq@@tx()=Reward").click()
@@ -172,6 +184,7 @@ def Task(chrome,env):
 def Gem(chrome,env):
 
     tab = chrome.new_tab("https://task.onenesslabs.io/inventory")
+    tab.set.auto_handle_alert()
     chrome.wait(3,5)
     tab.ele(".flex justify-center items-center").click()
     chrome.wait(2,3)
@@ -188,6 +201,34 @@ def Gem(chrome,env):
         if tab.s_ele(".text-[#D6B635]"):
             num = tab.ele(".inline-block text-[#D6B635]").text
             logger.info(f"{env.name}: 宝石合成成功！合成详情：{num}")
+
+
+# 参与抽奖
+def Lottery(chrome,env):
+    tab = chrome.new_tab(home_page)
+    tab.set.auto_handle_alert()
+    chrome.wait(4, 5)
+    if tab.s_ele('.relative ease-in-out duration-200 flex justify-center items-center select-none bg-100 font-[Bangers] text-[20px] flex-1 bg-[#D6B635] text-black h-[48px] rounded-full mt-[30px] hover:scale-[1.1] cursor-pointer'):
+        tab.ele('.relative ease-in-out duration-200 flex justify-center items-center select-none bg-100 font-[Bangers] text-[20px] flex-1 bg-[#D6B635] text-black h-[48px] rounded-full mt-[30px] hover:scale-[1.1] cursor-pointer').click()
+    if tab.s_ele('You have no raffle tickets allocated based on earthquake attack gameplay'):
+        logger.info(f"{env.name}: 很遗憾，没有抽奖卷")
+
+    if tab.s_ele("YOU'VE PARTICIPATED IN THE RAFFLE"):
+        logger.info(f"{env.name}: 已经抽奖完成")
+        return
+
+    if tab.s_ele('PARTICIPATE IN THE RAFFLE'):
+        tab.ele('PARTICIPATE IN THE RAFFLE').click()
+        chrome.wait(4, 5)
+        num = tab.s_ele('.text-[32px] ml-[12px]').text
+        logger.info(f"{env.name}: 抽奖成功！您的Tickets数量为：{num}")
+
+
+
+
+
+
+
 
 
 def Oneness(env):
@@ -209,36 +250,50 @@ def Oneness(env):
                     logger.info(f"{env.name}: {e} 超出重试次数")
 
             a = 0
-            try:
-                Gem(chrome, env)
-            except Exception as e:
-                logger.info(f"{env.name}: {e} 开始重新执行~")
-                a += 1
-                if a < 3:
-                    chrome.refresh()
-                    chrome.wait(3, 5)
-                    chrome.close()
-                    Gem(chrome, env)
-                else:
-                    logger.info(f"{env.name}: {e} 超出重试次数")
+            # try:
+            #     Gem(chrome, env)
+            # except Exception as e:
+            #     logger.info(f"{env.name}: {e} 开始重新执行~")
+            #     a += 1
+            #     if a < 3:
+            #         chrome.refresh()
+            #         chrome.wait(3, 5)
+            #         chrome.close()
+            #         Gem(chrome, env)
+            #     else:
+            #         logger.info(f"{env.name}: {e} 超出重试次数")
 
             a = 0
-            try:
-                Task(chrome, env)
-            except Exception as e:
-                logger.info(f"{env.name}: {e} 开始重新执行~")
-                a += 1
-                if a < 3:
-                    chrome.refresh()
-                    chrome.wait(3, 5)
-                    chrome.close()
-                    Task(chrome, env)
-                else:
-                    logger.info(f"{env.name}: {e} 超出重试次数")
+            # try:
+            #     Task(chrome, env)
+            # except Exception as e:
+            #     logger.info(f"{env.name}: {e} 开始重新执行~")
+            #     a += 1
+            #     if a < 3:
+            #         chrome.refresh()
+            #         chrome.wait(3, 5)
+            #         chrome.close()
+            #         Task(chrome, env)
+            #     else:
+            #         logger.info(f"{env.name}: {e} 超出重试次数")
 
             a = 0
+            # try:
+            #     Gem(chrome, env)
+            # except Exception as e:
+            #     logger.info(f"{env.name}: {e} 开始重新执行~")
+            #     a += 1
+            #     if a < 3:
+            #         chrome.refresh()
+            #         chrome.wait(3, 5)
+            #         chrome.close()
+            #         Gem(chrome, env)
+            #     else:
+            #         logger.info(f"{env.name}: {e} 超出重试次数")
+
+
             try:
-                Gem(chrome, env)
+                Lottery(chrome, env)
             except Exception as e:
                 logger.info(f"{env.name}: {e} 开始重新执行~")
                 a += 1
@@ -246,7 +301,7 @@ def Oneness(env):
                     chrome.refresh()
                     chrome.wait(3, 5)
                     chrome.close()
-                    Gem(chrome, env)
+                    Lottery(chrome, env)
                 else:
                     logger.info(f"{env.name}: {e} 超出重试次数")
 
@@ -259,7 +314,7 @@ def Oneness(env):
                 chrome.quit()
 
 if __name__ == '__main__':
-    # with app.app_context():
-    #     env = Env.query.filter_by(name="ZLL-112").first()
-    #     Oneness(env)
-    submit(Oneness,getAllEnvs())
+    with app.app_context():
+        env = Env.query.filter_by(name="ZLL-185").first()
+        Oneness(env)
+    #submit(Oneness,getAllEnvs())
