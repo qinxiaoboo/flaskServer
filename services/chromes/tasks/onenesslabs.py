@@ -256,12 +256,6 @@ def Lottery(chrome,env):
 
 
 
-
-
-
-
-
-
 def Oneness(env):
     with app.app_context():
         try:
@@ -331,21 +325,21 @@ def Oneness(env):
                 if a < 3:
                     chrome.refresh()
                     chrome.wait(3, 5)
-                    # chrome.close()
+                    chrome.close()
                     Lottery(chrome, env)
                 else:
                     logger.info(f"{env.name}: {e} 超出重试次数")
 
 
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
-            # chrome.quit()
+            chrome.quit()
         except Exception as e:
             logger.error(f"{env.name}: {e}")
             if chrome:
                 chrome.quit()
 
 if __name__ == '__main__':
-    with app.app_context():
-        env = Env.query.filter_by(name="ZLL-195").first()
-        Oneness(env)
-    # submit(Oneness,getAllEnvs())
+    # with app.app_context():
+    #     env = Env.query.filter_by(name="ZLL-195").first()
+    #     Oneness(env)
+    submit(Oneness,getAllEnvs())
