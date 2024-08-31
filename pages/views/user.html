@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理</title>
+    <script src="../js/user.js" ></script>
+    <script src="../js/config.js" ></script>
+    <script src="../js/encry.js" ></script>
+    <script src="../js/request.js" ></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        button {
+            padding: 10px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button.delete {
+            background-color: #dc3545;
+        }
+        button.add {
+            background-color: #28a745;
+        }
+        button.edit {
+            background-color: #ffc107;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+        <!-- 插入公共导航栏 -->
+    <div id="header"></div>
+    <h1>用户管理</h1>
+
+    <div class="form-group">
+        <label for="username">用户名:</label>
+        <input type="text" id="username" placeholder="输入用户名">
+    </div>
+    <div class="form-group">
+        <label for="groups">用户组:</label>
+        <input type="text" id="groups" placeholder="输入用户组">
+    </div>
+    <div class="form-group">
+        <label for="password">密码:</label>
+        <input type="password" id="password" placeholder="输入密码">
+    </div>
+    <button class="add" onclick="addUser()">添加用户</button>
+    <button class="edit" onclick="updateUser()">修改用户</button>
+
+    <table id="user-table">
+        <thead>
+            <tr>
+                <th>用户名</th>
+                <th>用户组</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 用户数据将通过 JavaScript 动态添加 -->
+        </tbody>
+    </table>
+    <script>
+        renderUserTable();
+
+    </script>
+</body>
+</html>

@@ -20,7 +20,7 @@ function restsLabel() {
     const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
     const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
     sendPostRequest(
-        'http://localhost:9000/envs/set/label',
+        'http://' + server_address + ':' + server_port + '/envs/set/label',
         { "ids": selectedIds, "label": searchQuery },
         '设置标签操作成功',
         '设置标签操作失败'
@@ -34,7 +34,7 @@ function addLabel() {
     const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
     const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
     sendPostRequest(
-        'http://localhost:9000/envs/add/label',
+        'http://' + server_address + ':' + server_port + '/envs/add/label',
         { "ids": selectedIds, "label": searchQuery },
         '追加标签操作成功',
         '追加标签操作失败'

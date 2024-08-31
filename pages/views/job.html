@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务管理</title>
+    <script src="../js/request.js" ></script>
+    <script src="../js/config.js" ></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        button {
+            margin: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        #taskForm {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        #taskForm input {
+            margin: 5px 0;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #taskForm button {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+        <!-- 插入公共导航栏 -->
+    <div id="header"></div>
+    <h1>任务管理</h1>
+    <button onclick="showAddForm()">新增任务</button>
+
+    <table id="tasksTable">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>名称</th>
+                <th>触发器</th>
+                <th>小时</th>
+                <th>分钟</th>
+                <th>函数名</th>
+                <th>参数</th>
+                <th>间隔</th>
+                <th>间隔单位</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 表格数据会在这里插入 -->
+        </tbody>
+    </table>
+
+    <!-- 新增/编辑任务表单 -->
+    <div id="taskForm" style="display: none;">
+        <h2 id="formTitle">新增任务</h2>
+        <input type="hidden" id="taskId">
+        <label for="taskName">名称:</label>
+        <input type="text" id="taskName" required>
+        <label for="trigger">触发器(每天cron/interval):</label>
+        <input type="text" id="trigger" required>
+        <label for="hour">几点cron:</label>
+        <input type="number" id="hour">
+        <label for="minute">几分cron:</label>
+        <input type="number" id="minute">
+        <label for="functionName">函数名:</label>
+        <input type="text" id="functionName" required>
+        <label for="parameters">参数:</label>
+        <input type="text" id="parameters">
+        <label for="interval">间隔interval 数字:</label>
+        <input type="number" id="interval">
+        <label for="intervalUnit">间隔单位 minutes/seconds :</label>
+        <input type="text" id="intervalUnit">
+        <button onclick="saveTask()">保存</button>
+        <button onclick="cancelForm()">取消</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTasks();
+        });
+
+        function loadTasks() {
+            request.get('/jobs')
+                .then(response => response.json())
+                .then(res => {
+                    if (res.code===0){
+                        data = res.data
+
+                        const tbody = document.querySelector('#tasksTable tbody');
+                        tbody.innerHTML = '';
+                        data.forEach(task => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${task.id}</td>
+                                <td>${task.name}</td>
+                                <td>${task.trigger}</td>
+                                <td>${task.hour || ''}</td>
+                                <td>${task.minute || ''}</td>
+                                <td>${task.function_name}</td>
+                                <td>${task.parameters || ''}</td>
+                                <td>${task.interval || ''}</td>
+                                <td>${task.interval_unit || ''}</td>
+                                <td>
+                                    <button onclick="editTask(${task.id})">编辑</button>
+                                    <button onclick="deleteTask(${task.id})">删除</button>
+                                </td>
+                            `;
+                            tbody.appendChild(row);
+                        });
+                    }else {
+                        if (res.error==="noLogin"){
+                            alert("请登录")
+                            window.location.assign('login.html');
+                        }else{
+                            alert(data.error)
+                        }
+                    }
+
+                });
+        }
+
+        function showAddForm() {
+            document.getElementById('formTitle').innerText = '新增任务';
+            document.getElementById('taskForm').style.display = 'block';
+            document.getElementById('taskId').value = '';
+            document.getElementById('taskName').value = '';
+            document.getElementById('trigger').value = '';
+            document.getElementById('hour').value = '';
+            document.getElementById('minute').value = '';
+            document.getElementById('functionName').value = '';
+            document.getElementById('parameters').value = '';
+            document.getElementById('interval').value = '';
+            document.getElementById('intervalUnit').value = '';
+        }
+
+        function editTask(id) {
+            request.get(`/jobs/${id}`)
+                .then(response => response.json())
+                .then(res => {
+                    if (res.code===0){
+                        task = res.msg
+                        document.getElementById('formTitle').innerText = '编辑任务';
+                        document.getElementById('taskForm').style.display = 'block';
+                        document.getElementById('taskId').value = task.id;
+                        document.getElementById('taskName').value = task.name;
+                        document.getElementById('trigger').value = task.trigger;
+                        document.getElementById('hour').value = task.hour || '';
+                        document.getElementById('minute').value = task.minute || '';
+                        document.getElementById('functionName').value = task.function_name;
+                        document.getElementById('parameters').value = task.parameters || '';
+                        document.getElementById('interval').value = task.interval || '';
+                        document.getElementById('intervalUnit').value = task.interval_unit || '';
+                    }else {
+                        if (res.error==="noLogin"){
+                            alert("请登录")
+                            window.location.assign('login.html');
+                        }else {
+                            alert(res.error)
+                        }
+                    }
+
+                });
+        }
+
+        function cancelForm() {
+            document.getElementById('taskForm').style.display = 'none';
+        }
+
+        function saveTask() {
+            const id = document.getElementById('taskId').value;
+            const task = {
+                name: document.getElementById('taskName').value,
+                trigger: document.getElementById('trigger').value,
+                hour: document.getElementById('hour').value || null,
+                minute: document.getElementById('minute').value || null,
+                function_name: document.getElementById('functionName').value,
+                parameters: document.getElementById('parameters').value || null,
+                interval: document.getElementById('interval').value || null,
+                interval_unit: document.getElementById('intervalUnit').value || null,
+            };
+
+            request.post(`/${localStorage.getItem("groups")}/jobs`, task)
+            .then(response => response.json())
+            .then((res) => {
+                if (res.code === 0){
+                    alert("执行成功")
+                    loadTasks();
+                    cancelForm();
+                }else {
+                    if (res.error==="noLogin"){
+                        alert("请登录")
+                        window.location.assign('login.html');
+                    }else {
+                        alert(res.error)
+                    }
+                }
+
+            });
+        }
+
+        function deleteTask(id) {
+            if (confirm('确定要删除这个任务吗？')) {
+                request.delete(`/jobs/${id}`, {})
+                .then(() => {
+                    loadTasks();
+                });
+            }
+        }
+    </script>
+</body>
+</html>

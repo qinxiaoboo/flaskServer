@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>任务列表</title>
+    <script src="../js/config.js" ></script>
+
     <style>
         table {
             width: 100%;
@@ -19,6 +21,8 @@
     </style>
 </head>
 <body>
+        <!-- 插入公共导航栏 -->
+    <div id="header"></div>
     <h1>任务列表</h1>
     <table id="dynamicTable">
         <!-- Table header and content will be generated here -->
@@ -27,7 +31,7 @@
     <script>
         let data = []
         function fetchTasksInfo(){
-            fetch(`http://localhost:9000/tasks/info`,
+            fetch(`http://${server_address}:${server_port}/tasks/info`,
             {headers: {
                     'Content-Type': 'application/json;charset=UTF-8'
                     }

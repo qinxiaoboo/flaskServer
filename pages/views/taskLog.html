@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="../js/request.js" ></script>
+    <script src="../js/config.js" ></script>
+    <title>任务日志详情管理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+        <!-- 插入公共导航栏 -->
+    <div id="header"></div>
+    <h1>任务日志详情管理</h1>
+
+    <form id="searchForm">
+        <label for="env_name">环境名称:</label>
+        <input type="text" id="env_name">
+
+        <label for="task_name">任务名称:</label>
+        <input type="text" id="task_name">
+        <button type="button" onclick="searchLogs()">查询</button>
+
+        <button onclick="cancelSelected()">取消执行</button>
+
+    </form>
+
+     <table id="taskTable">
+        <thead>
+            <tr>
+                <th><input type="checkbox" id="selectAll" onclick="toggleAll(this)"></th>
+                <th>ID</th>
+                <th>环境名称</th>
+                <th>任务名称</th>
+                <th>状态</th>
+                <th>开始时间</th>
+                <th>结束时间</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        function getStatus(status){
+            return status==="pending" ? "未执行" :status === "running" ? "在运行" : status === "completed" ? "执行完成" : status === "cancelled" ? "已取消" : "未知状态"
+        }
+        async function searchLogs() {
+            const envName = document.getElementById('env_name').value;
+            const taskName = document.getElementById('task_name').value;
+            request.get(`/task_logs?env_name=${encodeURIComponent(envName)}&task_name=${encodeURIComponent(taskName)}`).
+            then((response=>{return response.json()}))
+                .then(res=>{
+                    if (res.code===0){
+                        console.log(res)
+                        const tableBody = document.querySelector('#taskTable tbody');
+                        tableBody.innerHTML = ''; // Clear existing rows
+                        res.data.forEach(log => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td><input type="checkbox" value="${log.id}"></td>
+                                <td>${log.id}</td>
+                                <td>${log.env_name}</td>
+                                <td>${log.task_name}</td>
+                                <td>
+                                   <span
+                                   style="color: ${log.task_result === '成功'?'green' : log.task_result === '失败'? 'red' :log.status==='running'?'blue':log.status==='cancelled'?'gray':'black'}"
+                                   title="${log.execution_result}"
+                                   >
+                                    ${getStatus(log.status)}
+                                    </span>
+                                </td>
+                                <td>${log.start_time || ''}</td>
+                                <td>${log.end_time || ''}</td>
+                            `;
+                            tableBody.appendChild(row);
+                        })
+                    }else {
+                        if (res.error==="noLogin"){
+                            alert("请登录")
+                            window.location.assign('login.html');
+                        }else{
+                            alert(data.error)
+                        }
+                    }
+            });
+        }
+        function toggleAll(checkbox) {
+            const isChecked = checkbox.checked;
+            document.querySelectorAll('#taskTable tbody input[type="checkbox"]').forEach(cb => {
+                cb.checked = isChecked;
+            });
+        }
+        async function cancelSelected() {
+            const selectedIds = Array.from(document.querySelectorAll('#taskTable input[type="checkbox"]:checked'))
+                                     .map(checkbox => checkbox.value);
+
+            request.post(`/${localStorage.getItem("groups")}/task_logs/cancel`, { ids: selectedIds })
+                .then((response=>{return response.json()}))
+                .then(res=>{
+                    if(res.code===0){
+                        alert("执行成功")
+                    }else {
+                        alert("执行失败")
+                    }
+                })
+        }
+        searchLogs()
+    </script>
+</body>
+</html>

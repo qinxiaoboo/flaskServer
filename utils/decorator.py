@@ -1,15 +1,20 @@
 from functools import wraps
 from loguru import logger
-
-def closeChrome(fn):
+from flask import request
+from flaskServer.services.dto.user import getUserByToken,updateToken
+""" 装饰器 """
+def ApiCheck(fn):
     @wraps(fn)
-    def decorated(env,*args,**kwargs):
-        chrome = None
-        try:
-            chrome = fn(env,*args,**kwargs)
-        except Exception as e:
-            logger.error(f"{env.name}: {e}")
-        finally:
-            if chrome:
-                chrome.quit()
-    return decorated
+    def wrapper(*args,**kwargs):
+        token = request.headers.get("token")
+        groups = request.headers.get("groups")
+        user = getUserByToken(token)
+        if user:
+            updateToken(token)
+            if groups and groups != user.groups:
+                return {"code":-1, "error": "noLogin"}
+            ret = fn(user.groups,*args,**kwargs)
+        else:
+            return {"code":-1, "error": "noLogin"}
+        return ret
+    return wrapper

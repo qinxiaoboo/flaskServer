@@ -377,6 +377,7 @@ def toLoginAll(env):
             logger.error(f"{env.name}: {e}")
             if chrome:
                 chrome.quit()
+            return ("失败",f"{e}")
     else:
         logger.info(f"{env.name}: 已初始化")
 

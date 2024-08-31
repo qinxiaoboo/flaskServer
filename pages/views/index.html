@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="buttonoperation.js" ></script>
-	<script src="onclick.js" ></script>
-	<script src="event.js" defer></script>
-	<script src="query.js" ></script>
+    <script src="../js/buttonoperation.js" ></script>
+	<script src="../js/onclick.js" ></script>
+	<script src="../js/event.js" defer></script>
+	<script src="../js/query.js" ></script>
+    <script src="../js/config.js" ></script>
+    <script src="../js/request.js" ></script>
     <title>表格页面</title>
     <style>
         table {
@@ -24,9 +26,34 @@
         .pagination {
             margin: 10px 0;
         }
+        #system-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        .warning {
+            color: red;
+        }
+        .normal {
+            color: black;
+        }
     </style>
 </head>
 <body>
+        <!-- 插入公共导航栏 -->
+    <div id="header"></div>
+         <!-- 系统信息区域 -->
+    <div id="system-info">
+        <h4>系统状态</h4>
+        <div id="cpu-usage">CPU 使用率: Loading...</div>
+        <div id="memory-usage">内存使用率: Loading...</div>
+        <div id="disk-usage">硬盘使用率: Loading...</div>
+    </div>
     <form id="filter-form">
         <label for="search">输入框: </label>
         <input type="text" id="search" name="查询">
@@ -46,11 +73,11 @@
             <button id="init-action-button">初始化</button>
             <br>
             <span>银河任务: </span>
-            <button onclick="handleOperation('http://localhost:9000/galxe/task/all')" type="button">银河任务</button>
-            <button onclick="handleOperation('http://localhost:9000/galxe/countpoints')" type="button">银河统计</button>
+            <button onclick="handleOperation('http://' + server_address + ':' + server_port + '/galxe/task/all')" type="button">银河任务</button>
+            <button onclick="handleOperation('http://' + server_address + ':' + server_port + '/galxe/countpoints')" type="button">银河统计</button>
             <br>
             <span>其他任务: </span>
-            <button onclick="handleOperation('http://localhost:9000/todo/multifarm')" type="button">multifarm</button>
+            <button onclick="handleOperation('http://' + server_address + ':' + server_port + '/todo/multifarm')" type="button">multifarm</button>
             <br>
         </div>
 
@@ -83,8 +110,7 @@
 <!--            <button id="debug-action-button">调试</button>-->
 <!--            <button id="init-action-button">初始化</button>-->
 <!--        </div>-->
-        <a href="task.html" target="_blank">任务详情</a>
-        <a href="galxe.html" target="_blank">银河任务详情</a>
+
     </div>
 
     <script>
@@ -97,6 +123,11 @@
 
         // Initial data fetch
         fetchData();
+        // 每秒更新一次系统信息
+        setInterval(fetchSystemInfo, 10000);
+
+        // 初次加载
+        fetchSystemInfo();
     </script>
 </body>
 </html>

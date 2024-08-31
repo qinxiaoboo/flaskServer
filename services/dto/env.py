@@ -1,24 +1,31 @@
 import json
 import random
+import socket
 
 from loguru import logger
 from flaskServer.config.config import CHROME_VERSION,RANDOM_ORDER
 from flaskServer.config.connect import db, app
 from flaskServer.mode.env import Env,status_descriptions
 from flaskServer.mode.proxy import Proxy
+from flaskServer.services.dto.dataDictionary import getDataDictionaryByValue
 from flaskServer.utils.envutil import getUserAgent,to_be_list,can_convert_to_number,can_be_list
 from flaskServer.dao.envAccount import EnvAccountInfo
 from flaskServer.services.dto.account import Account
-from flaskServer.services.dto.proxy import Proxy
+from sqlalchemy import and_
 
 def getAllEnvs():
     with app.app_context():
-        envs = Env.query.all()
+        groups = getDataDictionaryByValue("GROUP_HOSTNAME", socket.gethostname())
+        if groups:
+            groups = groups.code
+        else:
+            groups = ""
+        envs = Env.query.filter(Env.group == groups).all()
         if RANDOM_ORDER:
             random.shuffle(envs)
         return envs
 
-def getEnvsInfo(page,page_size,search, label, sortBy="env", sortOrder="asc"):
+def getEnvsInfo(page,page_size,search, label, sortBy="env", sortOrder="asc",groups=""):
     envs_json = []
     with app.app_context():
         # 构建基本查询
@@ -30,6 +37,8 @@ def getEnvsInfo(page,page_size,search, label, sortBy="env", sortOrder="asc"):
                 (Env.name.like(search_term))|
                 (Env.label.like(search_term))
             )
+        if groups :
+            envs_query = envs_query.filter(Env.group==groups)
             # 动态设置排序
         if sortBy not in ['group']:
             sortBy = 'name'  # 默认排序字段
@@ -64,10 +73,10 @@ def getEnvsInfo(page,page_size,search, label, sortBy="env", sortOrder="asc"):
     return envs_json,paginated_envs.total - count
 
 
-def getEnvsByGroup(group):
+def getEnvsByGroup(group, RANDOM=RANDOM_ORDER):
     with app.app_context():
         envs = Env.query.filter_by(group=group).all()
-        if RANDOM_ORDER:
+        if RANDOM:
             random.shuffle(envs)
         return envs
 
@@ -81,13 +90,19 @@ def getEnvsByIds(ids):
 
 def getChoiceEnvs():
     num = random.choice([i for i in range(5)])
+    groups = getDataDictionaryByValue("GROUP_HOSTNAME", socket.gethostname())
+    if groups:
+        groups = groups.code
+    else:
+        groups = ""
     with app.app_context():
         proxys = Proxy.query.all()
         envs = []
         # envs.append(Env.query.filter_by(name="Q-0").first())
         for proxy in proxys:
-            env = Env.query.filter_by(t_proxy_id=proxy.id).all()[num]
-            envs.append(env)
+            env = Env.query.filter(and_(Env.t_proxy_id == proxy.id, Env.group == groups)).all()
+            if env:
+                envs.append(env[num])
         if RANDOM_ORDER:
             random.shuffle(envs)
         return envs
@@ -180,4 +195,4 @@ def getId(object):
         return 0
 
 if __name__ == '__main__':
-    print(int("1"))
+    print(getChoiceEnvs())

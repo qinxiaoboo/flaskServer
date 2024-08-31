@@ -35,6 +35,7 @@ with open(Path(WORK_PATH) / Path('flaskServer/files/surveys.csv'), 'r', encoding
     SURVEYS = [row for row in reader]
 TWO_CAPTCHA_API_KEY = cfg.get('TWO_CAPTCHA_API_KEY')
 CAP_SOLVER_API_KEY = cfg.get('CAP_SOLVER_API_KEY')
+PRIVATE_KEY_PEM = cfg.get("PRIVATE_KEY_PEM")
 SURVEYS = {row[0].lower(): row[1:] for row in SURVEYS}
 CHROME_VERSION = cfg.get("CHROME_VERSION")
 MAX_TRIES = cfg.get("MAX_TRIES")

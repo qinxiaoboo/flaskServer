@@ -130,7 +130,7 @@ def getFaucet(chrome,env,type):
     except AttributeError as e:
         logger.info(f" {env.name}: 由于消息积压严重，本次领水动作处理历史消息")
 
-def worker(env,type):
+def toDoPlumenetworkFaucet(env,type):
     logger.info(f"======开始执行{env.name}环境")
     chrome=None
     try:
@@ -138,12 +138,13 @@ def worker(env,type):
         getFaucet(chrome, env, type)
     except Exception as e:
         logger.error(f"{env.name} 执行异常：{e}")
+        return ("失败", f"{env.name} 执行异常：{e}")
     finally:
         if chrome:
             chrome.quit()
 
 def toDoFaucet(type):
-    submit(worker, getChoiceEnvs(), type)
+    submit(toDoPlumenetworkFaucet, getChoiceEnvs(), type)
 
 
 def toDo(env):

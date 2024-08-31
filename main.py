@@ -2,7 +2,7 @@ import random
 import sys
 
 from loguru import logger
-from flaskServer.config.connect import app
+from flaskServer.config.connect import app,db
 from gevent import pywsgi
 from flaskServer.config.scheduler import scheduler
 from flaskServer.mode.env import Env
@@ -13,21 +13,21 @@ from flaskServer.services.chromes.tasks.multifarm import toDo as toDoMultifarm
 from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGroup
 from flaskServer.services.internal.tasks.spaces_stats import todo as countPoints
 from flaskServer.services.chromes.galxe.login import debugGalxeTask,toDoGalxeTaskAll
+from flaskServer.services.dto.job import addJobByDB
 from threading import Thread
-from flaskServer.routes import env,task,galxe
+from flaskServer.routes import env,task,galxe,user
 from flask_cors import CORS
 from flaskServer.services.chromes.tasks.plume import toDoPlumeTaskAll
 app.register_blueprint(env.bp)
 app.register_blueprint(task.bp)
 app.register_blueprint(galxe.bp)
+app.register_blueprint(user.bp)
 logger.remove()
 logger.add(sys.stderr, format='<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | '
                               '<level>{level: <7}</level> | '
                               '<level>{message}</level>')
 
 result = {"code": 0, 'msg': "success"}
-
-
 # 初始化所有环境
 @app.route("/init/all")
 def loginAll ():
@@ -86,6 +86,10 @@ def taskPlume ():
 
 
 if __name__ == '__main__':
+    # # Create the database and table
+    # with app.app_context():
+    #     db.create_all()
+    addJobByDB()
     scheduler.init_app(app)
     scheduler.start()
     CORS(app)

@@ -19,7 +19,7 @@ function handleRestOperation() {
     const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
     const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
     sendPostRequest(
-        'http://localhost:9000/chromes/reset',
+        'http://' + server_address + ':' + server_port + '/chromes/reset',
         { "ids": selectedIds },
         '重置操作成功',
         '重置操作失败'
@@ -33,7 +33,7 @@ function handleDebugOperation() {
     const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
     const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
     sendPostRequest(
-        'http://localhost:9000/envs/debug',
+        'http://' + server_address + ':' + server_port + '/envs/debug',
         { "ids": selectedIds },
         '调试操作成功',
         '调试操作失败'
@@ -47,7 +47,7 @@ function handleInitOperation() {
     const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
     const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
     sendPostRequest(
-        'http://localhost:9000/envs/init',
+        'http://' + server_address + ':' + server_port + '/envs/init',
         { "ids": selectedIds },
         '初始化操作成功',
         '初始化操作失败'

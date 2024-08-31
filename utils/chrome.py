@@ -6,6 +6,7 @@ from flaskServer.config.chromiumOptions import initChromiumOptions
 from flaskServer.config.config import HEADLESS,get_ini_path,MUTE,OFF_VIDEO,OFF_IMG,WORK_PATH
 from flaskServer.services.dto.env import updateEnvStatus
 from flaskServer.services.dto.proxy import updateProxyStatus
+from flaskServer.utils.envutil import getUserAgent
 
 
 def get_Custome_Tab(tab):
@@ -83,10 +84,10 @@ def getChromiumPage(env, proxy): # 获取一个ChromiumPage对象
     try:
         if env.status == 0 or env.status == None:  # 如果环境是初始化状态
             if proxy:  # 需要代理
-                chrome = ChromiumPage(addr_or_opts=getChromiumOptions(initChromiumOptions(env.name, env.port, env.user_agent,"http://" + proxy.ip + ":" + proxy.port)))
+                chrome = ChromiumPage(addr_or_opts=getChromiumOptions(initChromiumOptions(env.name, env.port, getUserAgent(env.user_agent), "http://" + proxy.ip + ":" + proxy.port)))
                 initChrom(chrome, env.name, proxy.ip, proxy.port, proxy.user, proxy.pwd)
             else:
-                chrome = ChromiumPage(addr_or_opts=getChromiumOptions(initChromiumOptions(env.name, env.port, env.user_agent, None)))
+                chrome = ChromiumPage(addr_or_opts=getChromiumOptions(initChromiumOptions(env.name, env.port, getUserAgent(env.user_agent), None)))
         else:
             ini_path = get_ini_path(env.name)
             if ini_path.exists():

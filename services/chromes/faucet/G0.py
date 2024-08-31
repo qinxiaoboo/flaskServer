@@ -23,6 +23,7 @@ def worker(env):
             m2 = tab.ele("@class=mt-2").text
             if "Successful" in h3 or "Please" in m2:
                 logger.info(f"{env.name}环境领取成功")
+            chrome.wait(3,4)
     except Exception as e:
         logger.error(f"{env.name}: {e}")
     finally:

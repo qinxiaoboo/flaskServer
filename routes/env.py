@@ -1,21 +1,24 @@
 from threading import Thread
 
-from flask import Blueprint, request
+from flask import Blueprint, request, jsonify
 from loguru import logger
-
+from flaskServer.utils.decorator import ApiCheck
 from flaskServer.config.connect import app
 from flaskServer.services.chromes.login import toLoginAll, DebugChrome
 from flaskServer.services.chromes.worker import submit
 from flaskServer.services.dto.env import getEnvsByIds
 from flaskServer.services.dto.env import getEnvsInfo
 from flaskServer.services.dto.env import updateAllStatus, updateLabel, addLabel
+from flaskServer.services.dto.user import getUserByToken
 from flaskServer.utils.envutil import can_be_list
+from flaskServer.services.dto.job import updateJob, deleteJob, getJobs, getJob
 
 bp = Blueprint('envs', __name__)
 
 @app.route("/envs/info")
-def envsInfo():
-    result = {"code": 0, 'msg': "success"}
+@ApiCheck
+def envsInfo(groups):
+    result = {"code": 0, 'msg': "success","data":[],"total":0}
     logger.info(f"Received args: {request.args}")
     page = int(request.args.get('page', 1))
     page_size = int(request.args.get('pageSize', 100000))
@@ -23,9 +26,14 @@ def envsInfo():
     sortOrder = request.args.get("sortOrder","asc")
     search = request.args.get("search","").strip()
     label = request.args.get("label", "").strip()
-    data, total = getEnvsInfo(page, page_size, search, label, sortBy, sortOrder)
-    result["data"] = data
-    result["total"] = total
+    token = request.headers.get("token")
+    user = getUserByToken(token)
+    if user and user.username!="admin":
+        data, total = getEnvsInfo(page, page_size, search, label, sortBy, sortOrder,user.groups)
+        result["data"] = data
+        result["total"] = total
+    else:
+        return {"code": 0, "error": "noLogin"}
     return result
 
 # 初始化 浏览器配置
@@ -85,3 +93,99 @@ def addlabel ():
     logger.info(f"追加标签 Received body: {data}")
     addLabel(ids, label)
     return result
+
+
+@app.route('/<groups>/jobs', methods=['POST','PUT'])
+def add_job(groups):
+    data = request.json
+    user = getUserByToken(request.headers.get("token"))
+    if user:
+        if groups and groups != user.groups:
+            return {"code": -1, "error": "noLogin"}
+        data["groups"] = request.headers.get("groups")
+        updateJob(data)
+        return {"code":0,"msg":"成功"}
+    else:
+        return {"code":-1,"error":"noLogin"}
+
+@app.route('/jobs', methods=['GET'])
+@ApiCheck
+def get_jobs(groups):
+    jobs = getJobs(groups)
+    return {"code":0,"data":jobs}
+
+@app.route('/jobs/<job_id>', methods=['GET'])
+@ApiCheck
+def get_job(groups,job_id):
+    job = getJob(groups, job_id)
+    return {"code":0,"msg":job}
+
+@app.route('/jobs/<job_id>', methods=['DELETE'])
+def delete_job(job_id):
+    if deleteJob(job_id):
+        return {"code":0,"msg":"成功"}
+    else:
+        return {"code":-1,"error": "执行失败"}
+
+from flaskServer.services.dto.dataDictionary import getAll,getDataDictionaryById,updataDataDictionary,deleteDataDictionary
+@app.route('/dictionary', methods=['GET'])
+def get_all_entries():
+    return {"code":0,"data":getAll()}
+
+@app.route('/dictionary/<int:id>', methods=['GET'])
+def get_entry(id):
+    entry = getDataDictionaryById(id)
+    if entry:
+        return {"code":0,"data": entry.to_dict()}
+    return {"code":-1,"error":"没有该数据"}
+
+@app.route('/dictionary', methods=['POST'])
+def create_entry():
+    data = request.json
+    group_name = data['group_name'],
+    code = data['code'],
+    value = data['value'],
+    description = data.get('description', '')
+    updataDataDictionary(group_name,code,value,description)
+    return {"code":0,"msg":"操作成功"}
+
+@app.route('/dictionary/<int:id>', methods=['DELETE'])
+def delete_entry(id):
+    deleteDataDictionary(id)
+    return {"code":0,"msg":"操作成功"}
+
+from flaskServer.services.chromes.worker import cancelTasks
+from flaskServer.services.dto.taskLog import getTaskLogs
+
+@app.route('/task_logs', methods=['GET'])
+@ApiCheck
+def get_task_logs(groups):
+    envName = request.args.get("env_name", "").strip()
+    taskName = request.args.get("task_name", "").strip()
+    taskLogs = getTaskLogs(groups, envName, taskName)
+    return {"code": 0, "data": taskLogs}
+
+@app.route('/<groups>/task_logs/cancel', methods=['POST'])
+def cancel_task_logs(groups):
+    ids = request.json.get('ids', [])
+    cancelTasks(ids)
+    return {"code":0,"msg":"操作成功"}
+import psutil
+@app.route('/<group>/systeminfo', methods=['GET'])
+@ApiCheck
+def system_info(groups, group):
+    # 获取 CPU 使用率
+    cpu_usage = psutil.cpu_percent(interval=1)
+
+    # 获取内存使用情况
+    memory_info = psutil.virtual_memory()
+    memory_usage = memory_info.percent
+
+    # 获取硬盘使用情况
+    disk_info = psutil.disk_usage('/')
+    disk_usage = disk_info.percent
+
+    return {"code":0,"data":{
+        'cpu_usage': cpu_usage,
+        'memory_usage': memory_usage,
+        'disk_usage': disk_usage}}

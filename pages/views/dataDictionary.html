@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html  lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据字典</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        form {
+            margin-top: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script src="../js/request.js" ></script>
+    <script src="../js/config.js" ></script>
+    <script>
+        async function fetchEntries() {
+            request.get('/dictionary').
+            then((response=>{return response.json()}))
+                .then(res=>{
+                    if (res.code===0){
+                        console.log(res)
+                         const table = document.getElementById('dictionaryTable');
+                        table.innerHTML = '<tr><th>ID</th><th>分组名称</th><th>Code</th><th>值</th><th>描述</th><th>操作</th></tr>';
+                        res.data.forEach(entry => {
+                            const row = table.insertRow();
+                            row.insertCell().textContent = entry.id;
+                            row.insertCell().textContent = entry.group_name;
+                            row.insertCell().textContent = entry.code;
+                            row.insertCell().textContent = entry.value;
+                            row.insertCell().textContent = entry.description;
+                                // 添加删除按钮
+                            const deleteCell = row.insertCell();
+                            const deleteButton = document.createElement('button');
+                            deleteButton.textContent = '删除';
+                            deleteButton.onclick = () => {
+                                deleteEntry(entry.id); // 删除条目并更新表格
+                            };
+                            deleteCell.appendChild(deleteButton);
+                        });
+                    }else {
+                        if (res.error==="noLogin"){
+                            alert("请登录")
+                            window.location.assign('login.html');
+                        }else {
+                            alert(res.error)
+                        }
+                    }
+                })
+
+        }
+
+        async function addEntry() {
+            const groupName = document.getElementById('groupName').value;
+            const code = document.getElementById('code').value;
+            const value = document.getElementById('value').value;
+            const description = document.getElementById('description').value;
+
+            request.post('/dictionary',{ group_name: groupName, code: code, value: value, description: description })
+
+
+            fetchEntries();
+        }
+        function deleteEntry(index) {
+            request.delete(`/dictionary/${index}`)
+            fetchEntries();
+
+        }
+    </script>
+</head>
+<body onload="fetchEntries()">
+        <!-- 插入公共导航栏 -->
+    <div id="header"></div>
+    <div class="container">
+        <h1>数据 字典</h1>
+        <table id="dictionaryTable">
+        </table>
+        <h2>添加新条目</h2>
+        <form id="entryForm" onsubmit="event.preventDefault(); addEntry();">
+            <div class="form-group">
+                <label for="groupName">组名：</label>
+                <input type="text" id="groupName" required>
+            </div>
+            <div class="form-group">
+                <label for="code">代码：</label>
+                <input type="text" id="code" required>
+            </div>
+            <div class="form-group">
+                <label for="value">值：</label>
+                <input type="text" id="value" required>
+            </div>
+            <div class="form-group">
+                <label for="description">描述：</label>
+                <input type="text" id="description">
+            </div>
+            <button type="submit">添加条目</button>
+        </form>
+    </div>
+</body>
+</html>
