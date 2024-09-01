@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="../js/buttonoperation.js" async></script>
 	<script src="../js/onclick.js" async></script>
+    <script src="../js/alertComponent.js" async></script>
 	<script src="../js/event.js" async></script>
+    <script src="../js/config.js" defer></script>
     <script src="../js/request.js"></script>
 	<script src="../js/query.js"></script>
-    <script src="../js/config.js" defer></script>
     <title>表格页面</title>
     <style>
            /* 样式化输入框 */
@@ -122,12 +123,12 @@
             <br>
             <br>
             <span>银河任务: </span>
-            <button onclick="handleOperation('http://' + server_address + ':' + server_port + '/galxe/task/all')" type="button">银河任务</button>
-            <button onclick="handleOperation('http://' + server_address + ':' + server_port + '/galxe/countpoints')" type="button">银河统计</button>
+            <button onclick="handleOperation('http://' + server_address + ':' + server_port + `/${localStorage.getItem('groups')}/galxe/task/all`)" type="button">银河任务</button>
+            <button onclick="handleOperation('http://' + server_address + ':' + server_port + `/${localStorage.getItem('groups')}/galxe/countpoints`)" type="button">银河统计</button>
             <br>
             <br>
             <span>其他任务: </span>
-            <button onclick="handleOperation('http://' + server_address + ':' + server_port + '/todo/multifarm')" type="button">multifarm</button>
+            <button onclick="handleOperation('http://' + server_address + ':' + server_port + `/${localStorage.getItem('groups')}/todo/multifarm`)" type="button">multifarm</button>
             <br>
         </div>
 
@@ -170,10 +171,11 @@
 		let sortBy = 'env';
         let sortOrder = 'asc';
         let searchQuery = '';
+        let label = ""
         document.addEventListener("DOMContentLoaded", function() {
                     // 每秒更新一次系统信息
-                setInterval(fetchSystemInfo, 10000);
-                setInterval(fetchData, 20000);
+                setInterval(fetchSystemInfo, 30000);
+                setInterval(fetchData, 60000);
                 // Initial data fetch
                 fetchData();
                 // 初次加载

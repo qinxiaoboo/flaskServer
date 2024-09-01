@@ -19,8 +19,8 @@ def tasksInfo():
     result["data"] = data
     return result
 
-@app.route("/todo/multifarm", methods=["POST"])
-def p_multifarm ():
+@app.route("/<groups>/todo/multifarm", methods=["POST"])
+def p_multifarm (groups):
     result = {"code": 0, 'msg': "success"}
     data = request.get_json()
     ids = data.get('ids', [])

@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>任务管理</title>
+    <script src="../js/alertComponent.js" async></script>
     <script src="../js/request.js"></script>
     <script src="../js/config.js" defer></script>
-
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -134,10 +134,10 @@
                         });
                     }else {
                         if (res.error==="noLogin"){
-                            alert("请登录")
+                            showAlert("请登录")
                             window.location.assign('login.html');
                         }else{
-                            alert(data.error)
+                            showAlert(data.error)
                         }
                     }
 
@@ -177,10 +177,10 @@
                         document.getElementById('intervalUnit').value = task.interval_unit || '';
                     }else {
                         if (res.error==="noLogin"){
-                            alert("请登录")
+                            showAlert("请登录")
                             window.location.assign('login.html');
                         }else {
-                            alert(res.error)
+                            showAlert(res.error)
                         }
                     }
 
@@ -208,15 +208,15 @@
             .then(response => response.json())
             .then((res) => {
                 if (res.code === 0){
-                    alert("执行成功")
+                    showAlert("执行成功")
                     loadTasks();
                     cancelForm();
                 }else {
                     if (res.error==="noLogin"){
-                        alert("请登录")
+                        showAlert("请登录")
                         window.location.assign('login.html');
                     }else {
-                        alert(res.error)
+                        showAlert(res.error)
                     }
                 }
 

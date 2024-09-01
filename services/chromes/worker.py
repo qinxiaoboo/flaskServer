@@ -38,7 +38,11 @@ def checkTasks():
                 updateTaskLogStatus(key, "cancelled")
                 cancelled.append(key)
             elif value.done():
-                res = value.result()
+                res = None
+                try:
+                    res = value.result()
+                except Exception as e:
+                    logger.error(f"{key}程序执行发生异常，来自于线程池任务 :{e}")
                 result = "成功"
                 msg = "执行成功"
                 if res!= None and type(res) is not ChromiumPage and len(res) ==2:

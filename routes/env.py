@@ -48,9 +48,9 @@ def reset ():
     logger.info(f"所选环境配置初始化成功，下次登录环境重新加载配置文件")
     return result
 
-# 初始化 浏览器配置
-@app.route("/chromes/close", methods=["POST"])
-def close ():
+# 关闭浏览器
+@app.route("/<groups>/chromes/close", methods=["POST"])
+def close (groups):
     result = {"code": 0, 'msg': "success"}
     data = request.get_json()
     ids = data.get('ids', [])
@@ -58,8 +58,8 @@ def close ():
     quitChromeByEnvIds(ids)
     return result
 
-@app.route("/envs/debug", methods=["POST"])
-def debug ():
+@app.route("/<groups>/envs/debug", methods=["POST"])
+def debug (groups):
     result = {"code": 0, 'msg': "success"}
     data = request.get_json()
     ids = data.get('ids', [])
@@ -69,8 +69,8 @@ def debug ():
 
     return result
 
-@app.route("/envs/init", methods=["POST"])
-def init ():
+@app.route("/<groups>/envs/init", methods=["POST"])
+def init (groups):
     result = {"code": 0, 'msg': "success"}
     data = request.get_json()
     ids = data.get('ids', [])

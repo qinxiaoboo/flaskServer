@@ -3,6 +3,7 @@ import datetime
 from flaskServer.mode.task_record import TaskRecord
 from flaskServer.config.connect import db,app
 from flaskServer.utils.envutil import to_be_exclude
+from flaskServer.services.dto.env import getAllEnvs
 from sqlalchemy import and_
 # 获取任务记录通过环境和任务名称
 def getTaskRecord(env,name):
@@ -19,8 +20,11 @@ def checkTaskStatus(env,name):
 
 def getTaskRecordInfo():
     datas = []
+    env_names = []
+    for env in getAllEnvs():
+        env_names.append(env.name)
     with app.app_context():
-        ts = db.session.query(TaskRecord).order_by(TaskRecord.env_name.asc()).all()
+        ts = db.session.query(TaskRecord).filter(TaskRecord.env_name.in_(env_names)).order_by(TaskRecord.env_name.asc()).all()
         tasks = dict()
         for t in ts:
             if t.env_name in tasks:

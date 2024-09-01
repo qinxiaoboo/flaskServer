@@ -5,7 +5,7 @@ function getAccountColor(status){
 }
 
 // Function to fetch data and populate the table
-function fetchData({page=0,size=0,search=undefined,label=""}={}) {
+function fetchData({page=0,size=0,search=undefined}={}) {
 	fetch(`http://${server_address}:${server_port}/envs/info?page=${page===0?currentPage:page}&pageSize=${size===0?pageSize:size}&sortBy=${sortBy}&sortOrder=${sortOrder}&search=${encodeURIComponent(search===undefined?searchQuery:search)}&label=${encodeURIComponent(label)}`,
 		{headers: {
 				'Content-Type': 'application/json;charset=UTF-8',
@@ -80,19 +80,19 @@ function fetchData({page=0,size=0,search=undefined,label=""}={}) {
 			document.getElementById('totalCount').innerText = `Total Count: ${res.total}`;
 		}else {
 			if (res.error==="noLogin"){
-				alert("请登录")
+				showAlert("请登录")
 				window.location.assign('login.html');
 			}else {
-				alert(res.error)
+				showAlert(res.error)
 			}
 		}
-
 	}).catch(error => {
 		console.error('Error fetching data:', error);
 	});
 }
 
 function fetchDataByLabel(){
+	label = searchQuery
 	fetchData({page:1,size:100000,search:"",label:searchQuery})
 }
 function updateStatus(elementId, value) {
@@ -119,10 +119,10 @@ async function fetchSystemInfo() {
 			updateStatus('disk-usage', data.disk_usage);
 		}else {
 			if (res.error==="noLogin"){
-				alert("请登录")
+				showAlert("请登录")
 				window.location.assign('login.html');
 			}else{
-				alert(data.error)
+				showAlert(data.error)
 			}
 		}
 	})

@@ -65,6 +65,7 @@
             background-color: #0056b3;
         }
     </style>
+    <script src="../js/alertComponent.js" async></script>
     <script src="../js/request.js" ></script>
     <script src="../js/config.js" defer></script>
     <script>
@@ -94,10 +95,10 @@
                         });
                     }else {
                         if (res.error==="noLogin"){
-                            alert("请登录")
+                            showAlert("请登录")
                             window.location.assign('login.html');
                         }else {
-                            alert(res.error)
+                            showAlert(res.error)
                         }
                     }
                 })

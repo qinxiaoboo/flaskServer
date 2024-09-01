@@ -9,6 +9,7 @@ from flaskServer.mode.space_points import SpacePoints
 from flaskServer.mode.wallet import Wallet
 from flaskServer.utils.envutil import to_be_exclude
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
+from flaskServer.services.dto.env import getAllEnvs
 
 
 # 获取银河账号信息，通过ENV
@@ -26,8 +27,11 @@ def getAccountByEnv(env:Env):
 
 def getGaxlesInfo():
     datas = []
+    env_names = []
+    for env in getAllEnvs():
+        env_names.append(env.name)
     with app.app_context():
-        ts = db.session.query(SpacePoints).order_by(SpacePoints.env_name.asc()).all()
+        ts = db.session.query(SpacePoints).filter(SpacePoints.env_name.in_(env_names)).order_by(SpacePoints.env_name.asc()).all()
         points = {}
         for t in ts:
             if t.env_name in points:

@@ -43,20 +43,20 @@ async function addUser() {
         .then(response => response.json())
             .then(data=>{
                 if (data.code === 0){
-                    alert("操作成功")
+                    showAlert("操作成功")
                 }else {
                     if (data.error === "noLogin"){
-                        alert("请登录")
+                        showAlert("请登录")
                         window.location.assign('login.html');
                     }else {
-                        alert(data.error)
+                        showAlert(data.error)
                     }
                 }
             })
         renderUserTable();
         clearForm();
     } else {
-        alert('请填写所有字段');
+        showAlert('请填写所有字段');
     }
 }
 
@@ -83,7 +83,7 @@ function updateUser() {
     if (currentIndex !== -1) {
         addUser(); // 调用 addUser 实现更新功能
     } else {
-        alert('请选择要编辑的用户');
+        showAlert('请选择要编辑的用户');
     }
 
 }

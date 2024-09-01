@@ -19,7 +19,7 @@ function handleRestOperation() {
     const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
     const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
     sendPostRequest(
-        'http://' + server_address + ':' + server_port + '/chromes/reset',
+        'http://' + server_address + ':' + server_port + `/${localStorage.getItem("groups")}/chromes/reset`,
         { "ids": selectedIds },
         '重置操作成功',
         '重置操作失败'
@@ -32,7 +32,7 @@ function handleCloseOperation(){
     const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
     const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
     sendPostRequest(
-        'http://' + server_address + ':' + server_port + '/chromes/close',
+        'http://' + server_address + ':' + server_port + `/${localStorage.getItem("groups")}/chromes/close`,
         { "ids": selectedIds },
         '关闭操作成功',
         '关闭操作失败'
@@ -46,7 +46,7 @@ function handleDebugOperation() {
     const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
     const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
     sendPostRequest(
-        'http://' + server_address + ':' + server_port + '/envs/debug',
+        'http://' + server_address + ':' + server_port + `/${localStorage.getItem("groups")}/envs/debug`,
         { "ids": selectedIds },
         '调试操作成功',
         '调试操作失败'
@@ -60,7 +60,7 @@ function handleInitOperation() {
     const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
     const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
     sendPostRequest(
-        'http://' + server_address + ':' + server_port + '/envs/init',
+        'http://' + server_address + ':' + server_port + `/${localStorage.getItem("groups")}/envs/init`,
         { "ids": selectedIds },
         '初始化操作成功',
         '初始化操作失败'
@@ -76,7 +76,7 @@ function handleInitOperation() {
  */
 function sendPostRequest(url, body, successMessage, errorMessage) {
     if (body.ids.length === 0) {
-        alert('请选择要操作的行');
+        showAlert('请选择要操作的行');
         return;
     }
 
@@ -91,13 +91,13 @@ function sendPostRequest(url, body, successMessage, errorMessage) {
     .then(data => {
         console.log(data);
         if(data.code===0){
-            alert(data.msg);
+            showAlert(data.msg);
         }else {
-            alert(data.error)
+            showAlert(data.error)
         }
     })
     .catch(error => {
         console.error('Error fetching data:', error);
-        alert(errorMessage);
+        showAlert(errorMessage);
     });
 }

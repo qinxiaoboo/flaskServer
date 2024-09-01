@@ -2,6 +2,7 @@
 document.getElementById('search').addEventListener('input', (event) => {
 		// 获取输入框的值, 并赋值给全局变量
 		searchQuery = event.target.value;
+		label = "";
 })
 
 
