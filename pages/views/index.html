@@ -11,6 +11,52 @@
     <script src="../js/config.js" defer></script>
     <title>表格页面</title>
     <style>
+           /* 样式化输入框 */
+          input[type="text"],
+          input[type="password"],
+          input[type="email"],
+          input[type="number"],
+          textarea {
+            width: 80%; /* 短一些的宽度 */
+            max-width: 300px; /* 设置最大宽度 */
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* 确保 padding 和 border 不影响整体宽度 */
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+          }
+
+          input[type="text"]:focus,
+          input[type="password"]:focus,
+          input[type="email"]:focus,
+          input[type="number"]:focus,
+          textarea:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 6px rgba(52, 152, 219, 0.2);
+            outline: none; /* 移除默认的焦点轮廓 */
+          }
+
+          /* 样式化按钮 */
+          button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            font-size: 13px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s, box-shadow 0.3s;
+          }
+
+          button:hover {
+            background-color: #2980b9;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+          }
+
+          button:focus {
+            outline: none; /* 移除默认的焦点轮廓 */
+          }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -64,6 +110,7 @@
         <button onclick="addLabel()" type="button">追加标签</button>
         <button onclick="resetLocal()" type="button" >重置</button>
     </form>
+        <br>
     <div class="container">
 
         <div class="batch-actions">
@@ -73,9 +120,11 @@
             <button id="init-action-button">初始化</button>
             <button id="close-chrome-button">关闭浏览器</button>
             <br>
+            <br>
             <span>银河任务: </span>
             <button onclick="handleOperation('http://' + server_address + ':' + server_port + '/galxe/task/all')" type="button">银河任务</button>
             <button onclick="handleOperation('http://' + server_address + ':' + server_port + '/galxe/countpoints')" type="button">银河统计</button>
+            <br>
             <br>
             <span>其他任务: </span>
             <button onclick="handleOperation('http://' + server_address + ':' + server_port + '/todo/multifarm')" type="button">multifarm</button>

@@ -7,6 +7,31 @@
     <script src="../js/config.js"></script>
     <title>任务日志详情管理</title>
     <style>
+           /* 样式化输入框 */
+          input[type="text"],
+          input[type="password"],
+          input[type="email"],
+          input[type="number"],
+          textarea {
+            width: 80%; /* 短一些的宽度 */
+            max-width: 300px; /* 设置最大宽度 */
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; /* 确保 padding 和 border 不影响整体宽度 */
+            font-size: 14px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+          }
+
+          input[type="text"]:focus,
+          input[type="password"]:focus,
+          input[type="email"]:focus,
+          input[type="number"]:focus,
+          textarea:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 6px rgba(52, 152, 219, 0.2);
+            outline: none; /* 移除默认的焦点轮廓 */
+          }
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
