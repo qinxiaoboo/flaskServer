@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="../js/buttonoperation.js" ></script>
-	<script src="../js/onclick.js" ></script>
-	<script src="../js/event.js" defer></script>
-	<script src="../js/query.js" ></script>
-    <script src="../js/config.js" ></script>
-    <script src="../js/request.js" ></script>
+    <script src="../js/buttonoperation.js" async></script>
+	<script src="../js/onclick.js" async></script>
+	<script src="../js/event.js" async></script>
+    <script src="../js/request.js"></script>
+	<script src="../js/query.js"></script>
+    <script src="../js/config.js" defer></script>
     <title>表格页面</title>
     <style>
         table {
@@ -121,14 +121,15 @@
 		let sortBy = 'env';
         let sortOrder = 'asc';
         let searchQuery = '';
-
-        // Initial data fetch
-        fetchData();
-        // 每秒更新一次系统信息
-        setInterval(fetchSystemInfo, 10000);
-
-        // 初次加载
-        fetchSystemInfo();
+        document.addEventListener("DOMContentLoaded", function() {
+                    // 每秒更新一次系统信息
+                setInterval(fetchSystemInfo, 10000);
+                setInterval(fetchData, 20000);
+                // Initial data fetch
+                fetchData();
+                // 初次加载
+                fetchSystemInfo();
+          });
     </script>
 </body>
 </html>

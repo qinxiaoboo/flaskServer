@@ -26,7 +26,13 @@ function fetchData({page=0,size=0,search=undefined,label=""}={}) {
 					<td>${item.group}</td>
 					<td>
 						<span
-							style="color: ${item.isOpen === 0 ? 'black' : item.isOpen === 1 ?  'green' : 'gray'}"
+							style="color: ${item.isOpen === 0 ? 'black' : item.isOpen === 1 ?  'green' : 'gray'};
+							font-weight: bold;
+							padding: 5px 10px;
+							border-radius: 4px;
+							background-color: ${item.isOpen === 0 ? '#f0f0f0' : item.isOpen === 1 ? '#e6ffe6' : '#f5f5f5'};
+							text-transform: capitalize;
+							display: inline-block;"
 							title="${item.isOpen===0?'未运行':'在运行'}"
 						>
 						${item.env}
