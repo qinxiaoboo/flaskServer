@@ -10,7 +10,7 @@ from flaskServer.mode.env import Env
 from flaskServer.mode.proxy import Proxy
 from flaskServer.mode.wallet import Wallet
 from flaskServer.services.dto.env import updateEnvStatus
-from flaskServer.utils.chrome import getChrome,get_Custome_Tab
+from flaskServer.utils.chrome import getChrome,get_Custome_Tab, quitChrome
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 from flaskServer.services.content import Content
 from flaskServer.services.dto.account import updateAccountStatus
@@ -297,8 +297,7 @@ def OKXChrome(env):
             chrome.get_tab(title="Initia Wallet").close()
             return chrome
         except Exception as e:
-            if chrome:
-                chrome.quit()
+            quitChrome(env, chrome)
             raise e
 
 
@@ -311,8 +310,7 @@ def NoAccountChrome(env):
             chrome.get_tab(title="OKX Wallet").close()
             return chrome
         except Exception as e:
-            if chrome:
-                chrome.quit()
+            quitChrome(env, chrome)
             raise e
 
 def GalxeChrome(env):
@@ -328,8 +326,7 @@ def GalxeChrome(env):
             logger.info(f"{env.name}: {chrome.address}")
             return chrome
         except Exception as e:
-            if chrome:
-                chrome.quit()
+            quitChrome(env, chrome)
             raise e
 
 def LoginChrome(env):
@@ -347,8 +344,7 @@ def LoginChrome(env):
             updateEnvStatus(env.name, 2)
             return chrome
         except Exception as e:
-            if chrome:
-                chrome.quit()
+            quitChrome(env, chrome)
             raise e
 
 def DebugChrome(env):
@@ -372,11 +368,10 @@ def toLoginAll(env):
             logger.info(f"{env.name}: 打开环境")
             chrome = LoginChrome(env)
             logger.info(f"{env.name}环境：初始化成功，关闭环境")
-            chrome.quit()
+            quitChrome(env, chrome)
         except Exception as e:
             logger.error(f"{env.name}: {e}")
-            if chrome:
-                chrome.quit()
+            quitChrome(env, chrome)
             return ("失败",f"{e}")
     else:
         logger.info(f"{env.name}: 已初始化")
@@ -388,6 +383,6 @@ if __name__ == '__main__':
         try:
             chrome = OKXChrome(env)
             logger.info("环境初始化成功")
-            chrome.quit()
+            quitChrome(env, chrome)
         except Exception as e:
             logger.error(env.to_json(),e)

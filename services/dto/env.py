@@ -68,7 +68,7 @@ def getEnvsInfo(page,page_size,search, label, sortBy="env", sortOrder="asc",grou
             env_json = EnvAccountInfo(id=env.id,group=env.group,env=env.name,tw=tw.name,tw_status=tw.status,tw_error=tw.error,discord=discord.name,
                                       discord_status=discord.status,discord_error=discord.error,outlook_status=outlook.status,outlook_error=outlook.error,
                                       outlook=outlook.name, ip=ip.ip if ip else "", ip_status=ip.status if ip else 0, status=status_descriptions.get(env.status, "未知状态"),
-                                      label=env.label).to_dict()
+                                      label=env.label,isOpen=env.isOpen).to_dict()
             envs_json.append(env_json)
     return envs_json,paginated_envs.total - count
 
@@ -186,13 +186,23 @@ def updateEnv(env,group,port,cookies,proxy,tw,discord,outlook,okx,init,bitlight,
             print("新增一条环境信息，id：", ENV.id)
         db.session.add(ENV)
         db.session.commit()
-        return env
+        return ENV
 
 def getId(object):
     if object:
         return object.id
     else:
         return 0
+
+def updateOpenStatus(env_name, status):
+    env = getEnvByName(env_name)
+    with app.app_context():
+        if env:
+            if status != env.isOpen:
+                env.isOpen = status
+                db.session.add(env)
+                db.session.commit()
+                return env
 
 if __name__ == '__main__':
     print(getChoiceEnvs())

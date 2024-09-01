@@ -25,6 +25,19 @@ function handleRestOperation() {
         '重置操作失败'
     );
 }
+/**
+ * 关闭浏览器操作
+ */
+function handleCloseOperation(){
+    const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+    sendPostRequest(
+        'http://' + server_address + ':' + server_port + '/chromes/close',
+        { "ids": selectedIds },
+        '关闭操作成功',
+        '关闭操作失败'
+    );
+}
 
 /**
  * 处理调试操作

@@ -21,6 +21,7 @@ class Env(db.Model):
     # 浏览器状态0:什么都没做，1：初始化了配置，2：初始化了账号和钱包
     status = db.Column(db.Integer, unique=False, nullable=True)
     label = db.Column(db.String(255), unique=False, nullable=True)
+    isOpen = db.Column(db.Integer, unique=False, nullable=True)
 
 
     def to_json(self):

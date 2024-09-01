@@ -22,3 +22,4 @@ class EnvAccountInfo:
     ip_status:int=0
     status:str=""
     label:str=""
+    isOpen:int=0

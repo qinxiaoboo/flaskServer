@@ -24,7 +24,13 @@ function fetchData({page=0,size=0,search=undefined,label=""}={}) {
 				row.innerHTML = `
 					<td><input type="checkbox" class="row-checkbox" value="${item.id}" /></td>
 					<td>${item.group}</td>
-					<td>${item.env}</td>
+					<td>
+						<span
+							style="color: ${item.isOpen === 0 ? 'black' : item.isOpen === 1 ?  'green' : 'gray'}"
+							title="${item.isOpen===0?'未运行':'在运行'}"
+						>
+						${item.env}
+						</span></td>
 					<td>
 						<span 
 							style="color: ${getAccountColor(item.tw_status)};" 

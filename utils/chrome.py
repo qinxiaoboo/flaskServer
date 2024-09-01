@@ -4,7 +4,7 @@ from DrissionPage import ChromiumOptions
 from DrissionPage.errors import *
 from flaskServer.config.chromiumOptions import initChromiumOptions
 from flaskServer.config.config import HEADLESS,get_ini_path,MUTE,OFF_VIDEO,OFF_IMG,WORK_PATH
-from flaskServer.services.dto.env import updateEnvStatus
+from flaskServer.services.dto.env import updateEnvStatus, updateOpenStatus, getEnvsByIds
 from flaskServer.services.dto.proxy import updateProxyStatus
 from flaskServer.utils.envutil import getUserAgent
 
@@ -96,8 +96,7 @@ def getChromiumPage(env, proxy): # 获取一个ChromiumPage对象
                 raise Exception(f"{env.name}: ini_path配置文件不存在")
         return chrome
     except Exception as e:
-        if chrome:
-            chrome.quit()
+        quitChrome(env, chrome)
         raise e
 
 def checkIP(env,chrome):
@@ -114,6 +113,7 @@ def getChrome(proxy, env):
     chrome = None
     try:
         chrome = getChromiumPage(env, proxy)
+        updateOpenStatus(env.name, 1)
         # chrome.set.auto_handle_alert(accept=False,all_tabs=True)
         chrome.get(fr'file:///{WORK_PATH}\flaskServer\utils\pages\index.html?env={env.name}')
         checkIP(env, chrome)
@@ -128,8 +128,7 @@ def getChrome(proxy, env):
             raise WaitTimeoutError("等待初始页面等待超时！~")
         return chrome
     except Exception as e:
-        if chrome:
-            chrome.quit()
+        quitChrome(env, chrome)
         raise e
 
 def initChrom(chrome,env,http_host,http_port,user,pw):
@@ -139,6 +138,23 @@ def initChrom(chrome,env,http_host,http_port,user,pw):
     chrome.get("chrome-extension://mnloefcpaepkpmhaoipjkpikbnkmbnic/popup.html")
     chrome.get(
         f"chrome-extension://mnloefcpaepkpmhaoipjkpikbnkmbnic/options.html?env={env}&user={user}&pass={pw}&http_host={http_host}&http_port={http_port}")
+
+def quitChrome(env, chrome):
+    if chrome:
+        chrome.quit()
+    updateOpenStatus(env.name, 0)
+
+def quitChromeByEnvIds(ids):
+    envs = getEnvsByIds(ids)
+    for env in envs:
+        if env.isOpen == 1:
+            env.status = 1
+            quitChrome(env, getChromiumPage(env, None))
+
+
+
+
+
 
 
 if __name__ == '__main__':

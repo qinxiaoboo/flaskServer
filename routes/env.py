@@ -3,6 +3,7 @@ from threading import Thread
 from flask import Blueprint, request, jsonify
 from loguru import logger
 from flaskServer.utils.decorator import ApiCheck
+from flaskServer.utils.chrome import quitChromeByEnvIds
 from flaskServer.config.connect import app
 from flaskServer.services.chromes.login import toLoginAll, DebugChrome
 from flaskServer.services.chromes.worker import submit
@@ -45,6 +46,16 @@ def reset ():
     logger.info(f"Received ids: {ids}")
     updateAllStatus(ids, 0)
     logger.info(f"所选环境配置初始化成功，下次登录环境重新加载配置文件")
+    return result
+
+# 初始化 浏览器配置
+@app.route("/chromes/close", methods=["POST"])
+def close ():
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    quitChromeByEnvIds(ids)
     return result
 
 @app.route("/envs/debug", methods=["POST"])
@@ -175,7 +186,7 @@ import psutil
 @ApiCheck
 def system_info(groups, group):
     # 获取 CPU 使用率
-    cpu_usage = psutil.cpu_percent(interval=1)
+    cpu_usage = psutil.cpu_percent(interval=5)
 
     # 获取内存使用情况
     memory_info = psutil.virtual_memory()

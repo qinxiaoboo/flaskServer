@@ -9,6 +9,8 @@ document.getElementById('search').addEventListener('input', (event) => {
 document.getElementById('reset-chrome-setting').addEventListener('click', handleRestOperation);
 document.getElementById('debug-action-button').addEventListener('click', handleDebugOperation);
 document.getElementById('init-action-button').addEventListener('click', handleInitOperation);
+document.getElementById('close-chrome-button').addEventListener('click', handleCloseOperation);
+
 
 // 监听选择事件
 document.getElementById('select-all').addEventListener('change', (event) => {

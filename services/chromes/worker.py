@@ -2,6 +2,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 from loguru import logger
+from DrissionPage import ChromiumPage
 
 from flaskServer.config.config import THREAD_POOL_NUM
 from flaskServer.mode.env import Env
@@ -40,7 +41,7 @@ def checkTasks():
                 res = value.result()
                 result = "成功"
                 msg = "执行成功"
-                if res!= None and len(res) ==2:
+                if res!= None and type(res) is not ChromiumPage and len(res) ==2:
                     result, msg = res
                 updateTaskLogResult(key, result, msg)
                 updateTaskLogStatus(key, "completed")
