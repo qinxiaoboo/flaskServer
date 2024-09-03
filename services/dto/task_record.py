@@ -36,7 +36,7 @@ def getTaskRecordInfo(name):
     with app.app_context():
         ts = db.session.query(TaskRecord).filter(and_(TaskRecord.env_name.in_(env_names)), TaskRecord.name == name).order_by(TaskRecord.env_name.asc()).all()
         for t in ts:
-            datas.append({"id": t.id, "env_name": t.env_name, "name": t.name, "status": t.status, "createTime": t.createtime, "updateTime": t.updatetime} | getObjectByName(t.name, t.object))
+            datas.append({"id": t.id, "env_name": t.env_name, "name": t.name, "status": t.status, "createTime": t.createtime, "updateTime": t.updatetime} | (getObjectByName(t.name, t.object)).to_dict())
     return datas
 
 def getObjectByName(name, str):
