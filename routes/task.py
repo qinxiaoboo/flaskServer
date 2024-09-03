@@ -9,6 +9,7 @@ from flaskServer.services.chromes.worker import submit
 from flaskServer.services.dto.env import getEnvsByIds
 from flaskServer.services.dto.task_record import getTaskRecordInfo
 from flaskServer.config.task import objects
+from flaskServer.services.chromes.tasks.onenesslabs import Oneness
 
 bp = Blueprint('tasks', __name__)
 
@@ -36,3 +37,15 @@ def p_multifarm (groups):
         envs = getEnvsByIds(ids)
         Thread(target=submit, args=(toDoMultifarm, envs,)).start()
     return result
+
+@app.route("/<groups>/todo/onenesslabs", methods=["POST"])
+def onenesslabs (groups):
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    with app.app_context():
+        envs = getEnvsByIds(ids)
+        Thread(target=submit, args=(Oneness, envs,)).start()
+    return result
+
