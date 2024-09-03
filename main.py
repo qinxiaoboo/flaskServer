@@ -93,5 +93,5 @@ if __name__ == '__main__':
     scheduler.init_app(app)
     scheduler.start()
     CORS(app)
-    server = pywsgi.WSGIServer(("0.0.0.0",9000),app)
+    server = pywsgi.WSGIServer(("0.0.0.0",9000), app)
     server.serve_forever()

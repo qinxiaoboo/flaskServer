@@ -1,7 +1,7 @@
 import warnings
 from curl_cffi.requests import AsyncSession, BrowserType
 
-from flaskServer.dao.galxeAccount import AccountInfo
+from flaskServer.entity.galxeAccount import AccountInfo
 from flaskServer.config.config import DISABLE_SSL
 from flaskServer.services.internal.utils import async_retry, get_proxy_url
 from flaskServer.utils.envutil import getSEC_CH_UA,getSEC_CH_UA_PLATFORM,getUserAgent

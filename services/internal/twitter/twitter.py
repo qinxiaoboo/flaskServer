@@ -3,7 +3,7 @@ import json
 import binascii
 import aiohttp
 
-from flaskServer.dao.galxeAccount import AccountInfo
+from flaskServer.entity.galxeAccount import AccountInfo
 from flaskServer.services.internal.utils import get_proxy_url, handle_aio_response, async_retry, get_conn
 from flaskServer.config.config import DISABLE_SSL
 from flaskServer.utils.envutil import getUserAgent,getSEC_CH_UA,getSEC_CH_UA_PLATFORM

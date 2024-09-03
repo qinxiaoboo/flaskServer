@@ -15,7 +15,7 @@ from termcolor import colored
 from flaskServer.services.internal.vars import GALXE_CAPTCHA_ID
 
 # from ..email import Email
-from flaskServer.dao.galxeAccount import AccountInfo
+from flaskServer.entity.galxeAccount import AccountInfo
 from flaskServer.services.internal.storage.storage import Storage
 from flaskServer.services.internal.twitter.twitter import Twitter
 from flaskServer.services.internal.onchain import OnchainAccount

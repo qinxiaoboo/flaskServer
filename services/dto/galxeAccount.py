@@ -1,7 +1,7 @@
 from eth_account import Account as ETHAccount
 
 from flaskServer.config.connect import app, db
-from flaskServer.dao.galxeAccount import AccountInfo
+from flaskServer.entity.galxeAccount import AccountInfo
 from flaskServer.mode.account import Account
 from flaskServer.mode.env import Env
 from flaskServer.mode.proxy import Proxy

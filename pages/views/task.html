@@ -3,81 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>任务列表</title>
-    <script src="../js/config.js" ></script>
+    <title>任务详情</title>
+    <script src="../js/request.js"></script>
+    <script src="../js/config.js"></script>
+    <script src="../js/util.js"></script>
 
     <style>
         table {
             width: 100%;
             border-collapse: collapse;
         }
-        table, th, td {
-            border: 1px solid black;
-        }
         th, td {
+            border: 1px solid #ddd;
             padding: 8px;
-            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
         }
     </style>
 </head>
 <body>
-        <!-- 插入公共导航栏 -->
+    <!-- 插入公共导航栏 -->
     <div id="header"></div>
-    <h1>任务列表</h1>
-    <table id="dynamicTable">
-        <!-- Table header and content will be generated here -->
+    <h1>任务详情</h1>
+    <table id="task-details-table">
+        <thead id="table-head">
+        </thead>
+        <tbody id="table-body">
+        </tbody>
     </table>
 
     <script>
-        let data = []
-        function fetchTasksInfo(){
-            fetch(`http://${server_address}:${server_port}/tasks/info`,
-            {headers: {
-                    'Content-Type': 'application/json;charset=UTF-8'
-                    }
-            })
-            .then(response => response.json())
-            .then(res => {
-                data = res.data;
-                generateTable(data)
-            })
+        // 特殊处理 'status' 字段
+        function handleStatus(value) {
+            // 自定义处理逻辑，例如根据状态值设置不同的显示文本或样式
+            switch (value) {
+                case 0:
+                    return '初始';
+                case 1:
+                    return '正常';
+                case 2:
+                    return '异常';
+                default:
+                    return 'Unknown';
+            }
         }
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const taskName = urlParams.get('name');
 
-        function generateTable(data) {
-            console.log(data)
+            if (taskName) {
+                request.get(`/tasks/info?name=${encodeURIComponent(taskName)}`)
+                    .then(response => response.json())
+                    .then(res => {
+                        if (res.code === 0) {
+                            data = res.data
+                            const taskDetailsTableBody = document.getElementById('task-details-table-body');
+                            const tableHead = document.getElementById('table-head');
+                            const tableBody = document.getElementById('table-body');
+                            // Generate table headers
+                            let headers = Object.keys(data[0]);
+                            moveItemToPosition(headers,"env_name", 0)
+                            moveItemToPosition(headers,"id", 0)
+                            moveItemToPosition(headers,"name", 2)
+                            moveItemToPosition(headers,"status", 3)
+                            let theadRow = document.createElement('tr');
 
-            const table = document.getElementById('dynamicTable');
-
-            // Get all unique keys from the data for table headers
-            const headers = Array.from(new Set(data.flatMap(Object.keys)));
-
-            // Create table header
-            const header = document.createElement('thead');
-            const headerRow = document.createElement('tr');
-            headers.forEach(headerText => {
-                const th = document.createElement('th');
-                th.textContent = headerText;
-                headerRow.appendChild(th);
-            });
-            header.appendChild(headerRow);
-            table.appendChild(header);
-
-            // Create table body
-            const body = document.createElement('tbody');
-            data.forEach(rowData => {
-                const row = document.createElement('tr');
-                headers.forEach(headerText => {
-                    const td = document.createElement('td');
-                    td.textContent = rowData[headerText] || ''; // Add empty string if key doesn't exist
-                    row.appendChild(td);
-                });
-                body.appendChild(row);
-            });
-            table.appendChild(body);
-        }
-
-        // Generate table with example data
-        fetchTasksInfo();
+                            headers.forEach(header => {
+                                let th = document.createElement('th');
+                                th.textContent = header;
+                                theadRow.appendChild(th);
+                            });
+                            tableHead.appendChild(theadRow);
+                            data.forEach(row => {
+                                // Generate table rows
+                                let tr = document.createElement('tr');
+                                headers.forEach(header => {
+                                    let td = document.createElement('td');
+                                    let value = row[header];
+                                    if (header === 'status') {
+                                        // 特殊处理 'status' 字段
+                                        td.textContent = handleStatus(value);
+                                    } else if (header.toLowerCase().includes('time')) {
+                                        td.textContent = formatDate(new Date(value));
+                                    } else {
+                                        // 其他字段
+                                        td.textContent = value;
+                                    }
+                                    tr.appendChild(td);
+                                });
+                                tableBody.appendChild(tr);
+                            });
+                        } else {
+                            console.error('Error fetching task details:', data.msg);
+                        }
+                    });
+            } else {
+                console.error('Task name is missing in the URL');
+            }
+        });
     </script>
 </body>
 </html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务列表</title>
+    <script src="../js/request.js"></script>
+    <script src="../js/config.js"></script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+    <!-- 插入公共导航栏 -->
+    <div id="header"></div>
+    <h1>任务列表</h1>
+    <table id="task-table">
+        <thead>
+            <tr>
+                <th>任务名称</th>
+            </tr>
+        </thead>
+        <tbody id="task-table-body">
+            <!-- Task rows will be inserted here -->
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            request.get('/tasks')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.code === 0) {
+                        const taskTableBody = document.getElementById('task-table-body');
+                        data.data.forEach(taskName => {
+                            const row = document.createElement('tr');
+                            const cell = document.createElement('td');
+                            cell.textContent = taskName;
+                            cell.style.cursor = 'pointer';
+                            cell.onclick = () => {
+                               window.location.assign(`task.html?name=${encodeURIComponent(taskName)}`);
+                            };
+                            row.appendChild(cell);
+                            taskTableBody.appendChild(row);
+                        });
+                    } else {
+                        console.error('Error fetching tasks:', data.msg);
+                    }
+                });
+        });
+    </script>
+</body>
+</html>

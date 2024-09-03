@@ -5,7 +5,7 @@ from web3.exceptions import TransactionNotFound
 from web3.middleware import async_geth_poa_middleware
 from web3.contract.async_contract import AsyncContractConstructor
 
-from flaskServer.dao.galxeAccount import AccountInfo
+from flaskServer.entity.galxeAccount import AccountInfo
 from flaskServer.services.internal.utils import async_retry, get_proxy_url, get_w3, to_bytes
 from flaskServer.config.config import RPCs
 

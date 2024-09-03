@@ -1,12 +1,11 @@
-from DrissionPage import ChromiumPage
-from flaskServer.config.connect import db,app
-from flaskServer.mode.env import Env
-from flaskServer.mode.task_record import TaskRecord
-from flaskServer.services.chromes.login import OKXChrome,LoginTW,AuthTW, ConfirmOKXWallet
-from flaskServer.services.dto.task_record import updateTaskRecord,updateTaskStatus
-from flaskServer.services.dto.env import getAllEnvs
-from sqlalchemy import and_
 from loguru import logger
+
+from flaskServer.config.connect import app
+from flaskServer.mode.env import Env
+from flaskServer.services.chromes.login import OKXChrome, LoginTW, AuthTW, ConfirmOKXWallet
+from flaskServer.services.dto.task_record import updateTaskRecord, getTaskObject
+from flaskServer.utils.chrome import quitChrome
+
 # 任务名称
 name = "multifarm"
 
@@ -15,39 +14,37 @@ def toDo(env):
         chrome = None
         logger.info(f"======开始执行{env.name}环境")
         try:
-            record = TaskRecord.query.filter(and_(TaskRecord.env_name==env.name,TaskRecord.name==name)).first()
-            # if record and record.status == 1:
-            #     return
+            taskData = getTaskObject(env, name)
             chrome = OKXChrome(env)
-            LoginTW(chrome,env)
+            LoginTW(chrome, env)
             tab = chrome.new_tab(url="http://www.multifarm.io/?r=37JUJ4")
             tab.ele("GET STARTED").click()
             s = tab.s_ele("sign in to x")
-            print(s)
             if s:
                 tab.ele("sign in to x").click()
                 chrome.wait.load_start()
                 chrome.wait(14,15)
                 AuthTW(chrome,env)
-                wallet_tab = tab.ele("Metamask").click.for_new_tab()
-                ConfirmOKXWallet(chrome,wallet_tab,env)
+                if (tab.s_ele("Metamask")):
+                    wallet_tab = tab.ele("Metamask").click.for_new_tab()
+                    ConfirmOKXWallet(chrome,wallet_tab,env)
             buttons = tab.eles("@class=icon uppercase")
             for button in buttons:
+                taskData.count += 1
                 button.click()
                 tw = tab.ele("@class= flex gap-2 items-center ").click.for_new_tab()
                 tw.close()
             while tab.eles("@class: max-lg:mr-3 h-[29.43px] uppercase w-[110px] tablet:h-[1.667vw] tablet:w-[7.2vw] flex justify-center items-center font-akiraExpanded font-extrabold tracking-widest text-center text-[9.207px] tablet:text-[0.521vw] rounded-[3.06px] transition-all   text-yellow hover:bg-[#FFCC3E] hover:text-[#0B0B0B] border-[0.04vw] outline-none border-[#FFCC3E] cursor-not-allowed"):
                 chrome.wait(2,3)
-            updateTaskRecord(env.name,name,1)
+            updateTaskRecord(env.name, name, taskData.to_json(),1)
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
+            return ("失败", e)
         finally:
-            if chrome:
-                chrome.quit()
+            quitChrome(env, chrome)
 
 
 if __name__ == '__main__':
-    from flaskServer.services.chromes.worker import submit
     with app.app_context():
         env = Env.query.filter_by(name="Q-5-3").first()
         toDo(env)

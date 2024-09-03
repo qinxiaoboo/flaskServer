@@ -9,7 +9,7 @@ from flaskServer.mode.env import Env,status_descriptions
 from flaskServer.mode.proxy import Proxy
 from flaskServer.services.dto.dataDictionary import getDataDictionaryByValue
 from flaskServer.utils.envutil import getUserAgent,to_be_list,can_convert_to_number,can_be_list
-from flaskServer.dao.envAccount import EnvAccountInfo
+from flaskServer.entity.envAccount import EnvAccountInfo
 from flaskServer.services.dto.account import Account
 from sqlalchemy import and_
 
