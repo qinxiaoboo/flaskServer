@@ -25,23 +25,33 @@ def ApiCheck(fn):
     return wrapper
 
 
-def chrome_retry(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        tries, delay = MAX_TRIES, 1.5
-        while tries > 0:
-            try:
-                return func(*args, **kwargs)
-            except WaitTimeoutError as var1:
-                tries -= 1
-                if tries <= 0:
-                    raise var1
-                time.sleep(delay)
+def chrome_retry(exceptions=(WaitTimeoutError,), max_tries=MAX_TRIES, initial_delay=1.5, max_delay=10):
+    """
+    A decorator for retrying a function if it raises specified exceptions.
 
-                delay *= 2
-                delay += random.uniform(0, 1)
-                delay = min(delay, 10)
-            except Exception as e:
-                raise e
+    :param exceptions: A tuple of exception types to catch and retry on.
+    :param max_tries: Maximum number of retry attempts.
+    :param initial_delay: Initial delay between retries.
+    :param max_delay: Maximum delay between retries.
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            tries, delay = max_tries, initial_delay
+            while tries > 0:
+                try:
+                    return func(*args, **kwargs)
+                except exceptions as e:
+                    tries -= 1
+                    if tries <= 0:
+                        raise
+                    time.sleep(delay)
 
-    return wrapper
+                    delay *= 2
+                    delay += random.uniform(0, 1)
+                    delay = min(delay, max_delay)
+                except Exception as e:
+                    raise
+
+        return wrapper
+    return decorator
