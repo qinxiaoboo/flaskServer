@@ -7,7 +7,7 @@ from flaskServer.config.config import HEADLESS,get_ini_path,MUTE,OFF_VIDEO,OFF_I
 from flaskServer.services.dto.env import updateEnvStatus, updateOpenStatus, getEnvsByIds
 from flaskServer.services.dto.proxy import updateProxyStatus
 from flaskServer.utils.envutil import getUserAgent
-
+from flaskServer.utils.decorator import chrome_retry
 
 def get_Custome_Tab(tab):
     # if OFF_VIDEO:
@@ -40,7 +40,7 @@ def wait_captcha_page(tab,env):
     return True
 
 
-def wait_pages(chrome,wait_page_list):
+def wait_pages(chrome, wait_page_list):
     count = 100
     while count:
         for tab_id in chrome.tab_ids:
@@ -109,6 +109,7 @@ def checkIP(env,chrome):
     else:
         updateProxyStatus(env, 2)
 
+@chrome_retry
 def getChrome(proxy, env):
     chrome = None
     try:

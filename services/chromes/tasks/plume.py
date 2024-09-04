@@ -24,6 +24,7 @@ from faker import Faker
 from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGroup
 import os
 from datetime import datetime
+from flaskServer.utils.chrome import quitChrome
 
 # 任务名称
 name = "Plume"
@@ -809,11 +810,11 @@ def toDoPlumeTaskAll(env):
             chrome: ChromiumPage = OKXChrome(env)
             toDo(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
-            chrome.quit()
         except Exception as e:
             logger.error(f"{env.name}: {e}")
-            if chrome:
-                chrome.quit()
+            return ("失败", e)
+        finally:
+            quitChrome(env, chrome)
 
 if __name__ == '__main__':
     with app.app_context():

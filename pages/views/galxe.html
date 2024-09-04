@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>银河任务点数统计</title>
     <script src="../js/config.js" async></script>
+    <script src="../js/util.js"></script>
 
     <style>
         table {
@@ -52,6 +53,7 @@
 
             // Generate table headers
             const headers = Object.keys(data[0]);
+            moveItemToPosition(headers,"环境", 0)
             let theadRow = document.createElement('tr');
             headers.forEach(header => {
                 let th = document.createElement('th');
