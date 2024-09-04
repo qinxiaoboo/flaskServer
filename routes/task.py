@@ -10,6 +10,8 @@ from flaskServer.services.dto.env import getEnvsByIds
 from flaskServer.services.dto.task_record import getTaskRecordInfo
 from flaskServer.config.task import objects
 from flaskServer.services.chromes.tasks.onenesslabs import Oneness
+from flaskServer.services.chromes.tasks.plume import toDoPlumeTaskAll
+
 
 bp = Blueprint('tasks', __name__)
 
@@ -49,3 +51,14 @@ def onenesslabs (groups):
         Thread(target=submit, args=(Oneness, envs,)).start()
     return result
 
+
+@app.route("/<groups>/todo/Plume", methods=["POST"])
+def Plume (groups):
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    with app.app_context():
+        envs = getEnvsByIds(ids)
+        Thread(target=submit, args=(toDoPlumeTaskAll, envs,)).start()
+    return result
