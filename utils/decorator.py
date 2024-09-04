@@ -25,7 +25,7 @@ def ApiCheck(fn):
     return wrapper
 
 
-def chrome_retry(exceptions=(WaitTimeoutError,), max_tries=MAX_TRIES, initial_delay=1.5, max_delay=10):
+def chrome_retry(exceptions=(Exception,), max_tries=MAX_TRIES, initial_delay=1.5, max_delay=10):
     """
     一个装饰器，用于在函数抛出指定异常时进行重试。
 
