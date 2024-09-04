@@ -67,6 +67,8 @@
                             moveItemToPosition(headers,"id", 0)
                             moveItemToPosition(headers,"name", 2)
                             moveItemToPosition(headers,"status", 3)
+                            moveItemToPosition(headers,"createTime", headers.length -2)
+                            moveItemToPosition(headers,"updateTime", headers.length -1)
                             let theadRow = document.createElement('tr');
 
                             headers.forEach(header => {

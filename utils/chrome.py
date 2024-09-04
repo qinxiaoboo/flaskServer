@@ -41,7 +41,7 @@ def wait_captcha_page(tab,env):
 
 
 def wait_pages(chrome, wait_page_list):
-    count = 100
+    count = 66
     while count:
         for tab_id in chrome.tab_ids:
             tab = chrome.get_tab(id_or_num=tab_id)

@@ -52,6 +52,7 @@ def getObjectByName(name, str):
 
 # 更新任务记录
 def updateTaskRecord(env, name, object, status):
+    object = object.to_json()
     taskRecord = getTaskRecord(env, name)
     with app.app_context():
         if taskRecord:
