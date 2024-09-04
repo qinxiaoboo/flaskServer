@@ -27,13 +27,13 @@ def ApiCheck(fn):
 
 def chrome_retry(exceptions=(WaitTimeoutError,), max_tries=MAX_TRIES, initial_delay=1.5, max_delay=10):
     """
-    A decorator for retrying a function if it raises specified exceptions.
+    一个装饰器，用于在函数抛出指定异常时进行重试。
 
-    :param exceptions: A tuple of exception types to catch and retry on.
-    :param max_tries: Maximum number of retry attempts.
-    :param initial_delay: Initial delay between retries.
-    :param max_delay: Maximum delay between retries.
-    """
+    :param exceptions: 一个异常类型的元组，表示需要捕获并重试的异常。
+    :param max_tries: 最大重试次数。
+    :param initial_delay: 初始重试延迟时间。
+    :param max_delay: 最大重试延迟时间。
+"""
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
