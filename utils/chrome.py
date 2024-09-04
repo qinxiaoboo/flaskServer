@@ -109,7 +109,7 @@ def checkIP(env,chrome):
     else:
         updateProxyStatus(env, 2)
 
-@chrome_retry()
+@chrome_retry(exceptions=(WaitTimeoutError,), max_tries=3, initial_delay=2)
 def getChrome(proxy, env):
     chrome = None
     try:
