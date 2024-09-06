@@ -38,8 +38,8 @@ def envsInfo(groups):
     return result
 
 # 初始化 浏览器配置
-@app.route("/chromes/reset", methods=["POST"])
-def reset ():
+@app.route("/<groups>/chromes/reset", methods=["POST"])
+def reset (groups):
     result = {"code": 0, 'msg': "success"}
     data = request.get_json()
     ids = data.get('ids', [])
