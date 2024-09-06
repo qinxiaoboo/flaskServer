@@ -18,16 +18,17 @@ def checkTG(env):
             flag = True
             if tab.s_ele("Log in to Telegram by QR Code"):
                 flag = False
-            if tab.s_ele(".text-center i18n"):
-                if tab.ele(".text-center i18n").text == "Sign in to Telegram":
-                    flag = False
+            if tab.s_ele("Sign in to Telegram"):
+                flag = False
+            if tab.s_ele("Your account is protected with"):
+                flag = False
             if flag:
                 header = tab.ele(".sidebar-header can-have-forum")
                 header.ele(".btn-icon rp btn-menu-toggle sidebar-tools-button is-visible").click()
                 header.ele(".btn-menu bottom-right has-footer active was-open").ele(".btn-menu-item rp-overflow",index=4).click()
                 username = tab.ele(".profile-avatars-info").ele(".peer-title").text
-                phone = tab.ele(".sidebar-left-section-container",index=2).ele(".row-title").text
-                userName = tab.ele(".sidebar-left-section-container",index=2).ele(".row-title",index=2).text
+                phone = tab.ele(".sidebar-left-section no-delimiter").ele(".row-title").text
+                userName = tab.ele(".sidebar-left-section no-delimiter").ele(".row-title",index=2).text
                 tg.name = username
                 tg.phone = phone
                 tg.userName = userName
@@ -42,5 +43,5 @@ def checkTG(env):
 
 if __name__ == '__main__':
     with app.app_context():
-        env = Env.query.filter_by(name="Q-1-1").first()
+        env = Env.query.filter_by(name="Q-4-1").first()
         checkTG(env)
