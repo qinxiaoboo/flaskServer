@@ -85,3 +85,15 @@ def hemi (groups):
         envs = getEnvsByIds(ids)
         Thread(target=submit, args=(Hemi, envs,)).start()
     return result
+
+
+@app.route("/<groups>/todo/Portal", methods=["POST"])
+def Portal (groups):
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    with app.app_context():
+        envs = getEnvsByIds(ids)
+        Thread(target=submit, args=(portal, envs,)).start()
+    return result
