@@ -24,7 +24,6 @@ from faker import Faker
 from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGroup
 import os
 from datetime import datetime
-from flaskServer.utils.chrome import quitChrome
 
 # 任务名称
 name = "Plume"
@@ -52,8 +51,8 @@ click_wallet_js = """
             return button
             """
 
-swap_click_wallet_js = """
-            const button  = document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-connect-view").shadowRoot.querySelector("wui-flex > w3m-wallet-login-list").shadowRoot.querySelector("wui-flex > w3m-connect-announced-widget").shadowRoot.querySelector("wui-flex > wui-list-wallet").shadowRoot.querySelector("button");
+swap_click_wallet_js2 = """
+            const button  = document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-connect-view").shadowRoot.querySelector("wui-flex > wui-list-wallet:nth-child(3)").shadowRoot.querySelector("button > wui-text").shadowRoot.querySelector("slot")
             return button
             """
 
@@ -175,21 +174,53 @@ def getSave_screenshot(chrome, env, status):
 def getTab(chrome,env):
     logger.info(f"{env.name}: 开始登陆主页")
     tab = chrome.new_tab(url="https://miles.plumenetwork.xyz/?invite=PLUME-YJHMI")
+    chrome.wait(3, 6)
     try:
-        if tab.ele("@type=button"):
-            tab.ele("@type=button").click(by_js=None)
+        try:
+            if tab.ele("@type=button"):
+                tab.ele("@type=button").click(by_js=None)
+
+        except Exception as e:
+            tab.refresh()
+            chrome.wait(3, 6)
+            if tab.ele("@type=button"):
+                tab.ele("@type=button").click(by_js=None)
+
     except Exception as e:
-        getSave_screenshot(tab, env, 'error')
         logger.info(f"{env.name}: 代理网络不佳，页面访问失败，关闭浏览器")
         chrome.quit()
+
     chrome.wait(3, 5)
     for i in range(3):
         if tab.s_ele("@data-testid=sign-message-button"):
-            tab.ele("@data-testid=sign-message-button").click(by_js=None)
-            chrome.wait(5, 10)
-            chrome.get_tab(title="OKX Wallet").ele("@type=button").next().click()
             chrome.wait(3, 5)
+            try:
+                tab.ele("@data-testid=sign-message-button").click(by_js=None)
+                chrome.wait(5, 10)
+                chrome.get_tab(title="OKX Wallet").ele("@type=button").next().click()
+                chrome.wait(3, 5)
+            except Exception as e:
+                tab.refresh()
+                chrome.wait(5, 10)
+                tab.ele('@type=button').click(by_js=None)
+                chrome.wait(2, 3)
+                tab.ele("@data-testid=connect-wallet-button").click(by_js=None)
+                chrome.wait(5, 8)
+                okxbutton = tab.run_js(click_wallet_js)
+                logger.info(f"{env.name}: 链接钱包")
+                chrome.wait(5, 8)
+                okxbutton.click.for_new_tab().ele("@type=button").next().click()
+                logger.info(f"{env.name}: 确认钱包")
 
+                for i in range(3):
+                    if tab.ele("@data-testid=sign-message-button"):
+                        chrome.wait(3, 5)
+                        tab.ele("@data-testid=sign-message-button").click.for_new_tab(4, 6).ele("@type=button").next().click()
+                    if tab.ele("@text-sm font-semibold leading-5 text-red-500"):
+                        tab.refresh()
+                    else:
+                        chrome.wait(1, 2)
+                        break
         if tab.ele("@text-sm font-semibold leading-5 text-red-500"):
             tab.refresh()
 
@@ -205,51 +236,58 @@ def getTab(chrome,env):
 
     if tab.ele('text=Check In'):
         logger.info(f"{env.name}: 主页登录完成")
+        return
 
     if tab.ele('t:button@tx():Enter App'):
         logger.info(f"{env.name}: 主页登录完成")
+        return
 
     else:
         try:
+            chrome.wait(3, 5)
             tab.ele("@data-testid=connect-wallet-button").click(by_js=None)
-            chrome.wait(1, 2)
+            chrome.wait(5, 8)
             okxbutton = tab.run_js(click_wallet_js)
             logger.info(f"{env.name}: 链接钱包")
-            chrome.wait(3, 5)
+            chrome.wait(5, 8)
             okxbutton.click.for_new_tab().ele("@type=button").next().click()
             logger.info(f"{env.name}: 确认钱包")
+
             for i in range(3):
                 if tab.ele("@data-testid=sign-message-button"):
-                    chrome.wait(3,5)
+                    chrome.wait(3, 5)
                     tab.ele("@data-testid=sign-message-button").click.for_new_tab(4, 6).ele("@type=button").next().click()
                 if tab.ele("@text-sm font-semibold leading-5 text-red-500"):
-                        tab.refresh()
+                    tab.refresh()
                 else:
                     chrome.wait(1, 2)
                     break
-                # else:
-                #     chrome.wait(1, 2)
-                #     if tab.ele('t:button@tx():Enter App'):
-                #         logger.info(f"{env.name}: 主页登录完成")
-                #         break
 
             chrome.wait(1, 2)
             tab.run_js(click_plume_js).click()
             chrome.wait(1, 2)
         except Exception as e:
 
+            if tab.ele('text=Check In'):
+                logger.info(f"{env.name}: 主页登录完成")
+                return
+
             if tab.ele('t:button@tx():Enter App'):
                 logger.info(f"{env.name}: 主页登录完成")
+                return
 
             else:
                 logger.warning(f"{env.name}: {e}")
                 logger.info(f"{env.name}: 确认钱包")
                 chrome.wait(3, 4)
                 try:
+                    print('7')
                     tab.ele("@data-testid=sign-message-button").click.for_new_tab().wait(4, 6).ele("@type=button").next().click()
+                    print('8')
 
                 except Exception as e:
-                    getSave_screenshot(tab, env, 'error')
+                    logger.info(f"{env.name}: 代理网络不佳，页面访问失败，关闭浏览器")
+                    chrome.quit()
 
                 try:
                     chrome.wait(1, 2)
@@ -268,10 +306,10 @@ def getTab(chrome,env):
 ######   Mystic Finance   ######
 def getMystic(chrome, env):
     # 生成 0.1 到 1 之间的随机浮点数
+    random_number = random.uniform(0.1, 0.3)
+    tab = chrome.new_tab(url="https://app.mysticfinance.xyz/en/lend")
+    chrome.wait(4, 5)
     try:
-        random_number = random.uniform(0.1, 0.3)
-        tab = chrome.new_tab(url="https://app.mysticfinance.xyz/en/lend")
-
         try:
             if tab.ele('@class=wallet-icon'):
                 logger.info(f"{env.name}: 钱包未登录，尝试登录钱包")
@@ -303,33 +341,87 @@ def getMystic(chrome, env):
 
         chrome.wait(2, 3)
         tab.ele('@class= w-ful flex items-center justify-between gap-2 ', index=1).click()
+        chrome.wait(3, 5)
         tab.ele('@placeholder=0').click().input(random_number)
+        chrome.wait(2, 3)
         tab.ele('t:p@tx():Confirm').click()
-        chrome.wait(15, 20)
+        chrome.wait(3, 5)
 
+        var = 1
+        while var == 1:
+            if chrome.get_tab(title="OKX Wallet"):
+                logger.info(f"{env.name}: 开始处理钱包消息累积")
+                chrome.get_tab(title="OKX Wallet").ele("t:div@tx()=Cancel").click()
+                chrome.wait(2, 3)
+            else:
+                var = 0
+                chrome.wait(2, 3)
+
+        tab.refresh()
+        chrome.wait(2, 3)
+
+        try:
+
+            if tab.ele('@class=wallet-icon'):
+                logger.info(f"{env.name}: 钱包未登录，尝试登录钱包")
+                tab.ele('@class=wallet-icon').click()
+
+            else:
+                logger.info(f"{env.name}: 钱包未登录，尝试登录钱包")
+                tab.ele('Connect Wallet').click()
+
+
+            chrome.wait(4, 5)
+            logger.info(f"{env.name}: 点击同意协议")
+
+            try:
+                agree = tab.run_js(mystic_js)
+                agree.click()
+                chrome.wait(2, 3)
+            except Exception as e:
+                logger.info(f"{env.name}: 已经点击同意协议")
+
+            logger.info(f"{env.name}: 选择okx")
+            okx = tab.run_js(mystic_wallet)
+            okx.click()
+            chrome.wait(2, 3)
+            chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+            logger.info(f"{env.name}: 钱包登录完成")
+
+        except Exception as e:
+            logger.info(f"{env.name}: 钱包已登录")
+
+        chrome.wait(2, 3)
+        tab.ele('@class= w-ful flex items-center justify-between gap-2 ', index=1).click()
+        chrome.wait(3, 5)
+        tab.ele('@placeholder=0').click().input(random_number)
+        chrome.wait(2, 3)
+        tab.ele('t:p@tx():Confirm').click()
+        chrome.wait(3, 5)
+
+        chrome.wait(10, 15)
         if chrome.get_tab(title="OKX Wallet").ele("@type=button", index=3):
             chrome.get_tab(title="OKX Wallet").ele("@type=button", index=3).click()
 
-        chrome.wait(15, 20)
+        chrome.wait(25, 30)
         if chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2):
             chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
 
-        chrome.wait(15, 20)
+        chrome.wait(16, 20)
         logger.info(f"{env.name}: mystic 任务完成")
-        # tab.close()
-        return
+
 
     except Exception as e:
         logger.info(f"{env.name}: mystic 网络延迟，任务失败")
-        # tab.close()
-        return
+    tab.close()
+
 
 ######   EIyFi   ######
 def getEiyfi(chrome, env):
+    random_number = random.uniform(0.1, 0.3)
+    tab = chrome.new_tab(url="https://app.elyfi.world/pools/plumetestnet/10")
+    chrome.wait(3, 4)
     try:
-        random_number = random.uniform(0.1, 0.3)
-        tab = chrome.new_tab(url="https://app.elyfi.world/pools/plumetestnet/10")
-
         try:
             if tab.ele('class=sc-38f0cbe5-1 gJpNuz'):
                 pass
@@ -362,13 +454,14 @@ def getEiyfi(chrome, env):
 
             if chrome.get_tab(title="OKX Wallet").ele("@type=button", index=3):
                 chrome.get_tab(title="OKX Wallet").ele("@type=button", index=3).click()
-            chrome.wait(15, 20)
+            chrome.wait(25, 30)
 
             if chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2):
                 chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
 
             chrome.wait(15, 20)
             logger.info(f"{env.name}: EIyFi 任务完成")
+            tab.close()
             return
 
         except Exception as e:
@@ -386,7 +479,7 @@ def getEiyfi(chrome, env):
 
             if chrome.get_tab(title="OKX Wallet").ele("@type=button", index=3):
                 chrome.get_tab(title="OKX Wallet").ele("@type=button", index=3).click()
-            chrome.wait(15, 20)
+            chrome.wait(25, 30)
 
             if chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2):
                 chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
@@ -397,14 +490,13 @@ def getEiyfi(chrome, env):
 
     except Exception as e:
         logger.info(f"{env.name}: Eiyfi 网络延迟，任务失败")
-        # tab.close()
-        return
+    tab.close()
 
 ######   数据统计   ######
 def getCount(chrome, env):
+    tab = chrome.new_tab(url="https://miles.plumenetwork.xyz/")
+    chrome.wait(4)
     try:
-        tab = chrome.new_tab(url="https://miles.plumenetwork.xyz/")
-        chrome.wait(4)
         tab.ele('@class=chakra-button css-1mlwjgz').click(by_js=None)
         miles = tab.s_ele('@class=chakra-text css-1c1e297')
         tab.ele('@data-testid=passport-nav-link').click(by_js=None)
@@ -421,11 +513,12 @@ def getCount(chrome, env):
         miles_raw_text = miles.raw_text
         passport_list = len(passport_list)
         miles_multiplier = multiplier
-        with open('miles.txt', 'a') as file:
+        with open('../../../../../wf-chrome/flaskServer/services/chromes/tasks/miles.txt', 'a') as file:
             file.write(f"{env_name}          {miles_raw_text}        {passport_list}         {miles_multiplier}\n")
     except Exception as e:
         logger.info(f"{env.name}: 网络异常，统计失败")
-    return
+
+    tab.close()
 
 ######   Swap   ######
 def getSwapTab(chrome,env):
@@ -447,40 +540,42 @@ def getSwapTab(chrome,env):
             if tab.ele('#agree_button_ToS'):
                 tab.ele('#agree_button_ToS').click()
                 chrome.wait(3, 4)
-            okxbutton = tab.run_js(swap_click_wallet_js)
+            okxbutton = tab.run_js(swap_click_wallet_js2)
             okxbutton.click.for_new_tab().ele("@type=button").next().click()
 
+        # chrome.wait(3, 6)
+        # GoonNum = tab.ele('.Container__FlexContainer-sc-1b686b3-0 eveHGW', index=1).text
+        # InputNum = Num(GoonNum)
+        #
+        # if InputNum == 0:
+        #     logger.info(f"{env.name}: Goon不足开始执行下一个任务")
+        #     chrome.wait(5, 10)
+        #     tab.close()
+        #     return
 
-        chrome.wait(3, 6)
-        GoonNum = tab.ele('.Container__FlexContainer-sc-1b686b3-0 eveHGW', index=1).text
-        InputNum = Num(GoonNum)
-
-        if InputNum == 0:
-            logger.info(f"{env.name}: Goon不足开始执行下一个任务")
-            chrome.wait(5, 10)
-            tab.close()
-            return
-
-        tab.ele('.TradeModules__TokenQuantityInput-sc-7vr3o3-14 iZdQxV', index=1).input(InputNum, clear=True)
+        # tab.ele('.TradeModules__TokenQuantityInput-sc-7vr3o3-14 iZdQxV', index=1).input(InputNum, clear=True)
+        chrome.wait(2, 4)
+        tab.ele('.TradeModules__TokenQuantityInput-sc-7vr3o3-14 iZdQxV', index=1).input('0.00001', clear=True)
         chrome.wait(3, 5)
         tab.ele('#confirm_swap_button').click()
         chrome.wait(3, 5)
         tab.ele('@id=set_skip_confirmation_button').click()
         chrome.wait(6, 8)
         # chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
-        var = 1
-        while var == 1:
 
-            if chrome.get_tab(title="OKX Wallet").ele("t:div@tx():confirmations"):
-                logger.info(f"{env.name}: 开始处理钱包消息累积")
-                if chrome.get_tab(title="OKX Wallet").ele("t:div@tx():Third-party"):
-                    chrome.get_tab(title="OKX Wallet").ele("@type=button", index=1).click()
-                    chrome.wait(2)
-                else:
-                    chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
-                    chrome.wait(2)
-            else:
-                var = 0
+        # var = 1
+        # while var == 1:
+        #
+        #     if chrome.get_tab(title="OKX Wallet").ele("t:div@tx():confirmations"):
+        #         logger.info(f"{env.name}: 开始处理钱包消息累积")
+        #         if chrome.get_tab(title="OKX Wallet").ele("t:div@tx():Third-party"):
+        #             chrome.get_tab(title="OKX Wallet").ele("@type=button", index=1).click()
+        #             chrome.wait(2)
+        #         else:
+        #             chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+        #             chrome.wait(2)
+        #     else:
+        #         var = 0
 
         if chrome.get_tab(title="OKX Wallet").ele("t:div@tx():Third-party"):
             chrome.get_tab(title="OKX Wallet").ele("@data-testid=okd-button", index=1).click()
@@ -488,13 +583,13 @@ def getSwapTab(chrome,env):
         else:
             chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
 
-        chrome.wait(10)
+        chrome.wait(16, 20)
         logger.info(f"{env.name}: Swap成功")
 
-    except (RuntimeError,AttributeError) as e:
+    except (RuntimeError, AttributeError) as e:
         pass
-    # tab.close()
-    return
+
+    tab.close()
 
 ######   Stake   ######
 def getStake(chrome,env):
@@ -510,7 +605,7 @@ def getStake(chrome,env):
             logger.info(f"{env.name}: 以达到质押上限")
         else:
             try:
-                tab.ele('@class=chakra-button css-4pz8ga').click()
+                tab.ele('@class=chakra-button css-11fn1c7').click()
                 try:
                     exe_okx(chrome)
                 except AttributeError as e:
@@ -519,8 +614,8 @@ def getStake(chrome,env):
                 logger.info(f"{env.name}: 已授权")
         #claim
         tab.ele('@class=chakra-tabs__tab css-356ze8').next().click()
-        chrome.wait(3, 5)
-        nest_num = tab.ele('@class=chakra-text css-1a36ura', index=3).text.split( )[0].split('+')[1].replace(',','')
+        chrome.wait(2, 3)
+        nest_num = tab.ele('@class=chakra-text css-1a36ura', index=3).text.split()[0].split('+')[1].replace(',', '')
 
         if nest_num:
             pass
@@ -541,7 +636,7 @@ def getStake(chrome,env):
             chrome.wait(5, 7)
             logger.info(f"{env.name}: 质押奖励领取成功！")
         chrome.wait(3, 5)
-    except (RuntimeError,AttributeError) as e:
+    except (RuntimeError, AttributeError) as e:
         pass
     tab.close()
 
@@ -564,7 +659,8 @@ def getArc(chrome,env):
         logger.info(f"{env.name}: Arc执行完成")
         tab.close()
     except (RuntimeError, AttributeError) as e:
-        tab.close()
+        pass
+    tab.close()
 
 ######   Cultured   ######
 def getCultured(chrome,env):
@@ -585,7 +681,8 @@ def getCultured(chrome,env):
             chrome.wait(3, 5)
         tab.close()
     except (RuntimeError,AttributeError) as e:
-        tab.close()
+        pass
+    tab.close()
 
 ######   Landshare   ######
 # def getLandshare(chrome,env):
@@ -687,12 +784,13 @@ def getKuma(chrome,env):
 
         if nft:
             nft.click()
-            chrome.wait(2)
+            chrome.wait(2, 4)
             try:
-                tab.ele('t:button@tx():APPROVE KUMA NFT').click()
-                chrome.wait(7, 10)
-                chrome.get_tab(url='chrome-extension://mcohilncbfahbmgdjkbpemcciiolgcge/notification.html').ele("@type=button",index=3).click()
-                chrome.wait(50, 60)
+                if tab.ele('t:button@tx():APPROVE KUMA NFT'):
+                    tab.ele('t:button@tx():APPROVE KUMA NFT').click()
+                    chrome.wait(7, 10)
+                    chrome.get_tab(url='chrome-extension://mcohilncbfahbmgdjkbpemcciiolgcge/notification.html').ele("@type=button", index=3).click()
+                    chrome.wait(50, 60)
             except (RuntimeError, AttributeError) as e:
                 logger.info(f"{env.name}: 当前没有NFT可供出售")
 
@@ -713,6 +811,8 @@ def getKuma(chrome,env):
     except (RuntimeError,AttributeError) as e:
         logger.info(f"{env.name}: Kuma 网络延迟太大，执行失败")
         tab.close()
+
+    tab.close()
 
 ######   silverkoi   ######
 def getSilverkoi(chrome,env):
@@ -762,32 +862,36 @@ def getSilverkoi(chrome,env):
     except (RuntimeError,AttributeError) as e:
         logger.info(f"{env.name}: Silverkoi 网络延迟太大，执行失败")
         tab.close()
+    tab.close()
 
+def getVoting(chrome,env):
+    tab = chrome.new_tab(url='https://miles.plumenetwork.xyz/voting')
+    while True:
+            chrome.wait(2, 3)
+            voting_count = tab.s_ele('@class=css-yrzxkr').text
+            if 'h' in voting_count:
+                logger.info(f"{env.name}: 投票完成")
+                break
 
-# def toDo(env):
-#     with app.app_context():
-#         logger.info(f"======开始执行{env.name}环境")
-#         try:
-#             chrome: ChromiumPage = OKXChrome(env)
-#             tab = getTab(chrome, env)
-#             tab = getCount(chrome, env)
-#             tab = getSwapTab(chrome, env)
-#             tab = getStake(chrome, env)
-#             tab = getArc(chrome, env)
-#             tab = getCultured(chrome, env)
-#             tab = getSolidviolet(chrome, env)
-#             tab = getKuma(chrome, env)
-#             tab = getSilverkoi(chrome, env)
-#         except Exception as e:
-#             logger.error(f"{env.name} 执行异常：{e}")
-#             raise e
-#
-# if __name__ == '__main__':
-#     # toDoFaucet("GOON")
-#     with app.app_context():
-#         # env = Env.query.filter_by(name="SYL-8").first()
-#         # toDo(env)
-#         submit(toDo, getAllEnvs())
+            else:
+
+                tab.ele('@class=chakra-button css-2ew9hs', index=1).click()
+                chrome.wait(2, 3)
+                chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+                chrome.wait(6, 8)
+
+                var = 1
+                while var == 1:
+                    if chrome.get_tab(title="OKX Wallet"):
+                        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+                    else:
+                        var = 0
+
+                chrome.wait(3, 5)
+                tab.refresh()
+            continue
+    tab.close()
+
 
 def toDo(chrome,env):
     logger.info(f"======开始执行{env.name}环境")
@@ -795,6 +899,7 @@ def toDo(chrome,env):
     getMystic(chrome, env)
     getEiyfi(chrome, env)
     getCount(chrome, env)
+    getVoting(chrome, env)
     getSwapTab(chrome, env)
     getStake(chrome, env)
     getArc(chrome, env)
@@ -810,15 +915,15 @@ def toDoPlumeTaskAll(env):
             chrome: ChromiumPage = OKXChrome(env)
             toDo(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
+            chrome.quit()
         except Exception as e:
             logger.error(f"{env.name}: {e}")
-            return ("失败", e)
-        finally:
-            quitChrome(env, chrome)
+            if chrome:
+                chrome.quit()
 
 if __name__ == '__main__':
     with app.app_context():
-        # env = Env.query.filter_by(name="SYL-19").first()
+        # env = Env.query.filter_by(name="SYL-1").first()
         # toDoPlumeTaskAll(env)
         submit(toDoPlumeTaskAll, getAllEnvs())
 
