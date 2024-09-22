@@ -132,6 +132,7 @@
             <button onclick="handleOperation('http://' + server_address + ':' + server_port + `/${localStorage.getItem('groups')}/todo/onenesslabs`)" type="button">Onenesslabs</button>
             <button onclick="handleOperation('http://' + server_address + ':' + server_port + `/${localStorage.getItem('groups')}/todo/Plume`)" type="button">Plume</button>
             <button onclick="handleOperation('http://' + server_address + ':' + server_port + `/${localStorage.getItem('groups')}/todo/checkTG`)" type="button">checkTG</button>
+            <button onclick="handleOperation('http://' + server_address + ':' + server_port + `/${localStorage.getItem('groups')}/todo/hemi`)" type="button">Hemi</button>
 
             <br>
         </div>
@@ -171,7 +172,7 @@
     <script>
         let lastChecked = null;
         let currentPage = 1;
-        let pageSize = 12; // 每页显示的条目数
+        let pageSize = 1000; // 每页显示的条目数
 		let sortBy = 'env';
         let sortOrder = 'asc';
         let searchQuery = '';
@@ -179,7 +180,7 @@
         document.addEventListener("DOMContentLoaded", function() {
                     // 每秒更新一次系统信息
                 setInterval(fetchSystemInfo, 30000);
-                setInterval(fetchData, 60000);
+                setInterval(fetchData, 600000);
                 // Initial data fetch
                 fetchData();
                 // 初次加载

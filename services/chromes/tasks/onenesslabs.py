@@ -26,8 +26,9 @@ from flaskServer.services.chromes.login import tw2faV
 from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGroup
 from threading import Thread
 from flaskServer.services.chromes.login import LoginDiscord
-
-
+from flaskServer.utils.chrome import quitChrome
+from flaskServer.utils.decorator import chrome_retry
+from flaskServer.services.dto.task_record import updateTaskRecord, getTaskObject
 
 name = "Onenesslabs"
 home_page = 'https://task.onenesslabs.io/?code=Z73s9'
@@ -38,15 +39,13 @@ click_wallet_js = """
             """
 
 #登录账号
-def getOnenesslabs(chrome,env):
-
+@chrome_retry(exceptions=(Exception, ),max_tries=3, initial_delay=2)
+def getOnenesslabs(chrome, env):
     tab = chrome.new_tab(home_page)
-
     # 设置全屏
-    tab.set.window.full()
-    chrome.wait(3,4)
+    tab.set.window.max()
     tab.refresh()
-    chrome.wait(3, 4)
+    chrome.wait(2, 3)
 
     #处理欢迎页面
     if tab.s_ele("I'm Ready to Fight!"):
@@ -56,6 +55,7 @@ def getOnenesslabs(chrome,env):
             '.relative ease-in-out duration-200 flex justify-center items-center select-none bg-100 font-[Bangers] text-[20px] flex-1 bg-[#D6B635] text-black h-[48px] rounded-full mt-[30px] hover:scale-[1.1] cursor-pointer'):
         tab.ele(
             '.relative ease-in-out duration-200 flex justify-center items-center select-none bg-100 font-[Bangers] text-[20px] flex-1 bg-[#D6B635] text-black h-[48px] rounded-full mt-[30px] hover:scale-[1.1] cursor-pointer').click()
+
     #处理弹窗
     if tab.s_ele('@alt=close-icon.png',index=2):
         tab.ele('@alt=close-icon.png',index=2).click()
@@ -63,36 +63,57 @@ def getOnenesslabs(chrome,env):
     #登录discord
     if tab.s_ele('SIGN IN WITH DISCORD',index=1):
         discord = tab.ele('SIGN IN WITH DISCORD',index=1).click.for_new_tab()
-        time.sleep(10)
+        discord.set.window.max()
+        time.sleep(5)
         try:
-            if discord.s_ele('@class=text-md/medium_dc00ef label_ac2a99'):
+            if discord.s_ele('@class=text-md/normal_dc00ef label_ac2a99'):
                 discord.ele("@type=button", index=2).click()
-                chrome.wait(7,10)
+                chrome.wait(4, 6)
                 logger.info(f"{env.name}: Discord已登录，授权中")
+                chrome.wait(7, 8)
+
                 if tab.s_ele("SIGN IN WITH DISCORD"):
-                    logger.info(f"{env.name}: Discord 授权或者登录失败~")
-                    chrome.quit()
+
+                    try:
+                        raise AttributeError("Discord 授权或者登录失败~")
+                    except AttributeError as e:
+                        return ("失败", e)
+                    finally:
+                        quitChrome(env, chrome)
+
+                if tab.s_ele("Please log in again"):
+                    tab.ele("@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85")
+
                 else:
                     logger.info(f"{env.name}: Discord 授权成功~")
+
             else:
                 logger.info(f"{env.name}: Discord未登录，尝试重新登录")
                 discord.close()
                 LoginDiscord(chrome,env)
-                getOnenesslabs(chrome, env)
 
-            chrome.wait(7,9)
+            chrome.wait(7, 9)
         except Exception as e:
             logger.info(f"{env.name}: Discord未登录，账号登录失败")
-            chrome.quit()
+            quitChrome(env, chrome)
+            return ("Discord未登录，账号登录失败", e)
+
+
 
     # 处理授权成功后的弹窗
 
-
-
+    tab.refresh()
+    chrome.wait(3, 6)
     # 获取表头
-    headers = tab.ele("@class=flex justify-center items-center").eles("c:button")
-    # 鼠标指针移动到头像
-    tab.actions.move_to(headers[2])
+    try:
+        headers = tab.ele("@class=flex justify-center items-center").eles("c:button")
+        # 鼠标指针移动到头像
+        tab.actions.move_to(headers[2])
+    except Exception as e:
+        chrome.wait(3, 6)
+        headers = tab.ele("@class=flex justify-center items-center").eles("c:button")
+        # 鼠标指针移动到头像
+        tab.actions.move_to(headers[2])
 
     # 连接钱包
     if tab.s_ele("LINK YOUR WALLET"):
@@ -100,18 +121,70 @@ def getOnenesslabs(chrome,env):
         chrome.wait(1, 2)
         okxbutton = tab.run_js(click_wallet_js)
         logger.info(f"{env.name}: 链接钱包")
-        okxbutton.click.for_new_tab().wait(2,3).ele("@type=button").next().click()
-        chrome.wait(2,3)
+        okxbutton.click.for_new_tab().wait(2, 3).ele("@type=button").next().click()
+        chrome.wait(2, 3)
         chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
         chrome.wait(2, 3)
         logger.info(f"{env.name}: 钱包链接完成")
 
+    tab.close()
+
+######   oneness 数据统计   ######
+def getCount(chrome, env):
+    try:
+        taskData = getTaskObject(env, name)
+        env_name = env.name
+        tab = chrome.new_tab(home_page)
+        chrome.wait(2, 4)
+        logger.info(f"{env.name}: 统计oneness碎片")
+        onss = tab.ele('@class=font-bold text-[16px] text-[#EAAE75]', index=2).text
+
+        chrome.wait(2, 4)
+        tab.ele('@class=ant-badge flex justify-center items-center css-loyarq', index=11).click()
+        chrome.wait(2, 4)
+
+        logger.info(f"{env.name}: 统计L1~L5宝石个数")
+        lv_1 = tab.s_ele('@class=leading-none', index=1).text
+        lv_2 = tab.s_ele('@class=leading-none', index=2).text
+        lv_3 = tab.ele('@class=leading-none', index=3).text
+        lv_4 = tab.ele('@class=leading-none', index=4).text
+        lv_5 = tab.ele('@class=leading-none', index=5).text
+
+        chrome.wait(2, 4)
+        logger.info(f"{env.name}: 统计Task签到天数")
+        tab.back(1)
+        chrome.wait(2, 4)
+        tab.ele('@class=ant-badge flex justify-center items-center css-loyarq', index=13).click()
+        chrome.wait(2, 4)
+
+        try:
+            day = tab.ele('@class=text-[#F56E52] mr-[2px]').text
+        except Exception as e:
+            day = '7'
+
+        # 积攒的代币个数
+        taskData.OnssCoin_Num = onss
+        # 签到天数
+        taskData.CheckIn_DaysCount = day
+        taskData.level_1 = lv_1
+        taskData.level_2 = lv_2
+        taskData.level_3 = lv_3
+        taskData.level_4 = lv_4
+        taskData.level_5 = lv_5
+        updateTaskRecord(env.name, name, taskData, 1)
+        tab.close()
+
+    except Exception as e:
+        logger.info(f"{env.name}: 网络异常，统计失败", e)
+        tab.close()
+
+    return
 
 #完成任务
+@chrome_retry(exceptions=(Exception, ),max_tries=3, initial_delay=2)
 def Task(chrome,env):
     tab = chrome.new_tab(home_page)
 
-    tab.set.auto_handle_alert()
     chrome.wait(4, 5)
     #点击task
     tab.ele("@@class=ant-badge flex justify-center items-center css-loyarq@@tx()=Reward").click()
@@ -167,34 +240,35 @@ def Task(chrome,env):
     chrome.wait(4,5)
 
     if tab.s_ele("BET NOW"):
-        # 定位第一名
-        tab.ele('@alt=crown.png').click()
-        chrome.wait(1, 2)
-        tab.ele("@@class=ant-badge flex justify-center items-center css-loyarq@@tx():confirm").click()
-        chrome.wait(2, 3)
-        tab.ele('@alt=close-icon.png',index=1).click(by_js=None)
-        logger.info(f"{env.name}: 下注第一名已完成")
-    else:
-        logger.info(f"{env.name}: 今日下注已完成")
-    chrome.wait(4, 5)
-    if tab.s_ele("ATTACK NOW"):
-        # 定位其它
-        tab.eles("@@class=ant-badge flex justify-center items-center css-loyarq@@tx()=ATTACK")[random.randint(1,5)].click()
-        chrome.wait(1, 2)
-        tab.ele("@@class=ant-badge flex justify-center items-center css-loyarq@@tx():confirm").click()
+        tab.ele('t:p@tx():Lords Mobile').click()
+        chrome.wait(1)
+        tab.ele('t:span@tx():confirm').click()
         chrome.wait(2, 3)
         tab.ele('@alt=close-icon.png', index=1).click(by_js=None)
-        logger.info(f"{env.name}: 攻击第五名已完成")
+
+        logger.info(f"{env.name}: 下注 Lords Mobile")
+    else:
+        logger.info(f"{env.name}: 今日下注已完成")
+
+    chrome.wait(4, 5)
+    if tab.s_ele("ATTACK NOW"):
+        tab.ele('t:p@tx():Subway Surfers').click()
+        chrome.wait(1)
+        tab.ele('t:span@tx():confirm').click()
+        chrome.wait(2, 3)
+        tab.ele('@alt=close-icon.png', index=1).click(by_js=None)
+
+        logger.info(f"{env.name}: 攻击Subway Surfers已完成")
     else:
         logger.info(f"{env.name}: 今日攻击已完成")
 
+    tab.close()
 
 # 宝石升级
+@chrome_retry(exceptions=(Exception, ),max_tries=3, initial_delay=2)
 def Gem(chrome,env):
 
     tab = chrome.new_tab("https://task.onenesslabs.io/inventory")
-    tab.set.auto_handle_alert()
-    chrome.wait(3,5)
     tab.ele(".flex justify-center items-center").click()
     chrome.wait(2,3)
     tab.ele('@type=number').input(10,clear=True)
@@ -210,13 +284,12 @@ def Gem(chrome,env):
         if tab.s_ele(".text-[#D6B635]"):
             num = tab.ele(".inline-block text-[#D6B635]").text
             logger.info(f"{env.name}: 宝石合成成功！合成详情：{num}")
-
+    tab.close()
 
 # 参与抽奖
+@chrome_retry(exceptions=(Exception, ),max_tries=3, initial_delay=2)
 def Lottery(chrome,env):
     tab = chrome.new_tab(home_page)
-    tab.set.auto_handle_alert()
-
     if tab.s_ele(
             '.relative ease-in-out duration-200 flex justify-center items-center select-none bg-100 font-[Bangers] text-[20px] flex-1 bg-[#D6B635] text-black h-[48px] rounded-full mt-[30px] hover:scale-[1.1] cursor-pointer'):
         tab.ele(
@@ -226,6 +299,14 @@ def Lottery(chrome,env):
     headers = tab.ele("@class=flex justify-center items-center").eles("c:button")
     # 鼠标指针移动到头像
     tab.actions.move_to(headers[2])
+
+    if tab.s_ele('PARTICIPATE IN THE RAFFLE'):
+        tab.ele('PARTICIPATE IN THE RAFFLE').click()
+        chrome.wait(4, 5)
+        num = tab.s_ele('.text-[32px] ml-[12px]').text
+        logger.info(f"{env.name}: 抽奖成功！您的Tickets数量为：{num}")
+        tab.close()
+        return
 
     # 连接钱包
     if tab.s_ele("LINK YOUR WALLET"):
@@ -253,93 +334,29 @@ def Lottery(chrome,env):
         chrome.wait(4, 5)
         num = tab.s_ele('.text-[32px] ml-[12px]').text
         logger.info(f"{env.name}: 抽奖成功！您的Tickets数量为：{num}")
-
+    tab.close()
 
 
 def Oneness(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
-            a = 0
-            try:
-                getOnenesslabs(chrome, env)
-            except Exception as e:
-                logger.info(f"{env.name}: {e} 开始重新执行~")
-                a += 1
-                if a < 3:
-                    chrome.refresh()
-                    chrome.wait(3, 5)
-                    chrome.close()
-                    getOnenesslabs(chrome, env)
-                else:
-                    logger.info(f"{env.name}: {e} 超出重试次数")
-
-            a = 0
-            # try:
-            #     Gem(chrome, env)
-            # except Exception as e:
-            #     logger.info(f"{env.name}: {e} 开始重新执行~")
-            #     a += 1
-            #     if a < 3:
-            #         chrome.refresh()
-            #         chrome.wait(3, 5)
-            #         chrome.close()
-            #         Gem(chrome, env)
-            #     else:
-            #         logger.info(f"{env.name}: {e} 超出重试次数")
-
-            a = 0
-            # try:
-            #     Task(chrome, env)
-            # except Exception as e:
-            #     logger.info(f"{env.name}: {e} 开始重新执行~")
-            #     a += 1
-            #     if a < 3:
-            #         chrome.refresh()
-            #         chrome.wait(3, 5)
-            #         chrome.close()
-            #         Task(chrome, env)
-            #     else:
-            #         logger.info(f"{env.name}: {e} 超出重试次数")
-
-            a = 0
-            # try:
-            #     Gem(chrome, env)
-            # except Exception as e:
-            #     logger.info(f"{env.name}: {e} 开始重新执行~")
-            #     a += 1
-            #     if a < 3:
-            #         chrome.refresh()
-            #         chrome.wait(3, 5)
-            #         chrome.close()
-            #         Gem(chrome, env)
-            #     else:
-            #         logger.info(f"{env.name}: {e} 超出重试次数")
-
-
-            try:
-                Lottery(chrome, env)
-            except Exception as e:
-                logger.info(f"{env.name}: {e} 开始重新执行~")
-                a += 1
-                if a < 3:
-                    chrome.refresh()
-                    chrome.wait(3, 5)
-                    chrome.close()
-                    Lottery(chrome, env)
-                else:
-                    logger.info(f"{env.name}: {e} 超出重试次数")
-
+            getOnenesslabs(chrome, env)
+            getCount(chrome, env)
+            Gem(chrome, env)
+            Task(chrome, env)
+            Gem(chrome, env)
+            # Lottery(chrome, env)
 
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
-            chrome.quit()
         except Exception as e:
-            logger.error(f"{env.name}: {e}")
-            if chrome:
-                chrome.quit()
+            logger.error(f"{env.name} 执行：{e}")
+            return ("失败", e)
+        finally:
+            quitChrome(env, chrome)
 
 if __name__ == '__main__':
-    # with app.app_context():
-    #     env = Env.query.filter_by(name="ZLL-195").first()
-    #     Oneness(env)
-    submit(Oneness,getAllEnvs())
+    with app.app_context():
+        # env = Env.query.filter_by(name="SYL-1").first()
+        # Oneness(env)
+        submit(Oneness, getAllEnvs())
