@@ -13,6 +13,7 @@ from flaskServer.services.chromes.tasks.onenesslabs import Oneness
 from flaskServer.services.chromes.tasks.plume import toDoPlumeTaskAll
 from flaskServer.services.chromes.tasks.telegram import checkTG as toDoCheckTG
 from flaskServer.services.chromes.tasks.Hemi import Hemi
+from flaskServer.services.chromes.tasks.Portal_zearly import portal
 
 
 bp = Blueprint('tasks', __name__)
