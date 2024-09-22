@@ -12,6 +12,7 @@ from flaskServer.config.task import objects
 from flaskServer.services.chromes.tasks.onenesslabs import Oneness
 from flaskServer.services.chromes.tasks.plume import toDoPlumeTaskAll
 from flaskServer.services.chromes.tasks.telegram import checkTG as toDoCheckTG
+from flaskServer.services.chromes.tasks.Hemi import Hemi
 
 
 bp = Blueprint('tasks', __name__)
@@ -73,3 +74,14 @@ def checkTG (groups):
         envs = getEnvsByIds(ids)
         Thread(target=submit, args=(toDoCheckTG, envs,)).start()
     return {"code": 0, 'msg': "success"}
+
+@app.route("/<groups>/todo/hemi", methods=["POST"])
+def hemi (groups):
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    with app.app_context():
+        envs = getEnvsByIds(ids)
+        Thread(target=submit, args=(Hemi, envs,)).start()
+    return result

@@ -40,6 +40,44 @@ def LoginINITWallet(chrome,env):
                 logger.info(f"{env.name}: INIT 账号为空，跳过登录")
     tab.close()
 
+def LoginPhantomWallet(chrome,env):
+    tab = chrome.get_tab(title="Phantom Wallet")
+    if tab:
+        pass
+    else:
+        chrome.new_tab("chrome-extension://bfnaelmomeimhlpmgjnjophhpkkoljpa/popup.html")
+        tab = chrome.get_tab(title="Phantom Wallet")
+
+    if tab.s_ele("Unlock"):
+        passwords = tab.eles("@type=password")
+        for pwd in passwords:
+            pwd.input(WALLET_PASSWORD)
+        tab.ele("Unlock").click()
+
+    else:
+        with app.app_context():
+            wallet = Wallet.query.filter_by(id=env.okx_id).first()
+            if wallet:
+                tab.ele("Import an existing wallet").click()
+                tab.ele("@data-testid=import-seed-phrase-button",index=1).click()
+                eles = tab.eles("@class=sc-bttaWv gSFlAR")
+                for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
+                    eles[index].input(word)
+                tab.ele("Import Wallet").click()
+                tab.ele("Continue").click()
+                passwords = tab.eles("@type=password")
+                for pwd in passwords:
+                    pwd.input(WALLET_PASSWORD)
+                tab.ele("@type=checkbox").click()
+                tab.ele("Continue").click()
+                chrome.wait(25)
+                tab.ele("Get Started").click()
+
+                logger.info(f"{env.name}: Phantom 登录成功")
+            else:
+                logger.info(f"{env.name}: Phantom 账号为空，跳过登录")
+    tab.close()
+
 def ConfirmOKXWallet(chrome,tab,env):
     ele = tab.ele("@type=button").next()
     if ele.text == "Connect":
@@ -235,6 +273,10 @@ def LoginTW(chrome:ChromiumPage,env):
 def LoginDiscord(chrome:ChromiumPage,env):
     updateAccountStatus(env.discord_id, 0, "重置了Discord登录状态")
     tab = chrome.new_tab(url="https://discord.com/app")
+    if tab.s_ele("Please log in again"):
+        tab.ele("@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85").click()
+
+
     if "login" in tab.url:
         logger.info(f"{env.name} 开始登录 Discord 账号")
         with app.app_context():
@@ -294,6 +336,7 @@ def OKXChrome(env):
             proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
             chrome = getChrome(proxy,env)
             LoginOKXWallet(chrome,env)
+            LoginPhantomWallet(chrome,env)
             chrome.get_tab(title="Initia Wallet").close()
             return chrome
         except Exception as e:
@@ -336,6 +379,7 @@ def LoginChrome(env):
             chrome = getChrome(proxy,env)
             LoginINITWallet(chrome, env)
             LoginOKXWallet(chrome, env)
+            LoginPhantomWallet(chrome, env)
             LoginTW(chrome, env)
             LoginDiscord(chrome, env)
             LoginOutlook(chrome, env)
@@ -353,6 +397,7 @@ def DebugChrome(env):
         chrome = getChrome(proxy,env)
         LoginINITWallet(chrome, env)
         LoginOKXWallet(chrome, env)
+        LoginPhantomWallet(chrome, env)
         LoginTW(chrome, env)
         LoginDiscord(chrome, env)
         LoginOutlook(chrome, env)
