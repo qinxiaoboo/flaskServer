@@ -42,6 +42,10 @@ document.querySelector("#react-root > div > div > div.css-175oi2r.r-1f2l425.r-13
 url_js = '''let button  =
 document.querySelector("#react-root > div > div > div.css-175oi2r.r-1f2l425.r-13qz1uu.r-417010.r-18u37iz > header > div > div > div > div:nth-child(1) > div.css-175oi2r.r-15zivkp.r-1bymd8e.r-13qz1uu.r-1awozwy > nav > a:nth-child(11) > div");
 button.click(); '''
+
+url_js_2 = '''let button  =
+document.querySelector("#react-root > div > div > div.css-175oi2r.r-1f2l425.r-13qz1uu.r-417010.r-18u37iz > header > div > div > div > div:nth-child(1) > div.css-175oi2r.r-15zivkp.r-1bymd8e.r-13qz1uu.r-1awozwy > nav > a:nth-child(10) > div");
+button.click(); '''
 def generate_random_word(length=4):
     # 生成一个随机的字母单词
     letters = string.ascii_letters + string.digits  # 包含小写字母、大写字母和数字
@@ -163,7 +167,7 @@ def getZearly(chrome,env):
                 if chrome.get_tab(title='Discord | Authorize access to your account'):
                     chrome.get_tab(title='Discord | Authorize access to your account').ele("@type=button",index=2).click()
                     logger.info(f"{env.name}: 登录discord完成----------------------------------")
-                    time.sleep(5)
+                    time.sleep(10)
                     chrome.close_tabs()
                     chrome.new_tab(url='https://zealy.io/cw/portaltobitcoin/questboard')
                     time.sleep(6)
@@ -171,7 +175,7 @@ def getZearly(chrome,env):
                 elif chrome.get_tab(title='Discord | 授权访问您的账号'):
                     chrome.get_tab(title='Discord | 授权访问您的账号').ele("@type=button",index=2).click()
                     logger.info(f"{env.name}: 登录discord完成----------------------------------")
-                    time.sleep(5)
+                    time.sleep(10)
                     chrome.close_tabs()
                     chrome.new_tab(url='https://zealy.io/cw/portaltobitcoin/questboard')
                     time.sleep(6)
@@ -426,10 +430,18 @@ def getStayingExplore(chrome,env):
         tab.ele('t:button@tx():Tweet').click()
         time.sleep(3)
         chrome.get_tab(url='https://x.com/').wait(5).ele('t:span@tx():Post').click()
-        time.sleep(5)
-        chrome.get_tab(url='https://x.com/').wait(5).run_js(url_js)
-        time.sleep(5)
-        chrome.get_tab(url='https://x.com/').wait(5).run_js(Staying_js)
+        try:
+            print('开始')
+            time.sleep(5)
+            chrome.get_tab(url='https://x.com/').wait(5).run_js(url_js)
+            time.sleep(5)
+            print('执行第二个js')
+            chrome.get_tab(url='https://x.com/').wait(5).run_js(Staying_js)
+        except Exception as e:
+            logger.info(e)
+            chrome.get_tab(url='https://x.com/').wait(5).run_js(url_js_2)
+            time.sleep(5)
+            chrome.get_tab(url='https://x.com/').wait(5).run_js(Staying_js)
         time.sleep(2)
         link = chrome.get_tab(url='https://x.com/').url
         tab.ele('@id=2c0ed6c4-f66a-4638-85e3-4038528e8d69.tweetUrl').input(link)
@@ -452,10 +464,18 @@ def getStayingExplore(chrome,env):
         tab.ele('t:button@tx():Tweet').click()
         time.sleep(3)
         chrome.get_tab(url='https://x.com/').wait(5).ele('t:span@tx():Post').click()
-        time.sleep(5)
-        chrome.get_tab(url='https://x.com/').wait(5).run_js(url_js)
-        time.sleep(5)
-        chrome.get_tab(url='https://x.com/').wait(5).run_js(Staying_js)
+        try:
+            print('开始')
+            time.sleep(5)
+            chrome.get_tab(url='https://x.com/').wait(5).run_js(url_js)
+            time.sleep(5)
+            print('执行第二个js')
+            chrome.get_tab(url='https://x.com/').wait(5).run_js(Staying_js)
+        except  Exception as e:
+            logger.info(e)
+            chrome.get_tab(url='https://x.com/').wait(5).run_js(url_js_2)
+            time.sleep(5)
+            chrome.get_tab(url='https://x.com/').wait(5).run_js(Staying_js)
         time.sleep(2)
         link = chrome.get_tab(url='https://x.com/').url
         tab.ele('@id=09558b57-410e-405a-ab33-7364f7ffa51d.tweetUrl').input(link)
@@ -506,18 +526,6 @@ def getStayingExplore(chrome,env):
         time.sleep(6)
         chrome.close_tabs()
 
-   #-------------5pm UTC September 9th Twitter Spaces ------------------
-    # tab = chrome.new_tab( url='https://zealy.io/cw/portaltobitcoin/questboard/efda5f96-98c8-4fc4-96c2-0c3c7cb13938/8727dfb4-5afa-41a1-bf90-28162d33e0f2')
-    # time.sleep(2)
-    # if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
-    #     logger.info(f'{env.name}:任务已经完成')
-    #     chrome.close_tabs()
-    # else:
-    #     tab.ele('@value=2023').click()
-    #     time.sleep(2)
-    #     tab.ele('t:button@tx():Claim').click()
-    #     time.sleep(6)
-    #     chrome.close_tabs()
 
 def getPortal(chrome,env):
     tab = chrome.new_tab(url=Portal_url)
@@ -526,7 +534,7 @@ def getPortal(chrome,env):
     if tab.ele('t:button@tx():Join Portal To Bitcoin'):
         print('加入社团')
         tab.ele('t:button@tx():Join Portal To Bitcoin').click()
-    time.sleep(2)
+    time.sleep(10)
 
     # #--------------------GET STARTED(完成)----------------
     logger.info(f'{env.name}:GET STARTED开始')
