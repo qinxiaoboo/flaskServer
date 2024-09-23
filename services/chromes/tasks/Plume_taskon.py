@@ -3,6 +3,8 @@ from random_words import RandomWords
 #pip install RandomWords
 from DrissionPage import ChromiumPage,ChromiumOptions
 from loguru import logger
+from flaskServer.utils.chrome import quitChrome
+
 import random
 # 连接数据库
 from flaskServer.config.connect import app
@@ -155,29 +157,38 @@ def getTaskon(chrome, env):
     return
 
 
+# def toDo(chrome,env):
+#     logger.info(f"======开始执行{env.name}环境")
+#     getTaskon(chrome, env)
+#     time.sleep(5)
 
-
-def toDo(chrome,env):
-    logger.info(f"======开始执行{env.name}环境")
-    getTaskon(chrome, env)
-    time.sleep(5)
-
-def toDoPlumeTaskAll(env):
+# def toDoPlumeTaskAll(env):
+#     with app.app_context():
+#         try:
+#             chrome: ChromiumPage = OKXChrome(env)
+#             toDo(chrome, env)
+#             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
+#             chrome.quit()
+#         except Exception as e:
+#             logger.error(f"{env.name}: {e}")
+#             if chrome:
+#                 chrome.quit()
+def taskon(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
-            toDo(chrome, env)
+            getTaskon(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
-            chrome.quit()
         except Exception as e:
-            logger.error(f"{env.name}: {e}")
-            if chrome:
-                chrome.quit()
+            logger.error(f"{env.name} 执行：{e}")
+            return ("失败", e)
+        finally:
+            quitChrome(env, chrome)
 
-if __name__ == '__main__':
-    with app.app_context():
-        # env = Env.query.filter_by(name="SYL-18").first()
-        # toDoPlumeTaskAll(env)
-        submit(toDoPlumeTaskAll, getAllEnvs())
+# if __name__ == '__main__':
+#     with app.app_context():
+#         # env = Env.query.filter_by(name="SYL-18").first()
+#         # toDoPlumeTaskAll(env)
+#         submit(toDoPlumeTaskAll, getAllEnvs())
 
 
