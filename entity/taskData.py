@@ -43,4 +43,5 @@ class TaskChain:
     Liquidity: int = 0
     #桥
     Bridge: int = 0
-
+    #总分
+    PointsCount: int = 0

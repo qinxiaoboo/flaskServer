@@ -35,7 +35,7 @@ import string
 
 
 #项目名称
-name = 'now chain'
+name = 'NowChain'
 #项目邀请链接
 now_chain_url = 'https://testnet.nowchain.co/testnet/point-system?referral=0xECB41b49D74D7d13bB51f9603Fd2360557647504/'
 faucet_url= 'https://faucet.nowchain.co/'
@@ -59,24 +59,23 @@ def exe_okx(chrome):
         logger.error(e)
     return
 
-def getCount(chrome, env):
-    try:
-        taskData = getTaskObject(env, name)
-        tab = chrome.new_tab(url=now_chain_url)
-        taskData.check_in = 1
-        taskData.Liquidity = 1
-        taskData.Faucet = 1
-        taskData.Swap = 1
-        taskData.Leaderboard = 1
-        taskData.Bridge = 1
-        updateTaskRecord(env.name,name,taskData,1)
-        tab.close()
+def Count(chrome, env):
+    taskData = getTaskObject(env, name)
+    tab = chrome.new_tab(now_chain_url)
+    tab.refresh()
+    taskData.PointsCount = 1
+    taskData.check_in = 1
+    taskData.Faucet = 1
+    taskData.Swap = 1
+    taskData.Bridge = 1
+    taskData.Liquidity = 1
+    taskData.Leaderboard = 1
+    updateTaskRecord(env.name,name,taskData,1)
+    time.sleep(10)
 
-    except Exception as e:
-        logger.error(e)
 
 def getTab(chrome,env):
-    tab = chrome.new_tab(url=now_chain_url)
+    tab = chrome.new_tab(now_chain_url)
     time.sleep(5)
     # 设置全屏
     tab.set.window.max()
@@ -158,7 +157,8 @@ def NowChain(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
-            getCount(chrome, env)
+            print(2)
+            Count(chrome, env)
             # getFaucet(chrome, env)
             # getChck_in(chrome,env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
