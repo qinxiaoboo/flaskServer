@@ -198,7 +198,3 @@ def Hemi(env):
         finally:
             quitChrome(env, chrome)
 
-if __name__ == '__main__':
-    with app.app_context():
-        env = Env.query.filter_by(name="SYL-2").first()
-        Hemi(env)
