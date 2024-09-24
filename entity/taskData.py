@@ -7,3 +7,10 @@ from dataclasses_json import dataclass_json
 class TaskData:
     # 完成任务个数
     count:int=0
+
+
+@dataclass_json
+@dataclass
+class TaskChain:
+    count: int = 0
+

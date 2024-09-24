@@ -1,10 +1,12 @@
 from flaskServer.entity.taskData import TaskData
 from flaskServer.entity.taskAccount import TG
-
+from flaskServer.entity. import TG
 
 objects = {
     'multifarm': TaskData,
-    "telegram": TG
+    "telegram": TG,
+    "nowchain": TaskChain,
+
 }
 
 def get_object_by_name(name):
