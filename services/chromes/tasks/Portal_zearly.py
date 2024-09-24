@@ -59,6 +59,8 @@ def getrandom_url():
         'https://zealy.io/cw/portaltobitcoin/invite/aDN4zuhkodcoi9oMWAPEL',
         'https://zealy.io/cw/portaltobitcoin/invite/juHIa43dGkF1_stISTGpt'
     ]
+    random_item = random.choice(items)
+    return random_item
 
 #--------Staying----------
 Staying_js = """let button  = 
