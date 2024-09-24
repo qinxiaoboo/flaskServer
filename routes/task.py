@@ -15,7 +15,7 @@ from flaskServer.services.chromes.tasks.telegram import checkTG as toDoCheckTG
 from flaskServer.services.chromes.tasks.Hemi import Hemi
 from flaskServer.services.chromes.tasks.Portal_zearly import portal
 from flaskServer.services.chromes.tasks.Plume_taskon import taskon
-
+from flaskServer.services.chromes.tasks.nowchain import nowchain
 
 bp = Blueprint('tasks', __name__)
 
@@ -109,4 +109,15 @@ def Taskon (groups):
     with app.app_context():
         envs = getEnvsByIds(ids)
         Thread(target=submit, args=(taskon, envs,)).start()
+    return result
+
+@app.route("/<groups>/todo/taskon", methods=["POST"])
+def now_chain (groups):
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    with app.app_context():
+        envs = getEnvsByIds(ids)
+        Thread(target=submit, args=(nowchain, envs,)).start()
     return result

@@ -31,9 +31,35 @@ from flaskServer.services.dto.task_record import updateTaskRecord, getTaskObject
 from flaskServer.services.chromes.login import LoginTW
 import time
 import string
+import random
 
 
-Portal_url = 'https://zealy.io/cw/portaltobitcoin/invite/ckFoGaoYsQI8NaLS5rh90'
+
+
+# Portal_url = 'https://zealy.io/cw/portaltobitcoin/invite/slbLWMwfLoIgPJCfNO-9u'
+def getrandom_url():
+    items =[
+        'https://zealy.io/cw/portaltobitcoin/invite/ckFoGaoYsQI8NaLS5rh90',
+        'https://zealy.io/cw/portaltobitcoin/invite/axrEs-G-Gs9E2t43dk06D',
+        'https://zealy.io/cw/portaltobitcoin/invite/SuILo3bStLYzYgHHw9SNb',
+        'https://zealy.io/cw/portaltobitcoin/invite/Sr-qCTv0XjZEKA7jgtGv-',
+        'https://zealy.io/cw/portaltobitcoin/invite/6MtWuarcjE0Q_OGwA-Xv9',
+        'https://zealy.io/cw/portaltobitcoin/invite/kXYNqQbuLJtVaR65nLcjU',
+        'https://zealy.io/cw/portaltobitcoin/invite/TCh8HSl6XuPqBbLPBYyfb',
+        'https://zealy.io/cw/portaltobitcoin/invite/Z9X3Be0s7u9uwOxvLgM-v',
+        'https://zealy.io/cw/portaltobitcoin/invite/zqOwOaOYRpTD7yTrRR016',
+        'https://zealy.io/cw/portaltobitcoin/invite/lagg9ZO0mEonQ_hRsVIHI',
+        'https://zealy.io/cw/portaltobitcoin/invite/A5rxMfMySJV3G0EA7W0oC',
+        'https://zealy.io/cw/portaltobitcoin/invite/hmnnvPZ825LQnGsqXg7wf',
+        'https://zealy.io/cw/portaltobitcoin/invite/h4QWy7Q0NeBuCcWwSrhWj',
+        'https://zealy.io/cw/portaltobitcoin/invite/h0XCiMMMEvWjJTrAcm89A',
+        'https://zealy.io/cw/portaltobitcoin/invite/Ad1tFZASJgfZK55Fbogc9',
+        'https://zealy.io/cw/portaltobitcoin/invite/vnReLbAZtqHk66ZSpp-x4',
+        'https://zealy.io/cw/portaltobitcoin/invite/E5x-4NXNDKavwFvL5XoNl',
+        'https://zealy.io/cw/portaltobitcoin/invite/aDN4zuhkodcoi9oMWAPEL',
+        'https://zealy.io/cw/portaltobitcoin/invite/juHIa43dGkF1_stISTGpt'
+    ]
+
 #--------Staying----------
 Staying_js = """let button  = 
 document.querySelector("#react-root > div > div > div.css-175oi2r.r-1f2l425.r-13qz1uu.r-417010.r-18u37iz > main > div > div > div > div > div > div:nth-child(3) > div > div > section > div > div > div:nth-child(1) > div > div > article");               
@@ -250,8 +276,9 @@ def getStarted(chrome,env):
         #print('判断是否需要连接钱包')
         if tab.s_ele('t:button@tx():Connect wallet'):
             print('开始连接钱包')
+            time.sleep(3)
             tab.ele('t:button@tx():Connect wallet').click()
-            time.sleep(2)
+            time.sleep(5)
             tab.ele('t:div@tx():OKX Wallet').click()
             time.sleep(3)
             exe_okx(chrome)
@@ -259,6 +286,7 @@ def getStarted(chrome,env):
             print('判断是否需要钱包签名')
             if tab.s_ele('t:div@tx():Sign message'):
                 tab.ele('t:div@tx():Sign message').click()
+                time.sleep(2)
                 exe_okx(chrome)
             time.sleep(10)
             tab.ele('@class=shrink-0 w-button-icon-lg h-button-icon-lg').click()
@@ -430,6 +458,7 @@ def getStayingExplore(chrome,env):
         tab.ele('t:button@tx():Tweet').click()
         time.sleep(3)
         chrome.get_tab(url='https://x.com/').wait(5).ele('t:span@tx():Post').click()
+        time.sleep(5)
         try:
             print('开始')
             time.sleep(5)
@@ -464,6 +493,7 @@ def getStayingExplore(chrome,env):
         tab.ele('t:button@tx():Tweet').click()
         time.sleep(3)
         chrome.get_tab(url='https://x.com/').wait(5).ele('t:span@tx():Post').click()
+        time.sleep(5)
         try:
             print('开始')
             time.sleep(5)
@@ -528,7 +558,9 @@ def getStayingExplore(chrome,env):
 
 
 def getPortal(chrome,env):
-    tab = chrome.new_tab(url=Portal_url)
+    portal_url = getrandom_url()
+    print('邀请码:',portal_url)
+    tab = chrome.new_tab(url=portal_url)
     print('开始做任务了')
     time.sleep(2)
     if tab.ele('t:button@tx():Join Portal To Bitcoin'):

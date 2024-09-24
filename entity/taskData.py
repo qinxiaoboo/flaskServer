@@ -30,6 +30,6 @@ class TaskData:
 
 @dataclass_json
 @dataclass
-class oneneselabs:
+class TaskChain:
     # 示例
     a=0
