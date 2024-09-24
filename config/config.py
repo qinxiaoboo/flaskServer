@@ -1,7 +1,7 @@
 import toml,csv
 from pathlib import Path
 
-cfg = toml.load(open(r'D:\python\wf-chrome\flaskServer\config.toml', 'r', encoding='utf-8'))
+cfg = toml.load(open(r'F:\python\wf-chrome\flaskServer\config.toml', 'r', encoding='utf-8'))
 
 ENV_PATH = cfg.get('ENV_PATH')
 THREAD_POOL_NUM = cfg.get('THREAD_POOL_NUM')

@@ -5,6 +5,7 @@ from flaskServer.entity.taskData import TaskChain
 objects = {
     'multifarm': TaskData,
     "telegram": TG,
+    "Onenesslabs": TaskData,
     "nowchain": TaskChain,
 
 }
