@@ -33,10 +33,6 @@ deek_network_js = """
             const button = document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-unsupported-chain-view").shadowRoot.querySelector("wui-flex > wui-flex:nth-child(2) > wui-list-network").shadowRoot.querySelector("button");            
             return button
             """
-deek_network_js2 = """
-            const button = document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-header").shadowRoot.querySelector("wui-flex > wui-icon-link:nth-child(3)").shadowRoot.querySelector("button");
-            return button
-            """
 
 
 def getTab(chrome, env):
@@ -59,7 +55,7 @@ def getTab(chrome, env):
 
     try:
         if tab.ele('t:span@text():Login with X'):
-            logger.info(f"{env.name}开始登录X")
+            logger.info(f"{env.name}开始授权 X")
             tab.ele('t:span@text():Login with X').click()
             chrome.wait(2, 3)
             for _ in range(2):
@@ -69,15 +65,15 @@ def getTab(chrome, env):
                     tab.ele('t:span@text():Login with X').click()
                     chrome.wait(2, 3)
 
-            logger.info(f"{env.name}授权X")
-            tab.wait.ele_displayed(chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected"), timeout=60)
+            logger.info(f"{env.name}授权 X")
+            tab.wait.ele_displayed(chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected"), timeout=80)
             try:
                 chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected").click()
-                logger.info(f"{env.name}授权X完成")
+                logger.info(f"{env.name}授权 X 完成")
             except Exception as e:
                 tab.wait.load_start()
                 chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected").click()
-                logger.info(f"{env.name}授权X完成")
+                logger.info(f"{env.name}授权 X 完成")
 
 
         try:
@@ -214,7 +210,6 @@ def getTab(chrome, env):
                 tab.ele('t:button@text():Confirm').click()
                 logger.info(f"{env.name}提交邀请码")
 
-
         except Exception as e:
             logger.info(f"{env.name}主页登录失败")
             return
@@ -226,129 +221,165 @@ def getTab(chrome, env):
 def getDeek(chrome, env):
     tab = chrome.new_tab(url='https://www.deek.network/')
     chrome.wait(2, 4)
-    logger.info(f"{env.name}登陆钱包")
+    logger.info(f"{env.name}  登陆钱包")
+    chrome.wait(4, 8)
+
+    try:
+        tab.run_js(deek_network_js).click()
+    except Exception as e:
+        pass
+
+    logger.info(f"{env.name}    判断是否要重新连接钱包")
+    if tab.ele("t:button@tx():Connect Wallet"):
+        tab.ele("t:button@tx():Connect Wallet").click()
+
+        chrome.wait(4, 8)
+        logger.info(f"{env.name}    选择okx钱包")
+        tab.run_js(click_wallet_js).click()
+
+        chrome.wait(4, 8)
+        logger.info(f"{env.name}    okx钱包确认连接")
+        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+        chrome.wait(12, 14)
+
+        try:
+            tab.run_js(deek_network_js).click()
+            chrome.wait(4, 8)
+            tab.run_js(click_wallet_js).click()
+            chrome.wait(4, 8)
+            chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+        except Exception as e:
+            pass
+    else:
+        logger.info(f"{env.name}  钱包已连接，等待授权...")
+
+    chrome.wait(4, 8)
+    if chrome.get_tab(title="OKX Wallet"):
+        logger.info(f"{env.name}    okx钱包授权")
+        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
 
 
 
-    logger.info(f"{env.name}关注deek_network")
-    tab.ele('Go').click()
-    chrome.wait(10, 15)
-    chrome.get_tab(url='https://x.com/').ele("@type=button").click()
 
-    chrome.wait(2, 4)
-    if tab.ele('t:span@text():Follow'):
-        tab.ele('t:span@text():Follow').click()
-
-    chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务1")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-
-    logger.info(f"{env.name}关注OpenSocialLabs")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=2).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
-    chrome.get_tab(url='https://x.com/').ele("@type=button").click()
-    chrome.wait(2, 4)
-    if tab.ele('t:span@text():Follow'):
-        tab.ele('t:span@text():Follow').click()
-
-    chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务2")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-    logger.info(f"{env.name}关注chiefbigdeek")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=3).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
-    chrome.get_tab(url='https://x.com/').ele("@type=button").click()
-    chrome.wait(2, 4)
-    if tab.ele('t:span@text():Follow'):
-        tab.ele('t:span@text():Follow').click()
-    chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务3")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-
-    logger.info(f"{env.name}关注EVGHQ")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=4).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
-    chrome.get_tab(url='https://x.com/').ele("@type=button").click()
-    chrome.wait(2, 4)
-    if tab.ele('t:span@text():Follow'):
-        tab.ele('t:span@text():Follow').click()
-    chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务4")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-
-    logger.info(f"{env.name}关注SoMon_OwO")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=5).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
-    chrome.get_tab(url='https://x.com/').ele("@type=button").click()
-    chrome.wait(2, 4)
-    if tab.ele('t:span@text():Follow'):
-        tab.ele('t:span@text():Follow').click()
-    chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务5")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-
-    logger.info(f"{env.name}关注breadnbutterxyz")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=6).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
-    chrome.get_tab(url='https://x.com/').ele("@type=button").click()
-    chrome.wait(2, 4)
-    if tab.ele('t:span@text():Follow'):
-        tab.ele('t:span@text():Follow').click()
-    chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务6")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-
-    logger.info(f"{env.name}加入discord")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]',index=7).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
-    chrome.get_tab(url='https://discord.com/').ele("@type=button").click()
-    chrome.wait(2, 4)
-    chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务7")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-    logger.info(f"{env.name}日常任务1")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=6).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
-    chrome.get_tab(url='https://x.com/').wait(3).ele('@data-testid=tweetButton').click()
-    chrome.wait(2, 4)
+    # logger.info(f"{env.name}关注deek_network")
+    # tab.ele('Go').click()
+    # chrome.wait(10, 15)
+    # chrome.get_tab(url='https://x.com/').ele("@type=button").click()
+    #
+    # chrome.wait(2, 4)
+    # if tab.ele('t:span@text():Follow'):
+    #     tab.ele('t:span@text():Follow').click()
+    #
     # chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务8")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-    logger.info(f"{env.name}日常任务2")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=6).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
-    chrome.get_tab(url='https://x.com/').wait(3).ele('@data-testid=tweetButton').click()
-    chrome.wait(2, 4)
+    # logger.info(f"{env.name}开始验证任务1")
+    # if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
+    #     tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
+    #
+    #
+    # logger.info(f"{env.name}关注OpenSocialLabs")
+    # tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=2).click()
+    # tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
+    # chrome.get_tab(3, 6)
+    # chrome.get_tab(url='https://x.com/').ele("@type=button").click()
+    # chrome.wait(2, 4)
+    # if tab.ele('t:span@text():Follow'):
+    #     tab.ele('t:span@text():Follow').click()
+    #
     # chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务9")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-    chrome.wait(3, 6)
+    # logger.info(f"{env.name}开始验证任务2")
+    # if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
+    #     tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
+    #
+    # logger.info(f"{env.name}关注chiefbigdeek")
+    # tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=3).click()
+    # tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
+    # chrome.get_tab(3, 6)
+    # chrome.get_tab(url='https://x.com/').ele("@type=button").click()
+    # chrome.wait(2, 4)
+    # if tab.ele('t:span@text():Follow'):
+    #     tab.ele('t:span@text():Follow').click()
+    # chrome.wait(3, 6)
+    # logger.info(f"{env.name}开始验证任务3")
+    # if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
+    #     tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
+    #
+    #
+    # logger.info(f"{env.name}关注EVGHQ")
+    # tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=4).click()
+    # tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
+    # chrome.get_tab(3, 6)
+    # chrome.get_tab(url='https://x.com/').ele("@type=button").click()
+    # chrome.wait(2, 4)
+    # if tab.ele('t:span@text():Follow'):
+    #     tab.ele('t:span@text():Follow').click()
+    # chrome.wait(3, 6)
+    # logger.info(f"{env.name}开始验证任务4")
+    # if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
+    #     tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
+    #
+    #
+    # logger.info(f"{env.name}关注SoMon_OwO")
+    # tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=5).click()
+    # tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
+    # chrome.get_tab(3, 6)
+    # chrome.get_tab(url='https://x.com/').ele("@type=button").click()
+    # chrome.wait(2, 4)
+    # if tab.ele('t:span@text():Follow'):
+    #     tab.ele('t:span@text():Follow').click()
+    # chrome.wait(3, 6)
+    # logger.info(f"{env.name}开始验证任务5")
+    # if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
+    #     tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
+    #
+    #
+    # logger.info(f"{env.name}关注breadnbutterxyz")
+    # tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=6).click()
+    # tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
+    # chrome.get_tab(3, 6)
+    # chrome.get_tab(url='https://x.com/').ele("@type=button").click()
+    # chrome.wait(2, 4)
+    # if tab.ele('t:span@text():Follow'):
+    #     tab.ele('t:span@text():Follow').click()
+    # chrome.wait(3, 6)
+    # logger.info(f"{env.name}开始验证任务6")
+    # if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
+    #     tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
+    #
+    #
+    # logger.info(f"{env.name}加入discord")
+    # tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]',index=7).click()
+    # tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
+    # chrome.get_tab(3, 6)
+    # chrome.get_tab(url='https://discord.com/').ele("@type=button").click()
+    # chrome.wait(2, 4)
+    # chrome.wait(3, 6)
+    # logger.info(f"{env.name}开始验证任务7")
+    # if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
+    #     tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
+    #
+    # logger.info(f"{env.name}日常任务1")
+    # tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=6).click()
+    # tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
+    # chrome.get_tab(3, 6)
+    # chrome.get_tab(url='https://x.com/').wait(3).ele('@data-testid=tweetButton').click()
+    # chrome.wait(2, 4)
+    # # chrome.wait(3, 6)
+    # logger.info(f"{env.name}开始验证任务8")
+    # if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
+    #     tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
+    #
+    # logger.info(f"{env.name}日常任务2")
+    # tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=6).click()
+    # tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
+    # chrome.get_tab(3, 6)
+    # chrome.get_tab(url='https://x.com/').wait(3).ele('@data-testid=tweetButton').click()
+    # chrome.wait(2, 4)
+    # # chrome.wait(3, 6)
+    # logger.info(f"{env.name}开始验证任务9")
+    # if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
+    #     tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
+    #
+    # chrome.wait(3, 6)
     return
 
 
@@ -357,8 +388,8 @@ def deek(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
-            getTab(chrome, env)
-            # getDeek(chrome, env)
+            # getTab(chrome, env)
+            getDeek(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
