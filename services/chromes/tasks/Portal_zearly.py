@@ -600,7 +600,6 @@ def getPortal(chrome,env):
     # -----------------------------------------------
     logger.info(f'{env.name}:脚本任务全部完成，转人工')
 
-
 def portal(env):
     with app.app_context():
         try:
