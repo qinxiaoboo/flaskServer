@@ -61,6 +61,7 @@ def getrandom_url():
     ]
     random_item = random.choice(items)
     return random_item
+
 #--------Staying----------
 Staying_js = """let button  = 
 document.querySelector("#react-root > div > div > div.css-175oi2r.r-1f2l425.r-13qz1uu.r-417010.r-18u37iz > main > div > div > div > div > div > div:nth-child(3) > div > div > section > div > div > div:nth-child(1) > div > div > article");               
