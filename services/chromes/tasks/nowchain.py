@@ -35,15 +35,20 @@ import string
 
 
 #项目名称
-name = 'now chain'
-
+name = 'NowChain'
 #项目邀请链接
 now_chain_url = 'https://testnet.nowchain.co/testnet/point-system?referral=0xECB41b49D74D7d13bB51f9603Fd2360557647504/'
-
-
+faucet_url= 'https://faucet.nowchain.co/'
+switch_Network = '''let button  =
+document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-unsupported-chain-view").shadowRoot.querySelector("wui-flex > wui-flex:nth-child(2) > wui-list-network:nth-child(2)");
+button.click();
+'''
 okx_url = '''let button  =
 document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-connect-view").shadowRoot.querySelector("wui-flex > w3m-wallet-login-list").shadowRoot.querySelector("wui-flex > w3m-connect-announced-widget").shadowRoot.querySelector("wui-flex > wui-list-wallet:nth-child(1)");
 button.click();'''
+
+
+
 
 def exe_okx(chrome):
     try:
@@ -54,43 +59,108 @@ def exe_okx(chrome):
         logger.error(e)
     return
 
-def getCount(chrome, env):
-    try:
-        taskData = getTaskObject(env, name)
+def Count(chrome, env):
+    taskData = getTaskObject(env, name)
+    tab = chrome.new_tab(now_chain_url)
+    tab.refresh()
+    taskData.PointsCount = 1
+    taskData.check_in = 1
+    taskData.Faucet = 1
+    taskData.Swap = 1
+    taskData.Bridge = 1
+    taskData.Liquidity = 1
+    taskData.Leaderboard = 1
+    updateTaskRecord(env.name,name,taskData,1)
+    time.sleep(10)
 
-    except Exception as e:
-        logger.error(e)
 
-def getChck_in(chrome,env):
-    tab = chrome.new_tab(url=now_chain_url)
+def getTab(chrome,env):
+    tab = chrome.new_tab(now_chain_url)
     time.sleep(5)
+    # 设置全屏
+    tab.set.window.max()
     #登录钱包
     try:
         if tab.s_ele('Connect Wallet'):
+            print('开始链接钱包')
             tab.ele('Connect Wallet').click()
-            time.sleep(2)
-            tab.run_js(okx_url)
-            time.sleep(2)
+            time.sleep(5)
+            try:
+                tab.run_js(okx_url)
+                time.sleep(5)
+                exe_okx(chrome)
+                time.sleep(5)
+            except Exception as e:
+                logger.error(e)
+            try:
+                print('开始选择测试网')
+                tab.run_js(switch_Network)
+                time.sleep(5)
+                exe_okx(chrome)
+                time.sleep(5)
+            except Exception as e:
+                logger.error(e)
+        try:
+            print('开始选择测试网')
+            tab.run_js(switch_Network)
+            time.sleep(5)
             exe_okx(chrome)
-            time.sleep(2)
+            time.sleep(5)
+        except Exception as e:
+            logger.error(e)
+    except Exception as e:
+        logger.error(e)
+
+def getFaucet(chrome, env):
+    getTab(chrome, env)
+    time.sleep(5)
+    print('开始领水')
+    tab = chrome.new_tab(url='https://testnet.nowchain.co/testnet/faucet/')
+    try:
+        if tab.s_ele('Time remaining: '):
+            print('领水时间还没到：',tab.ele('Time remaining: ').text)
+            return
+        elif tab.s_ele('t:button@tx():Request Assets'):
+            logger.info('开始等待人机验证')
+            time.sleep(60)
+            tab.wait.ele_displayed('t:button@tx():Request Assets', timeout=60)
+            tab.ele('t:button@tx():Request Assets').click()
+            time.sleep(15)
+    except Exception as e:
+        logger.error(e)
 
 
-
+def getChck_in(chrome,env):
+    # getTab(chrome, env)
+    tab = chrome.new_tab(url=now_chain_url)
+    time.sleep(5)
+    chrome.refresh(ignore_cache= True)
+    time.sleep(5)
+    #登录钱包
+    try:
+        if tab.s_ele('t:button@tx():Checked'):
+            logger.info('已经签到完成,或者还没有到签到时间')
+            return
+        elif tab.s_ele('t:button@tx():Check-in'):
+            print('开始签到')
+            tab.wait.ele_displayed('t:button@tx():Check-in', timeout=20)
+            tab.ele('t:button@tx():Check-in').click()
+            time.sleep(5)
+            exe_okx(chrome)
+            time.sleep(20)
 
     except Exception as e:
         logger.error(e)
 
 
-
-
-
-
-def nowchain(env):
+def NowChain(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
-
-            getChck_in(chrome,env)
+            print(2)
+            Count(chrome, env)
+            # getFaucet(chrome, env)
+            # getChck_in(chrome,env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")

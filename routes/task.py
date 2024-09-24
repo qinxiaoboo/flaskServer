@@ -15,7 +15,8 @@ from flaskServer.services.chromes.tasks.telegram import checkTG as toDoCheckTG
 from flaskServer.services.chromes.tasks.Hemi import Hemi
 from flaskServer.services.chromes.tasks.Portal_zearly import portal
 from flaskServer.services.chromes.tasks.Plume_taskon import taskon
-from flaskServer.services.chromes.tasks.nowchain import nowchain
+from flaskServer.services.chromes.tasks.nowchain import NowChain
+from flaskServer.services.chromes.tasks.deek import deek
 
 bp = Blueprint('tasks', __name__)
 
@@ -111,7 +112,7 @@ def Taskon (groups):
         Thread(target=submit, args=(taskon, envs,)).start()
     return result
 
-@app.route("/<groups>/todo/taskon", methods=["POST"])
+@app.route("/<groups>/todo/NowChain", methods=["POST"])
 def now_chain (groups):
     result = {"code": 0, 'msg': "success"}
     data = request.get_json()
@@ -119,5 +120,16 @@ def now_chain (groups):
     logger.info(f"Received ids: {ids}")
     with app.app_context():
         envs = getEnvsByIds(ids)
-        Thread(target=submit, args=(nowchain, envs,)).start()
+        Thread(target=submit, args=(NowChain, envs,)).start()
+    return result
+
+@app.route("/<groups>/todo/deek", methods=["POST"])
+def Deek (groups):
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    with app.app_context():
+        envs = getEnvsByIds(ids)
+        Thread(target=submit, args=(deek, envs,)).start()
     return result

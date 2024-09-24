@@ -31,5 +31,17 @@ class TaskData:
 @dataclass_json
 @dataclass
 class TaskChain:
-    # 示例
-    a=0
+    # 签到天数
+    check_in: int = 0
+    #排名
+    Leaderboard: int = 0
+    #领水次数
+    Faucet: int = 0
+    #交互
+    Swap: int = 0
+    #流动性
+    Liquidity: int = 0
+    #桥
+    Bridge: int = 0
+    #总分
+    PointsCount: int = 0

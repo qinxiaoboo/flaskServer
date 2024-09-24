@@ -6,7 +6,7 @@ objects = {
     'multifarm': TaskData,
     "telegram": TG,
     "Onenesslabs": TaskData,
-    "nowchain": TaskChain,
+    "NowChain": TaskChain,
 
 }
 
