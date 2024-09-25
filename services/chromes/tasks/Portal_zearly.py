@@ -568,7 +568,6 @@ def getCount(chrome, env):
         portal_xp = num.split('/')[0]
         print('portal_xp:', portal_xp)
         taskData = getTaskObject(env, name)
-
         taskData.XP = portal_xp
         updateTaskRecord(env.name, name, taskData, 1)
         time.sleep(10)
@@ -621,18 +620,18 @@ def portal(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
-            # getZearly(chrome, env)
-            # time.sleep(5)
-            # chrome.close_tabs()
-            # time.sleep(5)
-            # getPortal(chrome,env)
+            getZearly(chrome, env)
+            time.sleep(5)
+            chrome.close_tabs()
+            time.sleep(5)
+            getPortal(chrome,env)
             getCount(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
             return ("失败", e)
-        # finally:
-        #     quitChrome(env, chrome)
+        finally:
+            quitChrome(env, chrome)
 
 
 
