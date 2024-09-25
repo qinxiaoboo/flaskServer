@@ -50,7 +50,7 @@ class TaskChain:
 @dataclass
 class TaskDeek:
     #积分
-    Points: int = 0
+    Points: str = 0
     #排名
-    top: int = 0
+    top: str = 0
 

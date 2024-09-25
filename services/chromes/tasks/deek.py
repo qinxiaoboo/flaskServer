@@ -417,6 +417,8 @@ def dailyTask(chrome, env):
 def deekCount(chrome, env):
 
     tab = chrome.new_tab(url='https://www.deek.network/')
+    taskData = getTaskObject(env, name)
+    env_name = env.name
     chrome.wait(2, 4)
     logger.info(f"{env.name}  登陆钱包")
     chrome.wait(4, 8)
@@ -457,8 +459,7 @@ def deekCount(chrome, env):
         chrome.wait(4, 8)
 
     logger.info(f"{env.name}  开始数据统计")
-    taskData = getTaskObject(env, name)
-    env_name = env.name
+
     points = tab.ele('@class=text-15-s60-l60-w700 font-degular-display capitalize not-italic text-content-accent1').text
     top = tab.ele('@class=font-sf-pro-display text-5-s20-l30-w700 not-italic text-content-primary').text
     text = str(top)
@@ -477,10 +478,10 @@ def deek(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
-            getTab(chrome, env)
-            getDeek(chrome, env)
-            dailyTask(chrome, env)
-            # deekCount(chrome, env)
+            # getTab(chrome, env)
+            # getDeek(chrome, env)
+            # dailyTask(chrome, env)
+            deekCount(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")

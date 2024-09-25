@@ -35,8 +35,8 @@ import random
 
 
 
-
-# Portal_url = 'https://zealy.io/cw/portaltobitcoin/invite/slbLWMwfLoIgPJCfNO-9u'
+name = "Portal"
+#随机返回数组里面的一个链接
 def getrandom_url():
     items =[
         'https://zealy.io/cw/portaltobitcoin/invite/ckFoGaoYsQI8NaLS5rh90',
@@ -558,6 +558,21 @@ def getStayingExplore(chrome,env):
         time.sleep(6)
         chrome.close_tabs()
 
+def getCount(chrome, env):
+    portal_url = getrandom_url()
+    tab = chrome.new_tab(url=portal_url)
+    print('邀请码:', portal_url)
+    try:
+        num = tab.ele('@class=flex justify-between items-center gap-50 text-progress-bar-label-secondary progress-bar-sm',index=2).text
+        portal_xp = num.split('/')[0]
+        print('portal_xp:', portal_xp)
+        taskData = getTaskObject(env, name)
+        taskData.XP = portal_xp
+        updateTaskRecord(env.name, name, taskData, 1)
+        time.sleep(10)
+    except Exception as e:
+        logger.info(e)
+
 
 def getPortal(chrome,env):
     portal_url = getrandom_url()
@@ -609,6 +624,7 @@ def portal(env):
             chrome.close_tabs()
             time.sleep(5)
             getPortal(chrome,env)
+            getCount(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
@@ -616,10 +632,5 @@ def portal(env):
         finally:
             quitChrome(env, chrome)
 
-if __name__ == '__main__':
-
-    with app.app_context():
-        env = Env.query.filter_by(name="ZLL-13").first()
-        portal(env)
 
 
