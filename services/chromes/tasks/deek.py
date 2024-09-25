@@ -4,8 +4,6 @@ from random_words import RandomWords
 from DrissionPage import ChromiumPage,ChromiumOptions
 from loguru import logger
 import random
-from flaskServer.utils.chrome import quitChrome
-
 # 连接数据库
 from flaskServer.config.connect import app
 #数据库信息
@@ -21,9 +19,18 @@ from flaskServer.services.content import Content
 from flaskServer.services.chromes.login import OKXChrome
 from flaskServer.services.dto.account import getAccountById
 from pprint import pprint
+from flaskServer.config.connect import db
+from flaskServer.mode.account import Account
+from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 from flaskServer.services.chromes.login import tw2faV
-from faker import Faker
 from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGroup
+from threading import Thread
+from flaskServer.services.chromes.login import LoginDiscord
+from flaskServer.utils.chrome import quitChrome
+from flaskServer.utils.decorator import chrome_retry
+from flaskServer.services.dto.task_record import updateTaskRecord, getTaskObject
+from flaskServer.services.chromes.login import LoginTW
+name = "Deek"
 click_wallet_js = """
             const button = document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-connect-view").shadowRoot.querySelector("wui-flex > w3m-wallet-login-list").shadowRoot.querySelector("wui-flex > w3m-connect-injected-widget").shadowRoot.querySelector("wui-flex > wui-list-wallet:nth-child(1)").shadowRoot.querySelector("button > wui-text").shadowRoot.querySelector("slot");
             return button
@@ -31,10 +38,6 @@ click_wallet_js = """
 
 deek_network_js = """
             const button = document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-unsupported-chain-view").shadowRoot.querySelector("wui-flex > wui-flex:nth-child(2) > wui-list-network").shadowRoot.querySelector("button");            
-            return button
-            """
-deek_network_js2 = """
-            const button = document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-header").shadowRoot.querySelector("wui-flex > wui-icon-link:nth-child(3)").shadowRoot.querySelector("button");
             return button
             """
 
@@ -59,9 +62,9 @@ def getTab(chrome, env):
 
     try:
         if tab.ele('t:span@text():Login with X'):
-            logger.info(f"{env.name}开始登录X")
+            logger.info(f"{env.name}开始授权 X")
             tab.ele('t:span@text():Login with X').click()
-            chrome.wait(2, 3)
+            chrome.wait(4, 8)
             for _ in range(2):
                 if tab.ele('t:div@text():Authorization failed, please try again'):
                     tab.refresh()
@@ -69,19 +72,20 @@ def getTab(chrome, env):
                     tab.ele('t:span@text():Login with X').click()
                     chrome.wait(2, 3)
 
-            logger.info(f"{env.name}授权X")
-            tab.wait.ele_displayed(chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected"), timeout=60)
+            logger.info(f"{env.name}授权 X")
+            tab.wait.ele_displayed(chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected"), timeout=120)
             try:
+                tab.wait.load_start()
                 chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected").click()
-                logger.info(f"{env.name}授权X完成")
+                logger.info(f"{env.name}授权 X 完成")
             except Exception as e:
                 tab.wait.load_start()
                 chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected").click()
-                logger.info(f"{env.name}授权X完成")
+                logger.info(f"{env.name}授权 X 完成")
 
 
         try:
-            tab.wait.ele_displayed('t:button@text():Create', timeout=60)
+            tab.wait.ele_displayed('t:button@text():Create', timeout=120)
             if tab.ele('t:button@text():Create'):
                 logger.info(f"{env.name}创建账户")
                 chrome.wait(2, 3)
@@ -144,7 +148,7 @@ def getTab(chrome, env):
             chrome.wait(2, 3)
             if tab.ele('t:span@text():Login with X'):
                 tab.ele('t:span@text():Login with X').click()
-                chrome.wait(2, 3)
+                chrome.wait(4, 8)
                 for _ in range(2):
                     if tab.ele('t:div@text():Authorization failed, please try again'):
                         tab.refresh()
@@ -153,8 +157,9 @@ def getTab(chrome, env):
                         chrome.wait(2, 3)
 
                 logger.info(f"{env.name}授权X")
-                tab.wait.ele_displayed(chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected"), timeout=60)
+                tab.wait.ele_displayed(chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected"), timeout=120)
                 try:
+                    tab.wait.load_start()
                     chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected").click()
                     logger.info(f"{env.name}授权X完成")
                 except Exception as e:
@@ -214,7 +219,6 @@ def getTab(chrome, env):
                 tab.ele('t:button@text():Confirm').click()
                 logger.info(f"{env.name}提交邀请码")
 
-
         except Exception as e:
             logger.info(f"{env.name}主页登录失败")
             return
@@ -226,144 +230,262 @@ def getTab(chrome, env):
 def getDeek(chrome, env):
     tab = chrome.new_tab(url='https://www.deek.network/')
     chrome.wait(2, 4)
-    logger.info(f"{env.name}登陆钱包")
+    logger.info(f"{env.name}  登陆钱包")
+    chrome.wait(4, 8)
+
+    try:
+        tab.run_js(deek_network_js).click()
+    except Exception as e:
+        pass
+
+    logger.info(f"{env.name}    判断是否要重新连接钱包")
+    if tab.ele("t:button@tx():Connect Wallet"):
+        tab.ele("t:button@tx():Connect Wallet").click()
+
+        chrome.wait(4, 8)
+        logger.info(f"{env.name}    选择okx钱包")
+        tab.run_js(click_wallet_js).click()
+
+        chrome.wait(4, 8)
+        logger.info(f"{env.name}    okx钱包确认连接")
+        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+        chrome.wait(12, 14)
+
+        try:
+            tab.run_js(deek_network_js).click()
+            chrome.wait(4, 8)
+            tab.run_js(click_wallet_js).click()
+            chrome.wait(4, 8)
+            chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+        except Exception as e:
+            pass
+    else:
+        logger.info(f"{env.name}  钱包已连接，等待授权...")
+
+    chrome.wait(4, 8)
+    if chrome.get_tab(title="OKX Wallet"):
+        logger.info(f"{env.name}    okx钱包授权")
+        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
 
 
-
-    logger.info(f"{env.name}关注deek_network")
+    logger.info(f"{env.name} 关注推特触发登录")
     tab.ele('Go').click()
     chrome.wait(10, 15)
-    chrome.get_tab(url='https://x.com/').ele("@type=button").click()
-
-    chrome.wait(2, 4)
-    if tab.ele('t:span@text():Follow'):
-        tab.ele('t:span@text():Follow').click()
-
-    chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务1")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-
-    logger.info(f"{env.name}关注OpenSocialLabs")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=2).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
+    if chrome.get_tab(url='https://discord.com/'):
+        chrome.get_tab(url='https://discord.com/').close()
+        return
     chrome.get_tab(url='https://x.com/').ele("@type=button").click()
     chrome.wait(2, 4)
     if tab.ele('t:span@text():Follow'):
         tab.ele('t:span@text():Follow').click()
 
-    chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务2")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-    logger.info(f"{env.name}关注chiefbigdeek")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=3).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
-    chrome.get_tab(url='https://x.com/').ele("@type=button").click()
-    chrome.wait(2, 4)
-    if tab.ele('t:span@text():Follow'):
-        tab.ele('t:span@text():Follow').click()
-    chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务3")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-
-    logger.info(f"{env.name}关注EVGHQ")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=4).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
-    chrome.get_tab(url='https://x.com/').ele("@type=button").click()
-    chrome.wait(2, 4)
-    if tab.ele('t:span@text():Follow'):
-        tab.ele('t:span@text():Follow').click()
-    chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务4")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-
-    logger.info(f"{env.name}关注SoMon_OwO")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=5).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
-    chrome.get_tab(url='https://x.com/').ele("@type=button").click()
-    chrome.wait(2, 4)
-    if tab.ele('t:span@text():Follow'):
-        tab.ele('t:span@text():Follow').click()
-    chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务5")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-
-    logger.info(f"{env.name}关注breadnbutterxyz")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=6).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
-    chrome.get_tab(url='https://x.com/').ele("@type=button").click()
-    chrome.wait(2, 4)
-    if tab.ele('t:span@text():Follow'):
-        tab.ele('t:span@text():Follow').click()
-    chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务6")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-
-    logger.info(f"{env.name}加入discord")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]',index=7).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
-    chrome.get_tab(url='https://discord.com/').ele("@type=button").click()
-    chrome.wait(2, 4)
-    chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务7")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-    logger.info(f"{env.name}日常任务1")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=6).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
-    chrome.get_tab(url='https://x.com/').wait(3).ele('@data-testid=tweetButton').click()
-    chrome.wait(2, 4)
-    # chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务8")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
-
-    logger.info(f"{env.name}日常任务2")
-    tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=6).click()
-    tab.wait.ele_displayed(chrome.get_tab(url='https://x.com/').ele("@type=button"), timeout=90)
-    chrome.get_tab(3, 6)
-    chrome.get_tab(url='https://x.com/').wait(3).ele('@data-testid=tweetButton').click()
-    chrome.wait(2, 4)
-    # chrome.wait(3, 6)
-    logger.info(f"{env.name}开始验证任务9")
-    if tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
-        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
+    if chrome.get_tab().ele('t:span@text():Log in'):
+        chrome.get_tab().ele('t:span@text():Log in').click()
 
     chrome.wait(3, 6)
+
+    if chrome.get_tab(url='https://x.com/'):
+        logger.info(f"{env.name} 开始验证任务1")
+        tab.ele('@class=btn-secondary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
+        chrome.get_tab(url='https://x.com/').close()
+
+    chrome.wait(12, 15)
+    tw_tab = chrome.get_tab(url="twitter")
+    if tw_tab:
+        if "login" in tw_tab.url:
+            logger.info(f"{env.name}: 推特未登录,尝试重新登录")
+            with app.app_context():
+                tw: Account = Account.query.filter_by(id=env.tw_id).first()
+                if tw:
+                    tw_tab.ele("@autocomplete=username").input(tw.name)
+                    tw_tab.ele("@@type=button@@text()=Next").click()
+                    tw_tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                    tw_tab.ele("@@type=button@@text()=Log in").click()
+                    fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                    if "login" in tab.url and len(fa2) > 10:
+                        tw2faV(tab, fa2)
+                    chrome.wait(15, 20)
+                    tw_tab.ele("Authorize app").click()
+                    logger.info(f"{env.name}: 推特授权成功")
+                else:
+                    raise Exception(f"{env.name}: 没有导入TW的账号信息")
+        else:
+            tw_tab.ele("Authorize app").click()
+            chrome.wait(4, 8)
+
+    var = 1
+    max_attempts = 12
+    attempts = 0
+
+    while var == 1 and attempts < max_attempts:
+        logger.info(f"{env.name}  关注推特任务")
+        if tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]'):
+            tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
+            chrome.wait(4, 8)
+            if chrome.get_tab(url='https://discord.com/'):
+                return
+        else:
+            logger.info(f"{env.name} 任务已全部完成")
+
+        if chrome.get_tab(url='https://x.com/'):
+
+            chrome.wait(6, 8)
+            if chrome.get_tab(url='https://x.com/'):
+                chrome.get_tab(url='https://x.com/').ele("@type=button").click()
+                chrome.wait(2, 4)
+                if tab.ele('t:span@text():Follow'):
+                    tab.ele('t:span@text():Follow').click()
+                    chrome.wait(2, 4)
+
+                if chrome.get_tab(url='https://x.com/'):
+                    tab.ele('t:button@text():Verify').click()
+                    logger.info(f"{env.name}  验证")
+                    chrome.wait(5, 7)
+                else:
+                    pass
+
+                if tab.ele('Verification Failed. Mostly due to twitter being delayed, please try again after 30 seconds'):
+                    logger.info(f"{env.name}  关注推特任务出错")
+                    if chrome.get_tab().ele('t:span@text():Log in'):
+                        logger.info(f"{env.name}  推特登录失败，退出任务")
+                        var = 0
+                        return
+                    tab.refresh()
+                    if chrome.get_tab(title="OKX Wallet"):
+                        logger.info(f"{env.name}  okx钱包授权")
+                        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+
+
+                    chrome.get_tab(url='https://x.com/').ele("@type=button").click()
+                    chrome.wait(10, 12)
+                    tab.ele('t:button@text():Verify').click()
+                    logger.info(f"{env.name}  验证")
+                else:
+                    logger.info(f"{env.name}  关注推特任务成功")
+                    chrome.get_tab(url='https://x.com/').close()
+        else:
+            chrome.get_tab(url='https://discord.com/').close()
+            tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').next().click()
+        attempts += 1
+
+    return
+
+def dailyTask(chrome, env):
+
+    try:
+        tab = chrome.new_tab(url='https://www.deek.network/')
+        chrome.wait(3, 6)
+        if chrome.get_tab(title="OKX Wallet"):
+            logger.info(f"{env.name}  okx钱包授权")
+            chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+            chrome.wait(10, 12)
+        tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=2).click()
+        chrome.wait(10, 12)
+        if chrome.get_tab(url='https://x.com/').ele('@data-testid=tweetButton'):
+            logger.info(f"{env.name}  每日任务一")
+            chrome.get_tab(url='https://x.com/').ele('@data-testid=tweetButton').click()
+            chrome.wait(2, 3)
+            chrome.get_tab(url='https://x.com/').close()
+
+        tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=3).click()
+        chrome.wait(10, 12)
+        if chrome.get_tab(url='https://x.com/').ele('@type=text'):
+            logger.info(f"{env.name}  每日任务二")
+            chrome.get_tab(url='https://x.com/').ele('@type=text').input(' DEEK')
+            chrome.wait(2, 3)
+            chrome.get_tab(url='https://x.com/').ele('@data-testid=Profile_Save_Button').click()
+            chrome.get_tab(url='https://x.com/').close()
+
+
+        if chrome.get_tab(title="OKX Wallet"):
+            logger.info(f"{env.name}  okx钱包授权")
+            chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+            chrome.wait(10, 12)
+
+        logger.info(f"{env.name}  验证")
+        tab.ele('t:button@text():Verify', index=2).click()
+        chrome.wait(10, 12)
+        tab.ele('t:button@text():Verify', index=3).click()
+        chrome.wait(10, 12)
+        logger.info(f"{env.name}  每日任务完成")
+    except Exception as e:
+        logger.info(f"{env.name}  每日任务失败")
+
     return
 
 
+def deekCount(chrome, env):
+
+    tab = chrome.new_tab(url='https://www.deek.network/')
+    chrome.wait(2, 4)
+    logger.info(f"{env.name}  登陆钱包")
+    chrome.wait(4, 8)
+
+    try:
+        tab.run_js(deek_network_js).click()
+    except Exception as e:
+        pass
+
+    logger.info(f"{env.name}    判断是否要重新连接钱包")
+    if tab.ele("t:button@tx():Connect Wallet"):
+        tab.ele("t:button@tx():Connect Wallet").click()
+
+        chrome.wait(4, 8)
+        logger.info(f"{env.name}    选择okx钱包")
+        tab.run_js(click_wallet_js).click()
+
+        chrome.wait(4, 8)
+        logger.info(f"{env.name}    okx钱包确认连接")
+        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+        chrome.wait(12, 14)
+
+        try:
+            tab.run_js(deek_network_js).click()
+            chrome.wait(4, 8)
+            tab.run_js(click_wallet_js).click()
+            chrome.wait(4, 8)
+            chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+        except Exception as e:
+            pass
+    else:
+        logger.info(f"{env.name}  钱包已连接，等待授权...")
+
+    chrome.wait(4, 8)
+    if chrome.get_tab(title="OKX Wallet"):
+        logger.info(f"{env.name}    okx钱包授权")
+        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+        chrome.wait(4, 8)
+
+    logger.info(f"{env.name}  开始数据统计")
+    taskData = getTaskObject(env, name)
+    env_name = env.name
+    points = tab.ele('@class=text-15-s60-l60-w700 font-degular-display capitalize not-italic text-content-accent1').text
+    top = tab.ele('@class=font-sf-pro-display text-5-s20-l30-w700 not-italic text-content-primary').text
+    text = str(top)
+    number = text.split()[2]
+    print(number)
+    print(points)
+
+    taskData.Points = points
+    taskData.top = number
+    updateTaskRecord(env.name, name, taskData, 1)
+    tab.close()
+
+    return
 
 def deek(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
             getTab(chrome, env)
-            # getDeek(chrome, env)
+            getDeek(chrome, env)
+            dailyTask(chrome, env)
+            # deekCount(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
             return ("失败", e)
-        # finally:
-        #     quitChrome(env, chrome)
+        finally:
+            quitChrome(env, chrome)
 
 

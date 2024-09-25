@@ -45,3 +45,12 @@ class TaskChain:
     Bridge: int = 0
     #总分
     PointsCount: int = 0
+
+@dataclass_json
+@dataclass
+class TaskDeek:
+    #积分
+    Points: int = 0
+    #排名
+    top: int = 0
+
