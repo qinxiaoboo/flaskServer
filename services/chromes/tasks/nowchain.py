@@ -282,6 +282,7 @@ def getCount(chrome, env):
         print(f'{env.name}的Faucet:', Faucet)
         time.sleep(5)
 
+
         getChck_in(chrome, env)
         chrome.close_tabs()
         # # 统计签到天数
