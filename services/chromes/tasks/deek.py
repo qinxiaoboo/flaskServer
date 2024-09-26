@@ -43,30 +43,21 @@ deek_network_js = """
 
 
 def getTab(chrome, env):
-    tab = chrome.new_tab(url="https://s.deek.network/invite/detail?inviteCode=13VRQ3&handle=chaojiaichihon1")
+    tab = chrome.new_tab(url="https://www.deek.network/")
     chrome.wait(2, 3)
 
-    try:
-        if tab.ele('Join now'):
-            tab.ele('Join now').click()
-            chrome.wait(3, 6)
-
-    except Exception as e:
-            tab.refresh()
-            chrome.wait(2, 3)
-            if tab.ele('Join now'):
-                tab.ele('Join now').click()
-                chrome.wait(3, 6)
-            else:
-                logger.info(f"{env.name}网络异常，Join失败")
+    if tab.ele('Join now'):
+        tab.ele('Join now').click()
+        chrome.wait(3, 6)
 
     try:
         if tab.ele('t:span@text():Login with X'):
             logger.info(f"{env.name}开始授权 X")
             tab.ele('t:span@text():Login with X').click()
             chrome.wait(4, 8)
-            for _ in range(2):
+            for _ in range(3):
                 if tab.ele('t:div@text():Authorization failed, please try again'):
+                    chrome.get_tab(url='https://api.x.com/').close()
                     tab.refresh()
                     chrome.wait(2)
                     tab.ele('t:span@text():Login with X').click()
@@ -74,15 +65,8 @@ def getTab(chrome, env):
 
             logger.info(f"{env.name}授权 X")
             tab.wait.ele_displayed(chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected"), timeout=120)
-            try:
-                tab.wait.load_start()
-                chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected").click()
-                logger.info(f"{env.name}授权 X 完成")
-            except Exception as e:
-                tab.wait.load_start()
-                chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected").click()
-                logger.info(f"{env.name}授权 X 完成")
-
+            chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected").click()
+            logger.info(f"{env.name}授权 X 完成")
 
         try:
             tab.wait.ele_displayed('t:button@text():Create', timeout=120)
@@ -149,23 +133,19 @@ def getTab(chrome, env):
             if tab.ele('t:span@text():Login with X'):
                 tab.ele('t:span@text():Login with X').click()
                 chrome.wait(4, 8)
-                for _ in range(2):
+                for _ in range(3):
                     if tab.ele('t:div@text():Authorization failed, please try again'):
                         tab.refresh()
+                        chrome.get_tab(url='https://api.x.com/').close()
                         chrome.wait(2)
                         tab.ele('t:span@text():Login with X').click()
                         chrome.wait(2, 3)
 
                 logger.info(f"{env.name}授权X")
                 tab.wait.ele_displayed(chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected"), timeout=120)
-                try:
-                    tab.wait.load_start()
-                    chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected").click()
-                    logger.info(f"{env.name}授权X完成")
-                except Exception as e:
-                    tab.wait.load_start()
-                    chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected").click()
-                    logger.info(f"{env.name}授权X完成")
+                chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected").click()
+                logger.info(f"{env.name}授权X完成")
+
 
             try:
                 tab.wait.ele_displayed('t:button@text():Create', timeout=60)
@@ -270,7 +250,7 @@ def getDeek(chrome, env):
 
     logger.info(f"{env.name} 关注推特触发登录")
     tab.ele('Go').click()
-    chrome.wait(10, 15)
+    chrome.wait(15, 20)
     if chrome.get_tab(url='https://discord.com/'):
         chrome.get_tab(url='https://discord.com/').close()
         return
@@ -405,14 +385,13 @@ def dailyTask(chrome, env):
         logger.info(f"{env.name}  验证")
         tab.ele('t:button@text():Verify', index=2).click()
         chrome.wait(10, 12)
-        tab.ele('t:button@text():Verify', index=3).click()
+        tab.ele('t:button@text():Verify', index=2).click()
         chrome.wait(10, 12)
         logger.info(f"{env.name}  每日任务完成")
     except Exception as e:
         logger.info(f"{env.name}  每日任务失败")
 
     return
-
 
 def deekCount(chrome, env):
 
@@ -464,8 +443,8 @@ def deekCount(chrome, env):
     top = tab.ele('@class=font-sf-pro-display text-5-s20-l30-w700 not-italic text-content-primary').text
     text = str(top)
     number = text.split()[2]
-    print(number)
-    print(points)
+    # print(number)
+    # print(points)
 
     taskData.Points = points
     taskData.top = number
@@ -478,9 +457,9 @@ def deek(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
-            # getTab(chrome, env)
-            # getDeek(chrome, env)
-            # dailyTask(chrome, env)
+            getTab(chrome, env)
+            getDeek(chrome, env)
+            dailyTask(chrome, env)
             deekCount(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:

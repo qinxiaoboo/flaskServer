@@ -276,14 +276,19 @@ def getCount(chrome, env):
             PointsCount_num = PointsCount.split('Points')[1].strip()
             print(f'{env.name}的p2s:', PointsCount_num)
             taskData.PointsCount = PointsCount_num
-        # # 统计签到天数
-        check_in = tab.ele('@class=px-4 text-sm sm:text-base py-1.5 rounded-lg text-primary-10 bg-BG-5 font-semibold').text
-        check_in_num = check_in.split('days')[0]
-        print(f'{env.name}的check_in_num:', check_in_num)
+
         time.sleep(5)
         Faucet = getFaucet(chrome, env)
         print(f'{env.name}的Faucet:', Faucet)
         time.sleep(5)
+
+        getChck_in(chrome, env)
+        chrome.close_tabs()
+        # # 统计签到天数
+        check_in = tab.ele('@class=px-4 text-sm sm:text-base py-1.5 rounded-lg text-primary-10 bg-BG-5 font-semibold').text
+        check_in_num = check_in.split('days')[0]
+        print(f'{env.name}的check_in_num:', check_in_num)
+
         Swap = getSwap(chrome, env)
         print(f'{env.name}的Swap:', Swap)
         time.sleep(5)
@@ -310,8 +315,6 @@ def NowChain(env):
         try:
             chrome: ChromiumPage = OKXChrome(env)
             getTab(chrome,env)
-            chrome.close_tabs()
-            getChck_in(chrome,env)
             chrome.close_tabs()
             getCount(chrome, env)
 
