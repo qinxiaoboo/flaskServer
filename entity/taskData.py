@@ -54,3 +54,7 @@ class TaskDeek:
     #排名
     top: str = 0
 
+@dataclass_json
+@dataclass
+class TaskPortal:
+    XP: int = 0
