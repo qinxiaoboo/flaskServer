@@ -41,7 +41,7 @@ def updateAccountStatus(account_id, status, error=""):
     account = getAccountById(account_id)
     with app.app_context():
         if account:
-            if account.status != status and status:
+            if account.status != status:
                 account.status = status
             if account.error != error:
                 account.error = error
