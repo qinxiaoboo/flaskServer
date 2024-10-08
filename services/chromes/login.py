@@ -1,3 +1,5 @@
+import time
+
 import requests
 from DrissionPage import ChromiumOptions
 from DrissionPage import ChromiumPage
@@ -59,18 +61,19 @@ def LoginPhantomWallet(chrome,env):
             wallet = Wallet.query.filter_by(id=env.okx_id).first()
             if wallet:
                 tab.ele("Import an existing wallet").click()
-                tab.ele("@data-testid=import-seed-phrase-button",index=1).click()
-                eles = tab.eles("@class=sc-bttaWv gSFlAR")
+                tab.ele("@@class=sc-bdvvtL iZUbiK@@text()=Import Secret Recovery Phrase").click()
+                eles = tab.eles("@class=sc-cdJjGe gOBozq")
                 for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
                     eles[index].input(word)
                 tab.ele("Import Wallet").click()
+                tab.wait(20)
                 tab.ele("Continue").click()
                 passwords = tab.eles("@type=password")
                 for pwd in passwords:
                     pwd.input(WALLET_PASSWORD)
                 tab.ele("@type=checkbox").click()
                 tab.ele("Continue").click()
-                chrome.wait(25)
+                chrome.wait(5)
                 tab.ele("Get Started").click()
 
                 logger.info(f"{env.name}: Phantom 登录成功")
