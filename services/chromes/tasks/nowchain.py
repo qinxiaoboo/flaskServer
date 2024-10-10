@@ -258,11 +258,13 @@ def getBridge(chrome,env):
     return False
 
 def getYesCaptchaassistant(chrome,env):
-    tab = chrome.new_tab(url='chrome-extension://ffbnooekhembinfdjbkbickgkmgkmbnj/popup/index.html')
+    tab = chrome.new_tab(url='chrome-extension://phnemkgfgnkkpagdlpccniemhdmogbah/popup/index.html')
     time.sleep(5)
     try:
         if tab.s_ele('@class=MuiButtonBase-root MuiSwitch-switchBase MuiSwitch-colorDefault PrivateSwitchBase-root MuiSwitch-switchBase MuiSwitch-colorDefault css-1g3pnk5'):
             tab.ele('@class=MuiButtonBase-root MuiSwitch-switchBase MuiSwitch-colorDefault PrivateSwitchBase-root MuiSwitch-switchBase MuiSwitch-colorDefault css-1g3pnk5').click()
+            print('点击完成')
+            time.sleep(5)
         elif tab.s_ele('@class=MuiButtonBase-root MuiSwitch-switchBase MuiSwitch-colorDefault Mui-checked PrivateSwitchBase-root MuiSwitch-switchBase MuiSwitch-colorDefault Mui-checked Mui-checked css-1g3pnk5'):
             print('开关已经打开')
             return
@@ -276,16 +278,21 @@ def getCount(chrome, env):
         time.sleep(10)
         # 统计总数
         try:
+            print('统计总数')
             PointsCount = tab.ele('@class=flex items-center gap-3 text-base sm:text-lg font-semibold').text
             PointsCount_num = PointsCount.split('Points')[0]
             print(f'{env.name}的PointsCount_num:', PointsCount_num)
+            print('开始上传总数')
             taskData.PointsCount = PointsCount_num
+            print('上传总数完成')
         except Exception as e:
             logger.error(e)
             PointsCount = tab.ele('@class=p-4 sm:p-5 rounded-lg sm:rounded-xl shadow flex justify-between gap-5 bg-BG-4').text
             PointsCount_num = PointsCount.split('Points')[1].strip()
             print(f'{env.name}的p2s:', PointsCount_num)
+            print('开始上传总数')
             taskData.PointsCount = PointsCount_num
+            print('上传总数完成')
 
         time.sleep(5)
         Faucet = getFaucet(chrome, env)
