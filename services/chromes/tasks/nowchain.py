@@ -333,7 +333,7 @@ def NowChain(env):
             getTab(chrome,env)
             chrome.close_tabs()
             getCount(chrome, env)
-            # getYesCaptchaassistant
+            # getYesCaptchaassistant(chrome,env)
 
 
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
