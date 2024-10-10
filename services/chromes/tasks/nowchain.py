@@ -257,7 +257,17 @@ def getBridge(chrome,env):
         return False
     return False
 
-
+def getYesCaptchaassistant(chrome,env):
+    tab = chrome.new_tab(url='chrome-extension://ffbnooekhembinfdjbkbickgkmgkmbnj/popup/index.html')
+    time.sleep(5)
+    try:
+        if tab.s_ele('@class=MuiButtonBase-root MuiSwitch-switchBase MuiSwitch-colorDefault PrivateSwitchBase-root MuiSwitch-switchBase MuiSwitch-colorDefault css-1g3pnk5'):
+            tab.ele('@class=MuiButtonBase-root MuiSwitch-switchBase MuiSwitch-colorDefault PrivateSwitchBase-root MuiSwitch-switchBase MuiSwitch-colorDefault css-1g3pnk5').click()
+        elif tab.s_ele('@class=MuiButtonBase-root MuiSwitch-switchBase MuiSwitch-colorDefault Mui-checked PrivateSwitchBase-root MuiSwitch-switchBase MuiSwitch-colorDefault Mui-checked Mui-checked css-1g3pnk5'):
+            print('开关已经打开')
+            return
+    except Exception as e:
+        logger.error(e)
 #统计数量
 def getCount(chrome, env):
     try:
@@ -299,11 +309,17 @@ def getCount(chrome, env):
         print(f'{env.name}的Liquidity:', Liquidity)
         time.sleep(5)
 
+        print('开始上传数据：')
         taskData.check_in = check_in_num
+        print('check_in_num：',check_in_num)
         taskData.Faucet = Faucet
+        print('Faucet:',Faucet)
         taskData.Swap = Swap
+        print('Swap:',Swap)
         taskData.Bridge = Bridge
+        print('Bridge:',Bridge)
         taskData.Liquidity = Liquidity
+        print('Liquidity:',Liquidity)
         taskData.Leaderboard = 0
         updateTaskRecord(env.name, name, taskData, 1)
         time.sleep(10)
@@ -316,7 +332,8 @@ def NowChain(env):
             chrome: ChromiumPage = OKXChrome(env)
             getTab(chrome,env)
             chrome.close_tabs()
-            getCount(chrome, env)
+            # getCount(chrome, env)
+
 
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
