@@ -332,6 +332,7 @@ def NowChain(env):
             chrome: ChromiumPage = OKXChrome(env)
             getTab(chrome,env)
             chrome.close_tabs()
+            getCount(chrome, env)
             # getCount(chrome, env)
 
 
