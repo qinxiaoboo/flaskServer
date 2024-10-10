@@ -22,13 +22,20 @@ def schedule_job(job_id, function_name, parameters, hour, minute, interval, inte
             print(f"Function {function_name} not found")
 
     if interval and interval_unit:
-        scheduler.add_job(
-            func=job_function,
-            trigger='interval',
-            minutes=interval if interval_unit == 'minutes' else None,
-            seconds=interval if interval_unit == 'seconds' else None,
-            id=str(job_id)
-        )
+        if interval_unit == 'minutes':
+            scheduler.add_job(
+                func=job_function,
+                trigger='interval',
+                minutes=interval ,
+                id=str(job_id)
+            )
+        else:
+            scheduler.add_job(
+                func=job_function,
+                trigger='interval',
+                seconds=interval,
+                id=str(job_id)
+            )
     else:
         scheduler.add_job(
             func=job_function,
