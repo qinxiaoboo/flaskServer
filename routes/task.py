@@ -17,6 +17,7 @@ from flaskServer.services.chromes.tasks.Portal_zearly import portal
 from flaskServer.services.chromes.tasks.Plume_taskon import taskon
 from flaskServer.services.chromes.tasks.nowchain import NowChain
 from flaskServer.services.chromes.tasks.deek import deek
+from flaskServer.services.chromes.tasks.Claim_diamante import claim_diamante
 
 bp = Blueprint('tasks', __name__)
 
@@ -132,4 +133,15 @@ def Deek (groups):
     with app.app_context():
         envs = getEnvsByIds(ids)
         Thread(target=submit, args=(deek, envs,)).start()
+    return result
+
+@app.route("/<groups>/todo/claim_diamante", methods=["POST"])
+def Claim_diamante (groups):
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    with app.app_context():
+        envs = getEnvsByIds(ids)
+        Thread(target=submit, args=(claim_diamante, envs,)).start()
     return result

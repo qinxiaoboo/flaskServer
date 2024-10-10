@@ -58,3 +58,9 @@ class TaskDeek:
 @dataclass
 class TaskPortal:
     XP: int = 0
+
+@dataclass_json
+@dataclass
+class TaskDiamante:
+    #积分
+    Points: str = 0
