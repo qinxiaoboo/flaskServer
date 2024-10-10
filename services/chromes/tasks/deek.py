@@ -359,22 +359,24 @@ def dailyTask(chrome, env):
             logger.info(f"{env.name}  okx钱包授权")
             chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
             chrome.wait(10, 12)
-        tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=2).click()
+        tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=2).click(by_js=None)
         chrome.wait(10, 12)
         if chrome.get_tab(url='https://x.com/').ele('@data-testid=tweetButton'):
             logger.info(f"{env.name}  每日任务一")
-            chrome.get_tab(url='https://x.com/').ele('@data-testid=tweetButton').click()
+            chrome.get_tab(url='https://x.com/').ele('@data-testid=tweetButton').click(by_js=None)
             chrome.wait(2, 3)
             chrome.get_tab(url='https://x.com/').close()
+            chrome.wait(10, 12)
 
-        tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=3).click()
+        tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=3).click(by_js=None)
         chrome.wait(10, 12)
         if chrome.get_tab(url='https://x.com/').ele('@type=text'):
             logger.info(f"{env.name}  每日任务二")
             chrome.get_tab(url='https://x.com/').ele('@type=text').input(' DEEK')
             chrome.wait(2, 3)
-            chrome.get_tab(url='https://x.com/').ele('@data-testid=Profile_Save_Button').click()
+            chrome.get_tab(url='https://x.com/').ele('@data-testid=Profile_Save_Button').click(by_js=None)
             chrome.get_tab(url='https://x.com/').close()
+            chrome.wait(10, 12)
 
 
         if chrome.get_tab(title="OKX Wallet"):
@@ -387,6 +389,7 @@ def dailyTask(chrome, env):
         chrome.wait(10, 12)
         tab.ele('t:button@text():Verify', index=2).click()
         chrome.wait(10, 12)
+
         logger.info(f"{env.name}  每日任务完成")
     except Exception as e:
         logger.info(f"{env.name}  每日任务失败")
@@ -458,9 +461,9 @@ def deek(env):
         try:
             chrome: ChromiumPage = OKXChrome(env)
             getTab(chrome, env)
-            getDeek(chrome, env)
+            # getDeek(chrome, env)
             dailyTask(chrome, env)
-            deekCount(chrome, env)
+            # deekCount(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
