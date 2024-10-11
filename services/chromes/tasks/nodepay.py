@@ -60,6 +60,7 @@ async def toKeep(token,proxy,env_name,username):
 
         except Exception as e:
             print(account)
+            await asyncio.sleep(5)
 
 
 
@@ -72,6 +73,7 @@ async def main():
         tasks = []
         for line in data:
             env_name, email, browser_id, token, proxy, none = line.strip().split("|")
+            await asyncio.sleep(5)
             task = asyncio.create_task(toKeep(token, proxy, env_name, email))
             tasks.append(task)
 
