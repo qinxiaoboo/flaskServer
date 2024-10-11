@@ -95,34 +95,59 @@ def getTab(chrome, env):
                     chrome.wait(10, 15)
                 else:
                     raise Exception(f"{env.name}: 没有导入TW的账号信息")
-    print('1')
-    if tab.ele('Something went wrong'):
-        print('2')
-        tab.back(2)
-        chrome.wait(15, 20)
-        if tab.ele('t:button@text():Authorize'):
-                tab.ele('t:button@text():Authorize').click()
-                logger.info(f"{env.name}    点击推特授权")
-                chrome.wait(20, 25)
-    print('3')
-    if tab.wait.ele_displayed(chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button"), timeout=20):
-            chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
-            logger.info(f"{env.name}    授权 X 完成")
-            chrome.wait(15, 20)
 
-            logger.info(f"{env.name}    关注推特")
-            tab.ele('@class=claim-button').click()
-            chrome.wait(4, 6)
+    try:
+        if tab.wait.ele_displayed(chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button"), timeout=20):
+                chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
+                logger.info(f"{env.name}    授权 X 完成")
+                chrome.wait(15, 20)
 
-            logger.info(f"{env.name}    点赞转发推特")
-            tab.ele('@class=claim-button').click()
-            chrome.wait(4, 6)
+                try:
+                    logger.info(f"{env.name}    关注推特")
+                    tab.ele('@class=claim-button').click()
+                    chrome.wait(4, 6)
+                except Exception as e:
+                    logger.info(f"{env.name}    该环境已完成")
+                    return
+
+                logger.info(f"{env.name}    点赞转发推特")
+                tab.ele('@class=claim-button').click()
+                chrome.wait(4, 6)
+
+    except Exception as e:
+            max_attempts = 5
+            attempt = 0
+            while attempt < max_attempts:
+                tab.close()
+                tab = chrome.new_tab(url="https://claim.diamante.io/twitter")
+                tab.refresh()
+                chrome.wait(15, 20)
+
+                if tab.ele('t:button@text():Authorize'):
+                    tab.ele('t:button@text():Authorize').click()
+                    logger.info(f"{env.name}    点击推特授权")
+                    chrome.wait(20, 25)
+
+                if tab.wait.ele_displayed(chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button"),timeout=20):
+                    chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
+                    logger.info(f"{env.name}    授权 X 完成")
+                    chrome.wait(15, 20)
+
+                    logger.info(f"{env.name}    关注推特")
+                    tab.ele('@class=claim-button').click()
+                    chrome.wait(4, 6)
+
+                    logger.info(f"{env.name}    点赞转发推特")
+                    tab.ele('@class=claim-button').click()
+                    chrome.wait(4, 6)
+                    break
+                attempt += 1
 
     logger.info(f"{env.name}    领取积分")
     tab.wait.ele_displayed('@class=claim-button', timeout=20)
     tab.ele('@class=claim-button').click()
     logger.info(f"{env.name}    领取积分成功！")
-    chrome.wait(4, 8)
+    chrome.wait(10, 15)
 
 def claim_diamante(env):
     with app.app_context():
