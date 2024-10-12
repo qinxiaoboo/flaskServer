@@ -13,7 +13,7 @@ objects = {
     "NowChain": TaskChain,
     "Deek": TaskDeek,
     "Portal": TaskPortal,
-    "claim_diamante": TaskDiamante,
+    "Claim_diamante": TaskDiamante,
 }
 
 def get_object_by_name(name):
