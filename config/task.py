@@ -4,6 +4,7 @@ from flaskServer.entity.taskData import TaskChain
 from flaskServer.entity.taskData import TaskDeek
 from flaskServer.entity.taskData import TaskPortal
 from flaskServer.entity.taskData import TaskDiamante
+from flaskServer.entity.taskData import TaskPassport
 
 
 objects = {
@@ -13,6 +14,7 @@ objects = {
     "NowChain": TaskChain,
     "Deek": TaskDeek,
     "Portal": TaskPortal,
+    "passport": TaskPassport,
     "Claim_diamante": TaskDiamante,
 }
 

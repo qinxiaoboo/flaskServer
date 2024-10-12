@@ -18,6 +18,7 @@ from flaskServer.services.chromes.tasks.Plume_taskon import taskon
 from flaskServer.services.chromes.tasks.nowchain import NowChain
 from flaskServer.services.chromes.tasks.deek import deek
 from flaskServer.services.chromes.tasks.Claim_diamante import claim_diamante
+from flaskServer.services.chromes.tasks.Passport import PassPort
 
 bp = Blueprint('tasks', __name__)
 
@@ -144,4 +145,15 @@ def Claim_diamante (groups):
     with app.app_context():
         envs = getEnvsByIds(ids)
         Thread(target=submit, args=(claim_diamante, envs,)).start()
+    return result
+
+@app.route("/<groups>/todo/PassPort", methods=["POST"])
+def Pass_Port (groups):
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    with app.app_context():
+        envs = getEnvsByIds(ids)
+        Thread(target=submit, args=(PassPort, envs,)).start()
     return result
