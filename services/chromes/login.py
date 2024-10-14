@@ -48,6 +48,7 @@ def LoginPhantomWallet(chrome,env):
         pass
     else:
         chrome.new_tab("chrome-extension://bfnaelmomeimhlpmgjnjophhpkkoljpa/popup.html")
+        chrome.wait(3,5)
         tab = chrome.get_tab(title="Phantom Wallet")
 
     if tab.s_ele("Unlock"):
@@ -62,7 +63,7 @@ def LoginPhantomWallet(chrome,env):
             if wallet:
                 tab.ele("Import an existing wallet").click()
                 tab.ele("@@class=sc-bdvvtL iZUbiK@@text()=Import Secret Recovery Phrase").click()
-                eles = tab.eles("@class=sc-cdJjGe gOBozq")
+                eles = tab.eles("@class=sc-bttaWv gSFlAR")
                 for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
                     eles[index].input(word)
                 tab.ele("Import Wallet").click()
@@ -113,7 +114,7 @@ def LoginOKXWallet(chrome,env):
             wallet = Wallet.query.filter_by(id=env.okx_id).first()
             if wallet:
                 tab.ele("Import wallet").click()
-                tab.ele("@@text()=Import wallet@@style=font-weight: 500; flex: 1 0 0%;").click()
+                tab.ele("@@text()=Seed phrase or private key@@style=font-weight: 500; flex: 1 0 0%;").click()
                 eles = tab.eles("@type=text")
                 for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
                     eles[index].input(word)
