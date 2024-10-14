@@ -75,9 +75,12 @@ def getTab(chrome, env):
         chrome.wait(25, 30)
     # Something went wrong
 
-    if chrome.get_tab(url='https://twitter.com/').ele("@value=Send email"):
-        logger.info(f"{env.name}    退出，推特需要邮箱验证！！")
-        return
+    try:
+        if chrome.get_tab(url='https://twitter.com/').ele("@value=Send email"):
+            logger.info(f"{env.name}    退出，推特需要邮箱验证！！")
+            return
+    except Exception as e:
+        pass
 
     tw_tab = chrome.get_tab(url="twitter")
     if tw_tab:
