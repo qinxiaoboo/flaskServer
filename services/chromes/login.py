@@ -434,5 +434,5 @@ if __name__ == '__main__':
         from flaskServer.services.chromes.mail.factory import Email
         outlook: Account = Account.query.filter_by(id=env.outlook_id).first()
         client = Email.from_account("0", chrome, "Q-2-1", outlook.name, aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
-        code = client.getCode("Your Galxe Verification Code", 3, 3)
+        code = client.getCode("Lauren Brown, confirm your email address to access all", 3, 3)
         print(code)
