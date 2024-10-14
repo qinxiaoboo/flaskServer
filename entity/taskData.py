@@ -64,3 +64,10 @@ class TaskPortal:
 class TaskDiamante:
     #积分
     Points: str = 0
+
+
+@dataclass_json
+@dataclass
+class TaskPassport:
+
+    Score: float = 0
