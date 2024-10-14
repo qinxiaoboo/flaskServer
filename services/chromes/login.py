@@ -66,7 +66,6 @@ def LoginPhantomWallet(chrome,env):
                 eles = tab.eles("@class=sc-bttaWv gSFlAR")
                 for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
                     eles[index].input(word)
-
                 tab.ele("Import Wallet").click()
                 tab.wait(20)
                 tab.ele("Continue").click()
