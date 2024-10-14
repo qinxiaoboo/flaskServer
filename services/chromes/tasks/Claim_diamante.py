@@ -82,26 +82,29 @@ def getTab(chrome, env):
     except Exception as e:
         pass
 
-    tw_tab = chrome.get_tab(url="twitter")
-    if tw_tab:
-        if "login" in tw_tab.url:
-            logger.info(f"{env.name}: 推特未登录,尝试重新登录")
-            with app.app_context():
-                tw: Account = Account.query.filter_by(id=env.tw_id).first()
-                if tw:
-                    tw_tab.ele("@autocomplete=username").input(tw.name)
-                    tw_tab.ele("@@type=button@@text()=Next").click()
-                    tw_tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
-                    tw_tab.ele("@@type=button@@text()=Log in").click()
-                    fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
-                    if "login" in tab.url and len(fa2) > 10:
-                        tw2faV(tab, fa2)
-                    chrome.wait(25, 30)
-                    tw_tab.ele("@data-testid=OAuth_Consent_Button").click()
-                    logger.info(f"{env.name}:   推特授权成功")
-                    chrome.wait(15, 20)
-                else:
-                    raise Exception(f"{env.name}: 没有导入TW的账号信息")
+    try:
+        tw_tab = chrome.get_tab(url="twitter")
+        if tw_tab:
+            if "login" in tw_tab.url:
+                logger.info(f"{env.name}: 推特未登录,尝试重新登录")
+                with app.app_context():
+                    tw: Account = Account.query.filter_by(id=env.tw_id).first()
+                    if tw:
+                        tw_tab.ele("@autocomplete=username").input(tw.name)
+                        tw_tab.ele("@@type=button@@text()=Next").click()
+                        tw_tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                        tw_tab.ele("@@type=button@@text()=Log in").click()
+                        fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                        if "login" in tab.url and len(fa2) > 10:
+                            tw2faV(tab, fa2)
+                        chrome.wait(25, 30)
+                        tw_tab.ele("@data-testid=OAuth_Consent_Button").click()
+                        logger.info(f"{env.name}:   推特授权成功")
+                        chrome.wait(15, 20)
+                    else:
+                        raise Exception(f"{env.name}: 没有导入TW的账号信息")
+    except Exception as e:
+        logger.info(f"{env.name}: 推特登陆失败")
 
     try:
         if tab.wait.ele_displayed(chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button"), timeout=20):
