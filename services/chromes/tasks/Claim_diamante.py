@@ -92,7 +92,7 @@ def getTab(chrome, env):
                     if tw:
                         tw_tab.ele("@autocomplete=username").input(tw.name)
                         tw_tab.ele("@@type=button@@text()=Next").click()
-                        tw_tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                        tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
                         tw_tab.ele("@@type=button@@text()=Log in").click()
                         fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
                         if "login" in tab.url and len(fa2) > 10:
@@ -126,7 +126,7 @@ def getTab(chrome, env):
                         try:
                             chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
                             logger.info(f"{env.name}    授权 X 完成")
-                            chrome.wait(20, 25)
+                            chrome.wait(30, 40)
                             break
                         except Exception as e:
                             pass
