@@ -5,7 +5,6 @@ from flaskServer.services.chromes.tasks.multifarm import toDo as toDoMultifarm
 from flaskServer.services.chromes.tasks.plumenetwork import toDoFaucet as toDoFaucetPlumenetwork
 from flaskServer.services.chromes.worker import checkTasks
 from flaskServer.services.dto.taskLog import clearTaskLog
-from flaskServer.services.chromes.tasks.nodepay import nodepaySessiontask
 
 # 定时任务配置
 class Config(object):
@@ -20,7 +19,6 @@ def get_function_by_name(name):
         'toDoFaucet0G': toDoFaucet0G,
         'toDoFaucetPlumenetwork': toDoFaucetPlumenetwork,
         'toDoMultifarm': toDoMultifarm,
-        "nodepaySessiontask": nodepaySessiontask,
     }
     return functions.get(name)
 
