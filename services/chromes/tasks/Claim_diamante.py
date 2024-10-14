@@ -52,7 +52,7 @@ def getTab(chrome, env):
 
     if tab.ele('I got it'):
         tab.ele('I got it').click()
-        logger.info(f"{env.name}    点击明白介绍")
+        logger.info(f"{env.name}   点击明白介绍")
         chrome.wait(3, 4)
 
     logger.info(f"{env.name}   开始数据统计")
@@ -107,51 +107,44 @@ def getTab(chrome, env):
         logger.info(f"{env.name}: 推特登陆失败")
 
     try:
-        if tab.wait.ele_displayed(chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button"), timeout=20):
-                chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
-                logger.info(f"{env.name}    授权 X 完成")
-                chrome.wait(20, 25)
-
-                try:
-                    logger.info(f"{env.name}    关注推特")
-                    tab.ele('@class=claim-button').click()
-                    chrome.wait(6, 9)
-                except Exception as e:
-                    logger.info(f"{env.name}    该环境已完成")
-                    return
-
-                logger.info(f"{env.name}    点赞转发推特")
-                tab.ele('@class=claim-button').click()
-                chrome.wait(4, 6)
+        chrome.wait(10, 15)
+        chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
+        logger.info(f"{env.name}    授权 X 完成")
+        chrome.wait(20, 25)
 
     except Exception as e:
-            max_attempts = 5
-            attempt = 0
-            while attempt < max_attempts:
-                tab.close()
-                tab = chrome.new_tab(url="https://claim.diamante.io/twitter")
-                tab.refresh()
-                chrome.wait(20, 25)
+                max_attempts = 5
+                attempt = 0
+                while attempt < max_attempts:
+                        tab.close()
+                        tab = chrome.new_tab(url="https://claim.diamante.io/twitter")
+                        tab.refresh()
+                        chrome.wait(10, 15)
 
-                if tab.ele('t:button@text():Authorize'):
-                    tab.ele('t:button@text():Authorize').click()
-                    logger.info(f"{env.name}    点击推特授权")
-                    chrome.wait(25, 30)
+                        if tab.ele('t:button@text():Authorize'):
+                            tab.ele('t:button@text():Authorize').click()
+                            logger.info(f"{env.name}    点击推特授权2")
+                            chrome.wait(25, 30)
+                        try:
+                            chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
+                            logger.info(f"{env.name}    授权 X 完成")
+                            chrome.wait(20, 25)
+                            break
+                        except Exception as e:
+                            pass
+                        attempt += 1
 
-                if tab.wait.ele_displayed(chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button"),timeout=20):
-                    chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
-                    logger.info(f"{env.name}    授权 X 完成")
-                    chrome.wait(20, 25)
+    try:
+        logger.info(f"{env.name}    关注推特")
+        tab.ele('@class=claim-button').click()
+        chrome.wait(6, 9)
+    except Exception as e:
+        logger.info(f"{env.name}    该环境已完成")
+        return
 
-                    logger.info(f"{env.name}    关注推特")
-                    tab.ele('@class=claim-button').click()
-                    chrome.wait(4, 6)
-
-                    logger.info(f"{env.name}    点赞转发推特")
-                    tab.ele('@class=claim-button').click()
-                    chrome.wait(4, 6)
-                    break
-                attempt += 1
+    logger.info(f"{env.name}    点赞转发推特")
+    tab.ele('@class=claim-button').click()
+    chrome.wait(4, 6)
 
     logger.info(f"{env.name}    领取积分")
     tab.wait.ele_displayed('@class=claim-button', timeout=20)
