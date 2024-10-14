@@ -98,13 +98,11 @@ def getTab(chrome, env):
                         if "login" in tab.url and len(fa2) > 10:
                             tw2faV(tab, fa2)
                         chrome.wait(25, 30)
-                        tw_tab.ele("@data-testid=OAuth_Consent_Button").click()
-                        logger.info(f"{env.name}:   推特授权成功")
-                        chrome.wait(15, 20)
                     else:
                         raise Exception(f"{env.name}: 没有导入TW的账号信息")
     except Exception as e:
         logger.info(f"{env.name}: 推特登陆失败")
+        return
 
     try:
         chrome.wait(10, 15)
