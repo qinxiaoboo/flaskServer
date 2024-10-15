@@ -19,6 +19,7 @@ from flaskServer.services.chromes.tasks.nowchain import NowChain
 from flaskServer.services.chromes.tasks.deek import deek
 from flaskServer.services.chromes.tasks.Claim_diamante import claim_diamante
 from flaskServer.services.chromes.tasks.Passport import PassPort
+from flaskServer.services.chromes.tasks.Highlayer import highlayer
 
 bp = Blueprint('tasks', __name__)
 
@@ -156,4 +157,15 @@ def Pass_Port (groups):
     with app.app_context():
         envs = getEnvsByIds(ids)
         Thread(target=submit, args=(PassPort, envs,)).start()
+    return result
+
+@app.route("/<groups>/todo/highlayer", methods=["POST"])
+def Highlayer (groups):
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    with app.app_context():
+        envs = getEnvsByIds(ids)
+        Thread(target=submit, args=(highlayer, envs,)).start()
     return result
