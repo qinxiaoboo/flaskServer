@@ -76,4 +76,4 @@ class TaskPassport:
 @dataclass
 class TaskHighlayer:
     #总分
-    Total: int = 0
+    Total: str = 0

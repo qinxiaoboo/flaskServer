@@ -212,9 +212,9 @@ def getTab(chrome, env):
     logger.info(f"{env.name}    统计总分")
     tab = chrome.new_tab(url="https://dashboard.highlayer.io/?referral=TOKATO")
     tab.refresh()
-    chrome.wait(4, 8)
+    chrome.wait(5, 10)
     total = tab.ele('@class=stat-value', index=6).text
-
+    print(total)
     taskData.Total = total
     updateTaskRecord(env.name, name, taskData, 1)
 
