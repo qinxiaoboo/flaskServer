@@ -71,3 +71,9 @@ class TaskDiamante:
 class TaskPassport:
 
     Score: float = 0
+
+@dataclass_json
+@dataclass
+class TaskHighlayer:
+    #总分
+    Total: int = 0
