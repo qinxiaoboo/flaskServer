@@ -200,7 +200,7 @@ def checkTw(tab,env):
         start = tab.s_ele("@@type=submit@@value=Start")
         if start:
             tab.ele("@@type=submit@@value=Start").click(by_js=True)
-            chrome.wait(1,2)
+            tab.wait(1, 2)
             send = tab.s_ele("@@type=submit@@value=Send email")
             if send:
                 updateAccountStatus(env.tw_id, 1, "该环境TW需要邮箱验证，请前往验证")
@@ -211,9 +211,10 @@ def checkTw(tab,env):
                     tab.ele("Reload Challenge").click()
                 ele = tab.ele("@@type=submit@@value=Continue to X",timeout=120)
                 if ele:
-                    chrome.wait(3, 4)
+                    tab.wait(3, 4)
                     ele.click(by_js=True)
                     logger.info(f"{env.name}: TW验证码验证成功")
+                    endCheckTW(tab, env)
                 else:
                     updateAccountStatus(env.tw_id, 1, "TW验证码元素未找到")
                     raise Exception(f"{env.name}: TW验证码元素未找到")
@@ -224,7 +225,7 @@ def checkTw(tab,env):
         tab.wait(1,2)
         if ".com/home" in tab.url:
             logger.info(f"{env.name}: 登录推特成功")
-            endCheckTW(tab,env)
+            endCheckTW(tab, env)
         else:
             updateAccountStatus(env.tw_id, 1, "没有检测到登录页面的url为.com/home")
             raise Exception(f"{env.name}: TW 登录失败")
