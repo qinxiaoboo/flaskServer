@@ -46,11 +46,10 @@ def getTab(chrome,env):
             tab.ele('Connect Wallet').click()
             time.sleep(5)
             try:
-                if tab.s_ele('OKX Wallet'):
-                    tab.run_js(okx_url)
-                    time.sleep(5)
-                    exe_okx(chrome, env)
-                    time.sleep(5)
+                tab.run_js(okx_url)
+                time.sleep(5)
+                exe_okx(chrome, env)
+                time.sleep(5)
             except Exception as e:
                 print('不需要钱包验证')
             try:
