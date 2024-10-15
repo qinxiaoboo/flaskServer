@@ -267,7 +267,7 @@ def LoginTW(chrome:ChromiumPage,env):
                 tab.ele("@@type=button@@text()=Log in").click()
                 fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
                 if "login" in tab.url and len(fa2) > 10:
-                    tw2faV(tab,fa2)
+                    tw2faV(tab, fa2)
             else:
                 updateAccountStatus(env.tw_id, 1, "没有导入TW的账号信息")
                 raise Exception(f"{env.name}: 没有导入TW的账号信息")
@@ -330,7 +330,7 @@ def LoginOutlook(chrome:ChromiumPage,env):
             else:
                 logger.info(f"{env.name}: 邮箱 账号为空，跳过登录")
     updateAccountStatus(env.outlook_id, 2)
-    return get_Custome_Tab(tab)
+    tab.close()
 
 
 def OKXChrome(env):
@@ -428,10 +428,11 @@ def toLoginAll(env):
 
 if __name__ == '__main__':
     with app.app_context():
-        env = Env.query.filter_by(name="Q-2").first()
-        try:
-            chrome = OKXChrome(env)
-            logger.info("环境初始化成功")
-            quitChrome(env, chrome)
-        except Exception as e:
-            logger.error(env.to_json(),e)
+        env = Env.query.filter_by(name="Q-2-1").first()
+        chrome = DebugChrome(env)
+        logger.info("环境初始化成功")
+        from flaskServer.services.chromes.mail.factory import Email
+        outlook: Account = Account.query.filter_by(id=env.outlook_id).first()
+        client = Email.from_account("0", chrome, "Q-2-1", outlook.name, aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
+        code = client.getCode("Lauren Brown, confirm your email address to access all", 3, 3)
+        print(code)

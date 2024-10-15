@@ -104,6 +104,10 @@ def getTab(chrome, env):
         logger.info(f"{env.name}: 推特登陆失败")
         return
 
+    if chrome.get_tab(url='https://twitter.com/account/access'):
+        logger.info(f"{env.name}: 推特登录失败")
+        return
+
     try:
         chrome.wait(10, 15)
         chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
