@@ -26,10 +26,11 @@ button.click();'''
 def exe_okx(chrome,env):
     try:
         chrome.wait(3, 4)
-        chrome.get_tab(title="OKX Wallet").ele('@data-testid=okd-button', index=2).click()
+        if chrome.get_tab(title="OKX Wallet").ele('@data-testid=okd-button', index=2):
+            chrome.get_tab(title="OKX Wallet").ele('@data-testid=okd-button', index=2).click()
+
     except Exception as e:
         print(f'{env.name}取的ele不对')
-        logger.error(e)
     return
 
 #主页面登录
@@ -45,12 +46,13 @@ def getTab(chrome,env):
             tab.ele('Connect Wallet').click()
             time.sleep(5)
             try:
-                tab.run_js(okx_url)
-                time.sleep(5)
-                exe_okx(chrome,env)
-                time.sleep(5)
+                if tab.s_ele('OKX Wallet'):
+                    tab.run_js(okx_url)
+                    time.sleep(5)
+                    exe_okx(chrome, env)
+                    time.sleep(5)
             except Exception as e:
-                logger.error(e)
+                print('不需要钱包验证')
             try:
                 print('开始选择测试网')
                 tab.run_js(switch_Network)
@@ -58,7 +60,7 @@ def getTab(chrome,env):
                 exe_okx(chrome,env)
                 time.sleep(5)
             except Exception as e:
-                logger.error(e)
+                print('不需要选择测试网了')
         try:
             print('开始选择测试网')
             tab.run_js(switch_Network)
@@ -66,7 +68,7 @@ def getTab(chrome,env):
             exe_okx(chrome,env)
             time.sleep(5)
         except Exception as e:
-            logger.error(e)
+            print('不需要选择测试网了')
     except Exception as e:
         logger.error(e)
 
