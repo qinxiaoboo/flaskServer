@@ -214,6 +214,8 @@ def checkTw(tab,env):
                     tab.wait(3, 4)
                     ele.click(by_js=True)
                     logger.info(f"{env.name}: TW验证码验证成功")
+                    tab.wait.doc_loaded()
+                    tab.wait(2, 3)
                     endCheckTW(tab, env)
                 else:
                     updateAccountStatus(env.tw_id, 1, "TW验证码元素未找到")
