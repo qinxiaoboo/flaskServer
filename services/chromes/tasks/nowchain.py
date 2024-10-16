@@ -93,7 +93,6 @@ def getFaucet(chrome, env):
     except Exception as e:
         logger.error(e)
         return False
-    return  False
 
 #check——in
 def getChck_in(chrome,env):
@@ -137,7 +136,6 @@ def getChck_in(chrome,env):
         logger.error(e)
         check_day = tab.ele('@class=px-4 text-sm sm:text-base py-1.5 rounded-lg text-primary-10 bg-BG-5 font-semibold').text
         return check_day
-    return False
 
 #swap
 def getSwap(chrome,env):
@@ -171,7 +169,6 @@ def getSwap(chrome,env):
     except Exception as e:
         logger.error(e)
         return False
-    return False
 
 #Liquidity
 def getLiquidity(chrome,env):
@@ -220,7 +217,6 @@ def getLiquidity(chrome,env):
     except Exception as e:
         logger.error(e)
         return False
-    return False
 
 #Bridge
 def getBridge(chrome,env):
@@ -256,7 +252,6 @@ def getBridge(chrome,env):
     except Exception as e:
         logger.error(e)
         return False
-    return False
 
 def getYesCaptchaassistant(chrome,env):
     tab = chrome.new_tab(url='chrome-extension://phnemkgfgnkkpagdlpccniemhdmogbah/popup/index.html')
@@ -342,8 +337,6 @@ def NowChain(env):
             chrome.close_tabs()
             getCount(chrome, env)
             # getYesCaptchaassistant(chrome,env)
-
-
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
