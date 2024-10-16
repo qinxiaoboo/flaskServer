@@ -82,11 +82,11 @@ def getFaucet(chrome, env):
             print('领水时间还没到：',tab.ele('Time remaining: ').text)
             return False
         elif tab.s_ele('t:button@tx():Request Assets'):
-            logger.info('开始等待人机验证')
-            #------------------------------待测试是否需要去掉
-            time.sleep(60)
-            #--------------------------
-            tab.wait.ele_displayed('t:button@tx():Request Assets', timeout=60)
+            # logger.info('开始等待人机验证')
+            # #------------------------------待测试是否需要去掉
+            # time.sleep(60)
+            # #--------------------------
+            # tab.wait.ele_displayed('t:button@tx():Request Assets', timeout=60)
             tab.ele('t:button@tx():Request Assets').click()
             time.sleep(15)
             return True
