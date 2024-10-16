@@ -57,6 +57,22 @@ def gethumanity(chrome,env):
     tab.set.window.max()
     time.sleep(2)
     try:
+        if tab.s_ele('@class=bottom'):
+            print('点击签到')
+            tab.ele('@class=bottom').click()
+            time.sleep(5)
+            try:
+                exe_okx(chrome, env)
+            except Exception as e:
+                print('不需要连接钱包')
+        elif tab.ele('@class=bottom disable'):
+            print('已经签到过不需要签到了')
+            quitChrome(env, chrome)
+
+
+    except Exception as e:
+        logger.info(e)
+    try:
         if tab.s_ele('Get Started'):
             try:
                 tab.run_js(dis_js)
@@ -121,43 +137,65 @@ def gethumanity(chrome,env):
                     logger.info(f'{env.name}:还有其他的语言需要加判断')
             except Exception as e:
                 logger.error(e)
+
+            time.sleep(10)
             try:
-                if tab.s_ele('@class=MuiInputBase-input mui-1qvwndf'):
-                    # 首次登录需要的注册，如果不是第一次可能就不需要
-                    print('hp_username:',generate_random_word())
+                if tab.s_ele('Choose a name for your Human ID'):
+                    tab.ele('@class=MuiInputBase-input mui-1qvwndf').input(generate_random_word())
+                    time.sleep(5)
+                    tab.ele('@class=MuiBox-root mui-171onha', index=2).click()
+                else:
+                    time.sleep(10)
                     tab.ele('@class=MuiInputBase-input mui-1qvwndf').input(generate_random_word())
                     time.sleep(2)
                     tab.ele('@class=MuiBox-root mui-171onha', index=2).click()
-                    time.sleep(2)
-                    print('First Name is:',generate_random_word())
+
+                time.sleep(5)
+                if tab.s_ele('Complete your profile'):
                     tab.ele('@class=MuiInputBase-input mui-1qvwndf', index=1).input(generate_random_word())
                     time.sleep(2)
-                    print('Last Name is:',generate_random_word())
                     tab.ele('@class=MuiInputBase-input mui-1qvwndf', index=2).input(generate_random_word())
                     time.sleep(2)
                     tab.ele('@class=MuiBox-root mui-171onha', index=2).click()
+                else:
                     time.sleep(10)
-
-                try:
-                    if tab.s_ele('@class=skip'):
-                        tab.ele('@class=skip').click()
-                except Exception as e:
-                    print('没有出现skip')
-                time.sleep(2)
-                if tab.s_ele('@class=bottom'):
-                    tab.ele('@class=bottom').click()
+                    tab.ele('@class=MuiInputBase-input mui-1qvwndf', index=1).input(generate_random_word())
                     time.sleep(5)
-                    try:
-                        exe_okx(chrome, env)
-                    except Exception as e:
-                        print('不需要连接钱包')
-
+                    tab.ele('@class=MuiInputBase-input mui-1qvwndf', index=2).input(generate_random_word())
+                    time.sleep(2)
+                    tab.ele('@class=MuiBox-root mui-171onha', index=2).click()
             except Exception as e:
                 logger.error(e)
+        chrome.wait(10)
+        try:
+            # tab.wait.ele_displayed(url=humanity_url).ele('@class=skip',timeout=90)
+            # tab.ele('@class=skip').click()
+            if tab.s_ele('@class=skip'):
+                print('点击skip弹幕')
+                tab.ele('@class=skip').click()
+            else:
+                time.sleep(10)
+                tab.ele('@class=skip').click()
+        except Exception as e:
+            print('没有出现skip')
+        time.sleep(2)
+        try:
+            if tab.s_ele('@class=bottom'):
+                print('点击签到')
+                tab.ele('@class=bottom').click()
+                time.sleep(5)
+                try:
+                    exe_okx(chrome, env)
+                except Exception as e:
+                    print('不需要连接钱包')
+            elif tab.ele('@class=bottom disable'):
+                print('已经签到过不需要签到了')
+        except Exception as e:
+            logger.info(e)
     except Exception as e:
         logger.error(e)
 
-def NowChain(env):
+def Humanity(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
