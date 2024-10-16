@@ -57,15 +57,12 @@ async def toKeep(token,proxy,env_name,username):
 async def main():
     with open(r"C:\Users\Joye\Desktop\nodepay.txt", "r") as f:
         data = f.readlines()
-
-
         tasks = []
         for line in data:
             env_name, email, browser_id, token, proxy, none = line.strip().split("|")
             await asyncio.sleep(5)
             task = asyncio.create_task(toKeep(token, proxy, env_name, email))
             tasks.append(task)
-
         await asyncio.gather(*tasks)
 
 
