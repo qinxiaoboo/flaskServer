@@ -30,8 +30,13 @@ for index, row in df.iterrows():
             ip, port, user, pwd = proxy.split(",")
             PROXY = update(ip, port, user, pwd)
         if tw:
-            name, pwd, fa2 = tw.split(",")
-            TW = updateAccount(name, pwd, fa2, "TW")
+            twList = tw.split(",")
+            if len(twList) == 3:
+                name, pwd, fa2 = tw.split(",")
+                TW = updateAccount(name, pwd, fa2, "TW")
+            elif len(twList) == 5:
+                name, pwd, fa2, emailUser, emailPassword = tw.split(",")
+                TW = updateAccount(name, pwd, fa2, "TW", emailUser, emailPassword)
         if discord:
             name, pwd, fa2 = discord.split(",")
             DISCORD = updateAccount(name, pwd, fa2, "DISCORD")

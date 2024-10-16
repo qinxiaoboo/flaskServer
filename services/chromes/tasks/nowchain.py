@@ -46,11 +46,10 @@ def getTab(chrome,env):
             tab.ele('Connect Wallet').click()
             time.sleep(5)
             try:
-                if tab.s_ele('OKX Wallet'):
-                    tab.run_js(okx_url)
-                    time.sleep(5)
-                    exe_okx(chrome, env)
-                    time.sleep(5)
+                tab.run_js(okx_url)
+                time.sleep(5)
+                exe_okx(chrome, env)
+                time.sleep(5)
             except Exception as e:
                 print('不需要钱包验证')
             try:
@@ -83,18 +82,17 @@ def getFaucet(chrome, env):
             print('领水时间还没到：',tab.ele('Time remaining: ').text)
             return False
         elif tab.s_ele('t:button@tx():Request Assets'):
-            logger.info('开始等待人机验证')
-            #------------------------------待测试是否需要去掉
-            time.sleep(60)
-            #--------------------------
-            tab.wait.ele_displayed('t:button@tx():Request Assets', timeout=60)
+            # logger.info('开始等待人机验证')
+            # #------------------------------待测试是否需要去掉
+            # time.sleep(60)
+            # #--------------------------
+            # tab.wait.ele_displayed('t:button@tx():Request Assets', timeout=60)
             tab.ele('t:button@tx():Request Assets').click()
             time.sleep(15)
             return True
     except Exception as e:
         logger.error(e)
         return False
-    return  False
 
 #check——in
 def getChck_in(chrome,env):
@@ -138,7 +136,6 @@ def getChck_in(chrome,env):
         logger.error(e)
         check_day = tab.ele('@class=px-4 text-sm sm:text-base py-1.5 rounded-lg text-primary-10 bg-BG-5 font-semibold').text
         return check_day
-    return False
 
 #swap
 def getSwap(chrome,env):
@@ -172,7 +169,6 @@ def getSwap(chrome,env):
     except Exception as e:
         logger.error(e)
         return False
-    return False
 
 #Liquidity
 def getLiquidity(chrome,env):
@@ -221,7 +217,6 @@ def getLiquidity(chrome,env):
     except Exception as e:
         logger.error(e)
         return False
-    return False
 
 #Bridge
 def getBridge(chrome,env):
@@ -257,7 +252,6 @@ def getBridge(chrome,env):
     except Exception as e:
         logger.error(e)
         return False
-    return False
 
 def getYesCaptchaassistant(chrome,env):
     tab = chrome.new_tab(url='chrome-extension://phnemkgfgnkkpagdlpccniemhdmogbah/popup/index.html')
@@ -343,8 +337,6 @@ def NowChain(env):
             chrome.close_tabs()
             getCount(chrome, env)
             # getYesCaptchaassistant(chrome,env)
-
-
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
