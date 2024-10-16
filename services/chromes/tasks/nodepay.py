@@ -1,12 +1,7 @@
 import asyncio
-import datetime
 import time
-import json
 from flaskServer.services.internal.tls.client import TLSClient
 from flaskServer.entity.galxeAccount import AccountInfo
-from flaskServer.mode.env import Env
-from flaskServer.mode.proxy import Proxy
-from flaskServer.mode.account import Account
 from flaskServer.config.connect import app
 
 async def toKeep(token,proxy,env_name,username):
@@ -21,9 +16,7 @@ async def toKeep(token,proxy,env_name,username):
         client = TLSClient(account, custom_headers)
         try:
             request = await client.post("https://api.nodepay.org/api/auth/session")
-
             a += 1
-
             print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),
                 "||| 环境ID：{7}||| 节点名: {0} ||| 邮箱：{1} ||| 节点状态：{2} ||| 任务积分：{3} ||| 挖矿积分：{4} ||| 总积分：{5} ||| 代理：{6}".format(
                     request["data"]["name"],
@@ -47,7 +40,6 @@ async def toKeep(token,proxy,env_name,username):
                         "version": "2.2.7"
                     }
                     ping = await client.post("https://nw.nodepay.org/api/network/ping",json=data)
-
                     print(
                         time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),
                         " ||| 环境ID：{3} ||| Ping检测状态：{0} ||| IP检测分数：{1} ||| 代理：{2}".format(ping['success'],ping['data']['ip_score'],proxy,env_name)
@@ -61,9 +53,6 @@ async def toKeep(token,proxy,env_name,username):
         except Exception as e:
             print(account)
             await asyncio.sleep(5)
-
-
-
 
 async def main():
     with open(r"C:\Users\Joye\Desktop\nodepay.txt", "r") as f:
