@@ -84,9 +84,9 @@ def getDiscord(chrome,env):
                 chrome.get_tab(title='Discord').ele("@type=button", index=2).click()
                 logger.info(f"{env.name}: 登录discord完成----------------------------------")
                 time.sleep(10)
-        elif chrome.get_tab('https://discord.com'):
-            print('这是通过网址进去的')
-            chrome.get_tab(title='Discord | Authorize access to your account').ele("@type=button", index=2).click()
+        elif chrome.get_tab('Onboarding | Humanity Protocol'):
+            print('Onboarding | Humanity Protocol进去的')
+            chrome.get_tab(title='Onboarding | Humanity Protocol').ele("@type=button", index=2).click()
             logger.info(f"{env.name}: 登录discord完成----------------------------------")
         else:
             logger.info(f'{env.name}:还有其他的语言需要加判断')
