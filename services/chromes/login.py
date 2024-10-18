@@ -264,9 +264,9 @@ def LoginTW(chrome:ChromiumPage,env):
         with app.app_context():
             tw:Account = Account.query.filter_by(id=env.tw_id).first()
             if tw:
-                tab.ele("@autocomplete=username").input(tw.name)
+                tab.ele("@autocomplete=username").input(tw.name, clear=True)
                 tab.ele("@@type=button@@text()=Next").click()
-                tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
                 tab.ele("@@type=button@@text()=Log in").click()
                 fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
                 if "login" in tab.url and len(fa2) > 10:
