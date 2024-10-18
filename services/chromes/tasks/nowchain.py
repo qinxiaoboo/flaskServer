@@ -13,7 +13,8 @@ from flaskServer.utils.chrome import quitChrome
 #项目名称
 name = 'NowChain'
 #项目邀请链接
-now_chain_url = 'https://testnet.nowchain.co/testnet/point-system?referral=0xECB41b49D74D7d13bB51f9603Fd2360557647504/'
+#now_chain_url = 'https://testnet.nowchain.co/testnet/point-system?referral=0xECB41b49D74D7d13bB51f9603Fd2360557647504/'
+now_chain_url = 'https://testnet.nowchain.co/testnet/point-system?referral=0x5518CcfE29f652175459F7772595Fa06163Bd92A/'
 switch_Network = '''let button  =
 document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-unsupported-chain-view").shadowRoot.querySelector("wui-flex > wui-flex:nth-child(2) > wui-list-network:nth-child(2)");
 button.click();
@@ -53,16 +54,16 @@ def getTab(chrome,env):
             except Exception as e:
                 print('不需要钱包验证')
             try:
-                print('开始选择测试网')
                 tab.run_js(switch_Network)
+                print('选择测试网完成')
                 time.sleep(5)
                 exe_okx(chrome,env)
                 time.sleep(5)
             except Exception as e:
                 print('不需要选择测试网了')
         try:
-            print('开始选择测试网')
             tab.run_js(switch_Network)
+            print('选择测试网完成')
             time.sleep(5)
             exe_okx(chrome,env)
             time.sleep(5)
@@ -78,16 +79,20 @@ def getFaucet(chrome, env):
     print('开始领水')
     tab = chrome.new_tab(url='https://testnet.nowchain.co/testnet/faucet/')
     try:
+        time.sleep(30)
         if tab.s_ele('Time remaining: '):
             print('领水时间还没到：',tab.ele('Time remaining: ').text)
             return False
         elif tab.s_ele('t:button@tx():Request Assets'):
+            print('此时为Request Assets，开始点击领水')
             # logger.info('开始等待人机验证')
             # #------------------------------待测试是否需要去掉
             # time.sleep(60)
             # #--------------------------
             # tab.wait.ele_displayed('t:button@tx():Request Assets', timeout=60)
+            time.sleep(30)
             tab.ele('t:button@tx():Request Assets').click()
+            print('点击完成')
             time.sleep(15)
             return True
     except Exception as e:
@@ -337,6 +342,7 @@ def NowChain(env):
             chrome.close_tabs()
             getCount(chrome, env)
             # getYesCaptchaassistant(chrome,env)
+            # getFaucet(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
