@@ -13,8 +13,7 @@ from flaskServer.utils.chrome import quitChrome
 #项目名称
 name = 'NowChain'
 #项目邀请链接
-#now_chain_url = 'https://testnet.nowchain.co/testnet/point-system?referral=0xECB41b49D74D7d13bB51f9603Fd2360557647504/'
-now_chain_url = 'https://testnet.nowchain.co/testnet/point-system?referral=0x5518CcfE29f652175459F7772595Fa06163Bd92A/'
+now_chain_url = 'https://testnet.nowchain.co/testnet/point-system?referral=0xECB41b49D74D7d13bB51f9603Fd2360557647504/'
 switch_Network = '''let button  =
 document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-unsupported-chain-view").shadowRoot.querySelector("wui-flex > wui-flex:nth-child(2) > wui-list-network:nth-child(2)");
 button.click();
@@ -276,25 +275,66 @@ def getCount(chrome, env):
     try:
         taskData = getTaskObject(env, name)
         tab = chrome.new_tab(now_chain_url)
+        try:
+            if tab.s_ele('Connect Wallet'):
+                print('开始链接钱包')
+                tab.ele('Connect Wallet').click()
+                time.sleep(5)
+                try:
+                    tab.run_js(okx_url)
+                    time.sleep(5)
+                    exe_okx(chrome, env)
+                    time.sleep(5)
+                except Exception as e:
+                    print('不需要钱包验证')
+                try:
+                    tab.run_js(switch_Network)
+                    print('选择测试网完成')
+                    time.sleep(5)
+                    exe_okx(chrome, env)
+                    time.sleep(5)
+                except Exception as e:
+                    print('不需要选择测试网了')
+            try:
+                tab.run_js(switch_Network)
+                print('选择测试网完成')
+                time.sleep(5)
+                exe_okx(chrome, env)
+                time.sleep(5)
+            except Exception as e:
+                print('不需要选择测试网了')
+        except Exception as e:
+            logger.info(e)
         time.sleep(10)
         # 统计总数
-        try:
-            print('统计总数')
-            PointsCount = tab.ele('@class=flex items-center gap-3 text-base sm:text-lg font-semibold').text
-            PointsCount_num = PointsCount.split('Points')[0]
-            print(f'{env.name}的PointsCount_num:', PointsCount_num)
-            print('开始上传总数')
-            taskData.PointsCount = PointsCount_num
-            print('上传总数完成')
-        except Exception as e:
-            logger.error(e)
-            PointsCount = tab.ele('@class=p-4 sm:p-5 rounded-lg sm:rounded-xl shadow flex justify-between gap-5 bg-BG-4').text
-            PointsCount_num = PointsCount.split('Points')[1].strip()
-            print(f'{env.name}的p2s:', PointsCount_num)
-            print('开始上传总数')
-            taskData.PointsCount = PointsCount_num
-            print('上传总数完成')
-
+        num = 0
+        while num < 3:
+            if tab.s_ele('My Points'):
+                try:
+                    print('统计总数')
+                    PointsCount = tab.ele('@class=flex items-center gap-3 text-base sm:text-lg font-semibold').text
+                    PointsCount_num = PointsCount.split('Points')[0]
+                    print(f'{env.name}的PointsCount_num:', PointsCount_num)
+                    print('开始上传总数')
+                    taskData.PointsCount = PointsCount_num
+                    print('上传总数完成')
+                    break
+                except Exception as e:
+                    logger.info(e)
+                    PointsCount = tab.ele(
+                        '@class=p-4 sm:p-5 rounded-lg sm:rounded-xl shadow flex justify-between gap-5 bg-BG-4').text
+                    PointsCount_num = PointsCount.split('Points')[1].strip()
+                    print(f'{env.name}的p2s:', PointsCount_num)
+                    print('开始上传总数')
+                    taskData.PointsCount = PointsCount_num
+                    print('上传总数完成')
+                    break
+            else:
+                print('需要等待一下')
+                chrome.wait(5,10)
+                num += 1
+                if num == 3:
+                    print('统计总数失败')
         time.sleep(5)
         Faucet = getFaucet(chrome, env)
         print(f'{env.name}的Faucet:', Faucet)
