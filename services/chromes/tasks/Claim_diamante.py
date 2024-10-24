@@ -50,6 +50,12 @@ def getTab(chrome, env):
         chrome.get_tab(title="Phantom Wallet").ele("@type=submit").click()
         chrome.wait(13, 16)
 
+    if chrome.get_tab(title="OKX Wallet"):
+        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+        chrome.wait(13, 16)
+
+
+
     if tab.ele('I got it'):
         tab.ele('I got it').click()
         logger.info(f"{env.name}   点击明白介绍")
@@ -76,7 +82,7 @@ def getTab(chrome, env):
     # Something went wrong
 
     try:
-        if chrome.get_tab(url='https://twitter.com/').ele("@value=Send email"):
+        if chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Send email"):
             logger.info(f"{env.name}    退出，推特需要邮箱验证！！")
             return
     except Exception as e:
@@ -105,7 +111,7 @@ def getTab(chrome, env):
         return
 
     if chrome.get_tab(url='https://twitter.com/account/access'):
-        logger.info(f"{env.name}: 推特登录失败")
+        logger.info(f"{env.name}: 推特登录失败,需要机器人验证")
         return
 
     try:
@@ -115,7 +121,7 @@ def getTab(chrome, env):
         chrome.wait(20, 25)
 
     except Exception as e:
-                max_attempts = 5
+                max_attempts = 3
                 attempt = 0
                 while attempt < max_attempts:
                         tab.close()
@@ -153,6 +159,7 @@ def getTab(chrome, env):
     tab.ele('@class=claim-button').click()
     logger.info(f"{env.name}    领取积分成功！")
     chrome.wait(10, 15)
+
 
 def claim_diamante(env):
     with app.app_context():
