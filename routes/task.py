@@ -21,6 +21,8 @@ from flaskServer.services.chromes.tasks.Claim_diamante import claim_diamante
 from flaskServer.services.chromes.tasks.Passport import PassPort
 from flaskServer.services.chromes.tasks.Highlayer import highlayer
 from flaskServer.services.chromes.tasks.humanity import Humanity
+from flaskServer.services.chromes.tasks.humanityWallet import humanityWallet
+
 
 bp = Blueprint('tasks', __name__)
 
@@ -180,4 +182,15 @@ def HumanityProtocol (groups):
     with app.app_context():
         envs = getEnvsByIds(ids)
         Thread(target=submit, args=(Humanity, envs,)).start()
+    return result
+
+@app.route("/<groups>/todo/humanityWallet", methods=["POST"])
+def HumanityWallet (groups):
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    with app.app_context():
+        envs = getEnvsByIds(ids)
+        Thread(target=submit, args=(humanityWallet, envs,)).start()
     return result
