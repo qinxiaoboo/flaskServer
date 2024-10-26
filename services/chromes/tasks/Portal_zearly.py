@@ -508,8 +508,6 @@ def getBitScalerWhitepaper(chrome,env):
     except Exception as e:
         logger.info(e)
 
-
-
 #Partnership
 def getPartnership(chrome,env):
     tab = chrome.new_tab(url='https://zealy.io/cw/portaltobitcoin/questboard/4bfd79a1-8a54-4aca-9dc7-eca26781721a/926bc3c5-fd62-4fcf-a5d3-89954d0701fc')
@@ -713,7 +711,6 @@ def getCount(chrome, env):
     except Exception as e:
         logger.info(e)
 
-
 def getPortal(chrome,env):
     try:
         portal_url = getrandom_url()
@@ -732,7 +729,6 @@ def getPortal(chrome,env):
         time.sleep(2)
         logger.info(f'{env.name}:GET STARTED结束')
         # #-----------------------------------------------
-        #
         # #---------------------------BitScaler(完成)--------------------------
         logger.info(f'{env.name}:BitScaler任务结束')
         getBitScalerLaunch(chrome, env)
@@ -741,14 +737,12 @@ def getPortal(chrome,env):
         time.sleep(2)
         logger.info(f'{env.name}:BitScaler任务结束')
         # #--------------------------------------------------------------
-        #
         # #-------------PARTNERSHIP(完成)-----------------------
         logger.info(f'{env.name}:PARTNERSHIP的任务开始')
         getPartnership(chrome, env)
         time.sleep(2)
         logger.info(f'{env.name}:PARTNERSHIP的任务结束')
         # # -----------------------------------------------
-        #
         # -------------Staying on top of twitter!-----------------------
         logger.info(f'{env.name}:Staying on top of 任务开始')
         getStayingExplore(chrome, env)
