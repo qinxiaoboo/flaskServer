@@ -6,7 +6,7 @@ from flaskServer.entity.taskData import TaskPortal
 from flaskServer.entity.taskData import TaskDiamante
 from flaskServer.entity.taskData import TaskPassport
 from flaskServer.entity.taskData import TaskHighlayer
-
+from flaskServer.entity.taskData import TaskArch
 
 objects = {
     'multifarm': TaskData,
@@ -18,6 +18,7 @@ objects = {
     "passport": TaskPassport,
     "Claim_diamante": TaskDiamante,
     "Highlayer": TaskHighlayer,
+    "Arch": TaskArch,
 }
 
 def get_object_by_name(name):
