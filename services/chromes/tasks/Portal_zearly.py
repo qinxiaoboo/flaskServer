@@ -65,7 +65,7 @@ def getrandom_url():
 #--------Staying----------
 Staying_js = """let button  = 
 document.querySelector("#react-root > div > div > div.css-175oi2r.r-1f2l425.r-13qz1uu.r-417010.r-18u37iz > main > div > div > div > div > div > div:nth-child(3) > div > div > section > div > div > div:nth-child(1) > div > div > article");               
-                button.click(); """
+button.click(); """
 
 url_js = '''let button  =
 document.querySelector("#react-root > div > div > div.css-175oi2r.r-1f2l425.r-13qz1uu.r-417010.r-18u37iz > header > div > div > div > div:nth-child(1) > div.css-175oi2r.r-15zivkp.r-1bymd8e.r-13qz1uu.r-1awozwy > nav > a:nth-child(11) > div");
@@ -238,7 +238,6 @@ def getZearly(chrome,env):
             except Exception as e:
                 logger.info(e)
                 logger.info(f"{env.name}：Discord未登录，账号登录失败????????????????????????????????")
-                #chrome.quit()
                 logger.info(e)
         else:
             logger.info(f'------------{env.name}已经登录了---------------')
@@ -287,40 +286,50 @@ def getStarted(chrome,env):
         else:
             logger.info(f'{env.name}:twitter关注任务')
             chrome.wait(2, 3)
-            if tab.s_ele('Connect Twitter'):
-                tab.ele('Connect Twitter').click()
-                chrome.wait(2, 3)
-                chrome.get_tab(url='https://api.x.com/oauth').ele('@class=submit button selected').click()
-                chrome.wait(2, 3)
+            try:
+                if tab.s_ele('Connect Twitter'):
+                    tab.ele('Connect Twitter').click()
+                    chrome.wait(2, 3)
+                    chrome.get_tab(url='https://api.x.com/oauth').ele('@class=submit button selected').click()
+                    chrome.wait(2, 3)
+            except Exception as e:
+                logger.info(e)
             time.sleep(5)
-            print('判断是否需要连接钱包')
-            if tab.s_ele('t:button@tx():Connect wallet'):
-                print('开始连接钱包')
-                time.sleep(3)
-                tab.ele('t:button@tx():Connect wallet').click()
-                time.sleep(5)
-                tab.ele('t:div@tx():OKX Wallet').click()
-                time.sleep(3)
-                exe_okx(chrome)
-                time.sleep(2)
-                print('判断是否需要钱包签名')
-                if tab.s_ele('t:div@tx():Sign message'):
-                    tab.ele('t:div@tx():Sign message').click()
-                    time.sleep(2)
+            try:
+                if tab.s_ele('t:button@tx():Connect wallet'):
+                    print('开始连接钱包')
+                    time.sleep(3)
+                    tab.ele('t:button@tx():Connect wallet').click()
+                    time.sleep(5)
+                    tab.ele('t:div@tx():OKX Wallet').click()
+                    time.sleep(3)
                     exe_okx(chrome)
-                time.sleep(10)
-                tab.ele('@class=shrink-0 w-button-icon-lg h-button-icon-lg').click()
-            time.sleep(6)
-            # print('跳转到twitter关注')
-            # logger.info('开始点')
-            chrome.get_tab(url='https://x.com/').ele('Follow @PortaltoBitcoin').click()
-            # logger.info('结束')
-            time.sleep(2)
-            tab.ele('t:button@tx():Claim').click()
-            time.sleep(6)
-            chrome.close_tabs()
-            logger.info(f'{env.name}:twitter任务完成$$$$$$$$$$$$$$$$')
+                    time.sleep(2)
+                    print('判断是否需要钱包签名')
+                    if tab.s_ele('t:div@tx():Sign message'):
+                        tab.ele('t:div@tx():Sign message').click()
+                        time.sleep(2)
+                        exe_okx(chrome)
 
+            except Exception as e:
+                logger.info(e)
+
+            time.sleep(10)
+            try:
+                tab.ele('@class=shrink-0 w-button-icon-lg h-button-icon-lg').click()
+                time.sleep(6)
+                # print('跳转到twitter关注')
+                # logger.info('开始点')
+                chrome.get_tab(url='https://x.com/').ele('Follow @PortaltoBitcoin').click()
+                # logger.info('结束')
+                chrome.close_tabs()
+                time.sleep(2)
+                tab.ele('t:button@tx():Claim').click()
+                time.sleep(6)
+                chrome.close_tabs()
+                logger.info(f'{env.name}:twitter任务完成$$$$$$$$$$$$$$$$')
+            except Exception as e:
+                logger.info(e)
     except Exception as e:
        logger.error(e)
 
@@ -336,27 +345,34 @@ def getStarted(chrome,env):
             print('点击确认')
             time.sleep(10)
             getDiscord(chrome,env)
-            time.sleep(2)
-            print('点击关注')
-            print('title', chrome.get_tab(url='https://discord.com/channels').title)
-            title_url = chrome.get_tab(url='https://discord.com/channels').title
-            chrome.get_tab(title=title_url).ele('@class=contents_dd4f85 innerButton_faf5ab').click()
-            time.sleep(2)
-            print('点击对号')
-            chrome.get_tab(title=title_url).ele('@class=checkboxWrapper_f6cde8 alignCenter_f6cde8 checkbox_bd5b94').click()
-            time.sleep(2)
-            print('点击同意')
-            chrome.get_tab(title=title_url).ele('@class=submitButton_a74b6f button_dd4f85 lookFilled_dd4f85 colorGreen_dd4f85 sizeMedium_dd4f85 grow_dd4f85').click()
-            time.sleep(2)
-            chrome.close_tabs()
+            time.sleep(15)
+            try:
+                print('点击关注')
+                print('title', chrome.get_tab(url='https://discord.com/').title)
+                title_url = chrome.get_tab(url='https://discord.com/').title
+                chrome.get_tab(title=title_url).ele('@class=contents_dd4f85 innerButton_faf5ab').click()
+                time.sleep(2)
+                print('点击对号')
+                chrome.get_tab(title=title_url).ele(
+                    '@class=checkboxWrapper_f6cde8 alignCenter_f6cde8 checkbox_bd5b94').click()
+                time.sleep(2)
+                print('点击同意')
+                chrome.get_tab(title=title_url).ele(
+                    '@class=submitButton_a74b6f button_dd4f85 lookFilled_dd4f85 colorGreen_dd4f85 sizeMedium_dd4f85 grow_dd4f85').click()
+                time.sleep(2)
+                chrome.close_tabs()
+            except Exception as e:
+                logger.info(e)
+                chrome.close_tabs()
             time.sleep(2)
             tab.ele('t:button@tx():Claim').click()
             time.sleep(6)
+            chrome.close_tabs()
     except Exception as e:
         logger.info('discord有问题需要人工')
 
-    # print('Follow our Medium')
-    # --------------Follow our Medium------------
+#     # print('Follow our Medium')
+#     # --------------Follow our Medium------------
     try:
         tab = chrome.new_tab(
             url='https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/b5817b0f-4b29-4478-a961-c8f3024ead2e')
@@ -373,9 +389,8 @@ def getStarted(chrome,env):
             chrome.close_tabs()
     except Exception as e:
         logger.info(e)
-
-    # print('Subscribe to our YouTube Channel and watch a video!')
-    # ---------------Subscribe to our YouTube Channel and watch a video!---------------------------------
+#     # print('Subscribe to our YouTube Channel and watch a video!')
+#     # ---------------Subscribe to our YouTube Channel and watch a video!---------------------------------
     try:
         tab = chrome.new_tab(
             url='https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/55b14c1a-3c8e-4a4e-9239-81d263268360')
@@ -392,9 +407,8 @@ def getStarted(chrome,env):
             chrome.close_tabs()
     except Exception as e:
         logger.info(e)
-
- #-----------------Join us on Telegram and like/react to a few posts!-------------------
-    #-----------------------------------------------------------------------------------------------------------------------------------
+#  #-----------------Join us on Telegram and like/react to a few posts!-------------------
+#     #-----------------------------------------------------------------------------------------------------------------------------------
     try:
         tab = chrome.new_tab('https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/e30d9ed1-b71f-43f4-bbd8-8c7677e6acae')
         if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
@@ -407,8 +421,7 @@ def getStarted(chrome,env):
             chrome.close_tabs()
     except Exception as e:
         logger.info(e)
-
-#---------------------Follow us on Telegram and React!---------------------
+# #---------------------Follow us on Telegram and React!---------------------
     try:
         tab = chrome.new_tab('https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/ead3833b-7a28-4b85-90d4-55f5270156de')
         if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
@@ -437,37 +450,51 @@ def getBitScalerLaunch(chrome,env):
             tab.ele('t:button@tx():Retweet').click()
             time.sleep(5)
             # getTW_Three_Elements(chrome, 'Retweet', lambda: getBitScalerLaunch(chrome, env))
-            chrome.get_tab(url='https://x.com').ele('t:button@tx():Retweet').click()
+            chrome.get_tab(url='https://x.com').ele('t:span@tx():Repost').click()
+            time.sleep(2)
+            chrome.close_tabs()
             time.sleep(2)
             tab.ele('t:button@tx():Like').click()
             time.sleep(5)
             # getTW_Three_Elements(chrome, 'Like', lambda: getBitScalerLaunch(chrome, env))
-            chrome.get_tab(url='https://x.com').ele('t:button@tx():Like').click()
+            chrome.get_tab(url='https://x.com').ele('t:span@tx():Like').click()
+            time.sleep(2)
+            chrome.close_tabs()
             time.sleep(2)
             tab.ele('t:button@tx():Like', index=2).click()
             time.sleep(5)
             # getTW_Three_Elements(chrome, 'Like', lambda: getBitScalerLaunch(chrome, env))
-            chrome.get_tab(url='https://x.com').ele('t:button@tx():Like').click()
+            chrome.get_tab(url='https://x.com').ele('t:span@tx():Like').click()
+            time.sleep(2)
+            chrome.close_tabs()
             time.sleep(2)
             tab.ele('t:button@tx():Like', index=3).click()
             time.sleep(5)
             # getTW_Three_Elements(chrome, 'Like', lambda: getBitScalerLaunch(chrome, env))
-            chrome.get_tab(url='https://x.com').ele('t:button@tx():Like').click()
+            chrome.get_tab(url='https://x.com').ele('t:span@tx():Like').click()
+            time.sleep(2)
+            chrome.close_tabs()
             time.sleep(2)
             tab.ele('t:button@tx():Like', index=4).click()
             time.sleep(5)
             # getTW_Three_Elements(chrome, 'Like', lambda: getBitScalerLaunch(chrome, env))
-            chrome.get_tab(url='https://x.com').ele('t:button@tx():Like').click()
+            chrome.get_tab(url='https://x.com').ele('t:span@tx():Like').click()
+            time.sleep(2)
+            chrome.close_tabs()
             time.sleep(2)
             tab.ele('t:button@tx():Like', index=5).click()
             time.sleep(5)
             # getTW_Three_Elements(chrome, 'Like', lambda: getBitScalerLaunch(chrome, env))
-            chrome.get_tab(url='https://x.com').ele('t:button@tx():Like').click()
+            chrome.get_tab(url='https://x.com').ele('t:span@tx():Like').click()
+            time.sleep(2)
+            chrome.close_tabs()
             time.sleep(2)
             tab.ele('t:button@tx():Retweet', index=2).click()
             time.sleep(5)
             # getTW_Three_Elements(chrome, 'Retweet', lambda: getBitScalerLaunch(chrome, env))
-            chrome.get_tab(url='https://x.com').ele('t:button@tx():Retweet').click()
+            chrome.get_tab(url='https://x.com').ele('t:span@tx():Repost').click()
+            time.sleep(2)
+            chrome.close_tabs()
             time.sleep(2)
             tab.ele('t:button@tx():Claim').click()
             time.sleep(6)
@@ -550,12 +577,16 @@ def getStayingExplore(chrome,env):
             tab.ele('t:button@tx():Retweet').click()
             time.sleep(5)
             # getTW_Three_Elements(chrome, 'Retweet', lambda: getStayingExplore(chrome, env))
-            chrome.get_tab(url='https://x.com').ele('t:button@tx():Retweet').click()
+            chrome.get_tab(url='https://x.com').ele('t:span@tx():Repost').click()
+            time.sleep(2)
+            chrome.close_tabs()
             time.sleep(2)
             tab.ele('t:button@tx():Like').click()
             time.sleep(5)
             # getTW_Three_Elements(chrome, 'Like', lambda: getStayingExplore(chrome, env))
-            chrome.get_tab(url='https://x.com').ele('t:button@tx():Like').click()
+            chrome.get_tab(url='https://x.com').ele('t:span@tx():Like').click()
+            time.sleep(2)
+            chrome.close_tabs()
             time.sleep(2)
             tab.ele('t:button@tx():Claim').click()
             time.sleep(6)
@@ -661,12 +692,16 @@ def getStayingExplore(chrome,env):
             tab.ele('t:button@tx():Retweet').click()
             time.sleep(5)
             # getTW_Three_Elements(chrome, 'Retweet', lambda: getStayingExplore(chrome, env))
-            chrome.get_tab(url='https://x.com').ele('t:button@tx():Retweet').click()
+            chrome.get_tab(url='https://x.com').ele('t:span@tx():Repost').click()
+            time.sleep(2)
+            chrome.close_tabs()
             time.sleep(2)
             tab.ele('t:button@tx():Like').click()
             time.sleep(5)
             # getTW_Three_Elements(chrome, 'Like', lambda: getStayingExplore(chrome, env))
-            chrome.get_tab(url='https://x.com').ele('t:button@tx():Like').click()
+            chrome.get_tab(url='https://x.com').ele('t:span@tx():Like').click()
+            time.sleep(2)
+            chrome.close_tabs()
             time.sleep(2)
             tab.ele('t:button@tx():Claim').click()
             time.sleep(6)
@@ -692,7 +727,6 @@ def getStayingExplore(chrome,env):
             tab.ele('t:button@tx():Claim').click()
             time.sleep(6)
             chrome.close_tabs()
-
     except Exception as e:
         logger.info(e)
 
@@ -762,7 +796,7 @@ def portal(env):
             time.sleep(5)
             chrome.close_tabs()
             time.sleep(5)
-            getPortal(chrome,env)
+            getPortal(chrome, env)
             getCount(chrome, env)
             time.sleep(10)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")

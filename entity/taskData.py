@@ -89,3 +89,16 @@ class TaskArch:
     Unkonwn_Resource: str = 0
 
 
+@dataclass_json
+@dataclass
+class TaskHumanity:
+    #总分
+    Rewards_Balance: str = 0
+    #排名
+    Ranking: str = 0
+    #签到得分
+    Rewards: str = 0
+    #前天得分
+    Rewards_Yesterday: str = 0
+    #钱包
+    wallet: str = 0
