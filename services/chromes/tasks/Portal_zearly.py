@@ -238,7 +238,6 @@ def getZearly(chrome,env):
             except Exception as e:
                 logger.info(e)
                 logger.info(f"{env.name}：Discord未登录，账号登录失败????????????????????????????????")
-                #chrome.quit()
                 logger.info(e)
         else:
             logger.info(f'------------{env.name}已经登录了---------------')
@@ -728,7 +727,6 @@ def getStayingExplore(chrome,env):
             tab.ele('t:button@tx():Claim').click()
             time.sleep(6)
             chrome.close_tabs()
-
     except Exception as e:
         logger.info(e)
 
