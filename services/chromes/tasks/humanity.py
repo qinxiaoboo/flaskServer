@@ -1,5 +1,4 @@
 import string
-
 from DrissionPage import ChromiumPage,ChromiumOptions
 from loguru import logger
 # 连接数据库
@@ -205,7 +204,6 @@ def getCount(chrome, env):
         updateTaskRecord(env.name, name, taskData, 1)
     except Exception as e:
         logger.error(e)
-
 
 def Humanity(env):
     with app.app_context():
