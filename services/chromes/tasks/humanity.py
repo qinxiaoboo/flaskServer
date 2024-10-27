@@ -67,19 +67,19 @@ def getDiscord(chrome,env):
             time.sleep(10)
         elif chrome.get_tab(title='Discord'):
             print('Discord 进入')
-            # if tab.s_ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85'):
-            #     logger.info(f'{env.name}的discord需要重新登录')
-            #     tab.ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85').click()
-            #     time.sleep(6)
-            #     LoginDiscord(chrome, env)
-            #     time.sleep(6)
-            #     chrome.close_tabs()
-            # elif tab.ele('Welcome back!'):
-            #     logger.info(f"{env.name}的Discord未登录，尝试重新登录")
-            #     time.sleep(6)
-            #     LoginDiscord(chrome, env)
-            #     time.sleep(6)
-            #     chrome.close_tabs()
+            if chrome.get_tab(title='Discord').ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85'):
+                logger.info(f'{env.name}的discord需要重新登录')
+                chrome.get_tab(title='Discord').ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85').click()
+                time.sleep(6)
+                LoginDiscord(chrome, env)
+                time.sleep(6)
+                chrome.close_tabs()
+            elif chrome.get_tab(title='Discord').ele('Welcome back!'):
+                logger.info(f"{env.name}的Discord未登录，尝试重新登录")
+                time.sleep(6)
+                LoginDiscord(chrome, env)
+                time.sleep(6)
+                chrome.close_tabs()
             if chrome.get_tab(title='Discord').ele("@type=button", index=2):
                 chrome.get_tab(title='Discord').ele("@type=button", index=2).click()
                 logger.info(f"{env.name}: 登录discord完成----------------------------------")
@@ -108,7 +108,6 @@ def gethumanity(chrome,env):
                 print('不需要连接钱包')
         elif tab.ele('@class=bottom disable'):
             print('已经签到过不需要签到了')
-            quitChrome(env, chrome)
     except Exception as e:
         logger.info(e)
     try:
@@ -121,23 +120,7 @@ def gethumanity(chrome,env):
             #disocrd 授权过程
             try:
                 logger.info(f'{env.name}:开始判断登录discord情况')
-                print(tab.title)
-                num = 0
-                while num < 4:
-                    if tab.title != '502 Server Error':
-                        print('一切通畅')
-                        break
-                    elif tab.title == '502 Server Error':
-                        print('跳转失败')
-                        num += 1
-                        time.sleep(30)
-                        print('开始刷新')
-                        chrome.refresh(ignore_cache=True)
-                        if num == 3:
-                            if tab.title == '502 Server Error':
-                                print('还是无法登录需要关闭网页')
-                                quitChrome(env, chrome)
-                print('title',tab.title)
+                chrome.wait(10, 20)
                 getDiscord(chrome, env)
             except Exception as e:
                 logger.error(e)
@@ -168,33 +151,7 @@ def gethumanity(chrome,env):
                     time.sleep(2)
                     tab.ele('@class=MuiBox-root mui-171onha', index=2).click()
             except Exception as e:
-                logger.error(e)
-            print('1')
-            while True:
-                if tab.s_ele('Almost there!'):
-                    logger.info('等待中......')
-                    time.sleep(20)
-                    chrome.refresh(ignore_cache=True)
-                else:
-                    break
-            print('2')
-
-        print('3')
-        while True:
-            if tab.s_ele('Almost there!'):
-                logger.info('等待中......')
-                time.sleep(20)
-                chrome.refresh(ignore_cache=True)
-            else:
-                try:
-                    tab.run_js(dis_js)
-                    time.sleep(2)
-                    getDiscord(chrome, env)
-                except Exception as e:
-                    logger.error(e)
-                break
-        print('4')
-
+                logger.info(e)
         chrome.wait(10)
         try:
             if tab.s_ele('@class=skip'):
@@ -222,11 +179,40 @@ def gethumanity(chrome,env):
     except Exception as e:
         logger.error(e)
 
+def getCount(chrome, env):
+    try:
+        taskData = getTaskObject(env, name)
+        tab = chrome.new_tab(url=humanity_url)
+        chrome.wait(10,20)
+        print('开始收集数据')
+        Rewards_Balance = tab.ele('@class=number', index=1).text
+        print('总分:', Rewards_Balance)
+        Ranking = tab.ele('@class=number', index=2).text
+        print('排名:', Ranking)
+        Rewards = tab.ele('@class=number', index=3).text
+        print('签到总分:', Rewards)
+        Rewards_Yesterday = tab.ele('@class=number', index=4).text
+        print('昨天得分:', Rewards_Yesterday)
+        wallet = tab.ele('@class=chain', index=2).text
+        print('wallet:', wallet)
+
+        print('开始上传数据')
+        taskData.Rewards_Balance = Rewards_Balance
+        taskData.Ranking = Ranking
+        taskData.Rewards = Rewards
+        taskData.Rewards_Yesterday = Rewards_Yesterday
+        taskData.wallet = wallet
+        updateTaskRecord(env.name, name, taskData, 1)
+    except Exception as e:
+        logger.error(e)
+
+
 def Humanity(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
             gethumanity(chrome, env)
+            getCount(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
