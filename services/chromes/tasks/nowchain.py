@@ -79,21 +79,27 @@ def getFaucet(chrome, env):
     tab = chrome.new_tab(url='https://testnet.nowchain.co/testnet/faucet/')
     try:
         time.sleep(30)
-        if tab.s_ele('Time remaining: '):
-            print('领水时间还没到：',tab.ele('Time remaining: ').text)
-            return False
-        elif tab.s_ele('t:button@tx():Request Assets'):
-            print('此时为Request Assets，开始点击领水')
-            # logger.info('开始等待人机验证')
-            # #------------------------------待测试是否需要去掉
-            # time.sleep(60)
-            # #--------------------------
-            # tab.wait.ele_displayed('t:button@tx():Request Assets', timeout=60)
-            time.sleep(30)
-            tab.ele('t:button@tx():Request Assets').click()
-            print('点击完成')
-            time.sleep(15)
-            return True
+        num = 0
+        while num < 5:
+            if tab.s_ele('Time remaining: '):
+                print('领水时间还没到：', tab.ele('Time remaining: ').text)
+                num = 5
+                return False
+
+            elif tab.s_ele('t:button@tx():Request Assets'):
+                print('此时为Request Assets，开始点击领水')
+                # logger.info('开始等待人机验证')
+                # #------------------------------待测试是否需要去掉
+                # time.sleep(60)
+                # #--------------------------
+                # tab.wait.ele_displayed('t:button@tx():Request Assets', timeout=60)
+                time.sleep(30)
+                tab.ele('t:button@tx():Request Assets').click()
+                print('点击完成')
+                num += 1
+                time.sleep(15)
+                return True
+
     except Exception as e:
         logger.error(e)
         return False
@@ -275,66 +281,25 @@ def getCount(chrome, env):
     try:
         taskData = getTaskObject(env, name)
         tab = chrome.new_tab(now_chain_url)
-        try:
-            if tab.s_ele('Connect Wallet'):
-                print('开始链接钱包')
-                tab.ele('Connect Wallet').click()
-                time.sleep(5)
-                try:
-                    tab.run_js(okx_url)
-                    time.sleep(5)
-                    exe_okx(chrome, env)
-                    time.sleep(5)
-                except Exception as e:
-                    print('不需要钱包验证')
-                try:
-                    tab.run_js(switch_Network)
-                    print('选择测试网完成')
-                    time.sleep(5)
-                    exe_okx(chrome, env)
-                    time.sleep(5)
-                except Exception as e:
-                    print('不需要选择测试网了')
-            try:
-                tab.run_js(switch_Network)
-                print('选择测试网完成')
-                time.sleep(5)
-                exe_okx(chrome, env)
-                time.sleep(5)
-            except Exception as e:
-                print('不需要选择测试网了')
-        except Exception as e:
-            logger.info(e)
         time.sleep(10)
         # 统计总数
-        num = 0
-        while num < 3:
-            if tab.s_ele('My Points'):
-                try:
-                    print('统计总数')
-                    PointsCount = tab.ele('@class=flex items-center gap-3 text-base sm:text-lg font-semibold').text
-                    PointsCount_num = PointsCount.split('Points')[0]
-                    print(f'{env.name}的PointsCount_num:', PointsCount_num)
-                    print('开始上传总数')
-                    taskData.PointsCount = PointsCount_num
-                    print('上传总数完成')
-                    break
-                except Exception as e:
-                    logger.info(e)
-                    PointsCount = tab.ele(
-                        '@class=p-4 sm:p-5 rounded-lg sm:rounded-xl shadow flex justify-between gap-5 bg-BG-4').text
-                    PointsCount_num = PointsCount.split('Points')[1].strip()
-                    print(f'{env.name}的p2s:', PointsCount_num)
-                    print('开始上传总数')
-                    taskData.PointsCount = PointsCount_num
-                    print('上传总数完成')
-                    break
-            else:
-                print('需要等待一下')
-                chrome.wait(5,10)
-                num += 1
-                if num == 3:
-                    print('统计总数失败')
+        try:
+            print('统计总数')
+            PointsCount = tab.ele('@class=flex items-center gap-3 text-base sm:text-lg font-semibold').text
+            PointsCount_num = PointsCount.split('Points')[0]
+            print(f'{env.name}的PointsCount_num:', PointsCount_num)
+            print('开始上传总数')
+            taskData.PointsCount = PointsCount_num
+            print('上传总数完成')
+        except Exception as e:
+            logger.error(e)
+            PointsCount = tab.ele('@class=p-4 sm:p-5 rounded-lg sm:rounded-xl shadow flex justify-between gap-5 bg-BG-4').text
+            PointsCount_num = PointsCount.split('Points')[1].strip()
+            print(f'{env.name}的p2s:', PointsCount_num)
+            print('开始上传总数')
+            taskData.PointsCount = PointsCount_num
+            print('上传总数完成')
+
         time.sleep(5)
         Faucet = getFaucet(chrome, env)
         print(f'{env.name}的Faucet:', Faucet)
