@@ -32,7 +32,7 @@ class IMAPClient(BaseClient):
         email_domain = self.account.email_username.split('@')[1]
         if email_domain not in IMAP_SERVERS:
             raise Exception(f'Imap server for {email_domain} not found. Add it in internal/email/constants.py')
-        self.imap = aioimaplib.IMAP4_SSL(IMAP_SERVERS[email_domain])
+        self.imap = aioimaplib.IMAP4_SSL(IMAP_SERVERS[email_domain], timeout=60)
         await self.imap.wait_hello_from_server()
         await self.imap.login(self.account.email_username, self.account.email_password)
         await self.imap.select()
@@ -64,14 +64,28 @@ class IMAPClient(BaseClient):
 
 async def main():
     email_username = "1337556808@qq.com"
-    email_password = "qabdxfaklxetiiha"
+    email_password = "xixutkibzvzjifcg"
     email_domain = email_username.split('@')[1]
-    client = aioimaplib.IMAP4_SSL(IMAP_SERVERS[email_domain])
+    client = aioimaplib.IMAP4_SSL(IMAP_SERVERS[email_domain], timeout=60)
     await client.wait_hello_from_server()
     await client.login(email_username, email_password)
-    responce = await client.select()
-    print(responce)
+    await client.select()
+    _, messages = await client.select("INBOX")
+    msg_cnt = 0
+    for message in messages:
+        if message.endswith(b'EXISTS'):
+            msg_cnt = int(message.split()[0])
+            break
+    for i in range(msg_cnt, 0, -1):
+        res, msg = await client.fetch(str(i), '(RFC822)')
+        if res != 'OK':
+            continue
+        raw_email = msg[1]
+        msg = email.message_from_bytes(raw_email)
+        subject, encoding = decode_header(msg['Subject'])[0]
+        if isinstance(subject, bytes):
+            subject = subject.decode(encoding if encoding else 'utf-8')
+            print(subject)
 
 if __name__ == '__main__':
-    pass
     asyncio.run(main())
