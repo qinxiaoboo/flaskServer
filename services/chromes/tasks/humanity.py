@@ -107,6 +107,7 @@ def gethumanity(chrome,env):
                 print('不需要连接钱包')
         elif tab.ele('@class=bottom disable'):
             print('已经签到过不需要签到了')
+            return
     except Exception as e:
         logger.info(e)
     try:
