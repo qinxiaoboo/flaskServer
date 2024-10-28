@@ -82,12 +82,8 @@ class TaskHighlayer:
 @dataclass
 class TaskArch:
     #总分
-    Current_Rank: str = 0
     Level: str = 0
-    Rank_Progress: str = 0
     Total: str = 0
-    Unkonwn_Resource: str = 0
-
 
 @dataclass_json
 @dataclass
