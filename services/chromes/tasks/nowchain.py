@@ -79,25 +79,20 @@ def getFaucet(chrome, env):
     tab = chrome.new_tab(url='https://testnet.nowchain.co/testnet/faucet/')
     try:
         time.sleep(30)
+        if tab.s_ele('Time remaining: '):
+            print('领水时间还没到：', tab.ele('Time remaining: ').text)
+            return False
         num = 0
         while num < 5:
-            if tab.s_ele('Time remaining: '):
-                print('领水时间还没到：', tab.ele('Time remaining: ').text)
-                num = 5
-                return False
-
-            elif tab.s_ele('t:button@tx():Request Assets'):
+            if tab.s_ele('t:button@tx():Request Assets'):
                 print('此时为Request Assets，开始点击领水')
-                # logger.info('开始等待人机验证')
-                # #------------------------------待测试是否需要去掉
-                # time.sleep(60)
-                # #--------------------------
-                # tab.wait.ele_displayed('t:button@tx():Request Assets', timeout=60)
                 time.sleep(30)
                 tab.ele('t:button@tx():Request Assets').click()
                 print('点击完成')
                 num += 1
                 time.sleep(15)
+            else:
+                print('领水完成')
                 return True
 
     except Exception as e:
@@ -346,8 +341,6 @@ def NowChain(env):
             getTab(chrome,env)
             chrome.close_tabs()
             getCount(chrome, env)
-            # getYesCaptchaassistant(chrome,env)
-            # getFaucet(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
