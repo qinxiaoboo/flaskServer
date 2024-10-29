@@ -23,6 +23,7 @@ from flaskServer.services.chromes.tasks.Highlayer import highlayer
 from flaskServer.services.chromes.tasks.humanity import Humanity
 from flaskServer.services.chromes.tasks.humanityWallet import humanityWallet
 from flaskServer.services.chromes.tasks.Arch import arch
+from flaskServer.services.chromes.tasks.Theoriq import theoriq
 
 bp = Blueprint('tasks', __name__)
 
@@ -204,4 +205,16 @@ def Arch (groups):
     with app.app_context():
         envs = getEnvsByIds(ids)
         Thread(target=submit, args=(arch, envs,)).start()
+    return result
+
+
+@app.route("/<groups>/todo/theoriq", methods=["POST"])
+def Theoriq (groups):
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    with app.app_context():
+        envs = getEnvsByIds(ids)
+        Thread(target=submit, args=(theoriq, envs,)).start()
     return result
