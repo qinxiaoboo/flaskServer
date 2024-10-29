@@ -8,6 +8,7 @@ from flaskServer.entity.taskData import TaskPassport
 from flaskServer.entity.taskData import TaskHighlayer
 from flaskServer.entity.taskData import TaskArch
 from flaskServer.entity.taskData import TaskHumanity
+from flaskServer.entity.taskData import TaskTheoriq
 
 
 
@@ -23,7 +24,8 @@ objects = {
     "Claim_diamante": TaskDiamante,
     "Highlayer": TaskHighlayer,
     "Arch": TaskArch,
-    "humanity": TaskHumanity
+    "humanity": TaskHumanity,
+    "Theoriq": TaskTheoriq
 }
 
 def get_object_by_name(name):

@@ -1,16 +1,19 @@
 import string
+
+import requests
 from DrissionPage import ChromiumPage,ChromiumOptions
 from loguru import logger
 # 连接数据库
 from flaskServer.config.connect import app
+from flaskServer.mode.account import Account
 #登录环境账号
 from flaskServer.services.chromes.login import OKXChrome
 from flaskServer.services.dto.account import updateAccountStatus
 from flaskServer.services.dto.task_record import updateTaskRecord, getTaskObject
 import time
 import random
-from flaskServer.utils.chrome import quitChrome
-
+from flaskServer.utils.chrome import quitChrome, get_Custome_Tab
+from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 
 #humanity protocol
 name = 'humanity'
@@ -45,6 +48,28 @@ def LoginDiscord(chrome:ChromiumPage,env):
     tab = chrome.new_tab(url="https://discord.com/app")
     if tab.s_ele("Please log in again"):
         tab.ele("@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85").click()
+    if "login" in tab.url:
+        logger.info(f"{env.name} 开始登录 Discord 账号")
+        with app.app_context():
+            discord:Account = Account.query.filter_by(id=env.discord_id).first()
+            if discord:
+                tab.ele("@name=email").input(discord.name)
+                tab.ele("@name=password").input(aesCbcPbkdf2DecryptFromBase64(discord.pwd))
+                tab.ele("@type=submit").click()
+                fa2 = aesCbcPbkdf2DecryptFromBase64(discord.fa2)
+                if "login" in tab.url and len(fa2) > 10:
+                    res = requests.get(fa2)
+                    if res.ok:
+                        code = res.json().get("data").get("otp")
+                        tab.ele("@autocomplete=one-time-code").input(code)
+                        tab.ele("@type=submit").click()
+            else:
+                updateAccountStatus(env.discord_id, 1, "没有导入DISCORD 的账号信息")
+                raise Exception(f"{env.name}: 没有导入DISCORD 账号信息")
+    if "channels" in tab.url or ".com/app" in tab.url:
+        updateAccountStatus(env.discord_id, 2)
+        logger.info(f"{env.name}登录Discord成功！")
+    return get_Custome_Tab(tab)
 
 def generate_random_word(length=7):
     # 生成一个随机的字母单词

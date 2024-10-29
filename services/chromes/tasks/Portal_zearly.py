@@ -118,8 +118,7 @@ def getDiscord(chrome,env):
 
 
 def getSigninTW(chrome,env):
-    num = 0
-    while num < 3:
+    try:
         tab = chrome.new_tab(url='https://x.com/')
         chrome.wait(8, 10)
         logger.info('开始判断')
@@ -147,14 +146,13 @@ def getSigninTW(chrome,env):
                     chrome.wait(2)
                     logger.info(f'{env.name}:登录完成')
                     chrome.close_tabs()
-                    break
                 else:
                     raise Exception(f"{env.name}: 没有导入TW的账号信息")
-        elif tab.s_ele('@value=Start') or tab.s_ele('@value=Send email') or tab.s_ele('@value=Continue to X'):
+        elif tab.s_ele('@class=Button EdgeButton EdgeButton--primary') or tab.s_ele('@value=Send email') or tab.s_ele('@value=Continue to X'):
             if tab.s_ele('@value=Send email'):
                 logger.info(f'{env.name}:需要人工验证twitter')
                 time.sleep(1)
-                chrome.quit()
+                quitChrome(env, chrome)
             elif tab.s_ele('@value=Start'):
                 tab.ele('@value=Start').click()
                 time.sleep(15)
@@ -163,12 +161,15 @@ def getSigninTW(chrome,env):
                 elif tab.s_ele('@value=Send email'):
                     logger.info(f'{env.name}:需要人工验证twitter')
                     time.sleep(1)
-                    chrome.quit()
+                    quitChrome(env, chrome)
                 else:
                     time.sleep(10)
                     tab.ele('@value=Continue to X').click()
             elif tab.s_ele('@value=Continue to X'):
                 tab.ele('@value=Continue to X').click()
+    except Exception as e:
+        logger.info(e)
+        quitChrome(env, chrome)
 #登录zearly平台
 def getZearly(chrome,env):
     tab = chrome.new_tab(url='https://zealy.io/cw/portaltobitcoin/questboard')

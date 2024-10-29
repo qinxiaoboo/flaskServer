@@ -98,3 +98,14 @@ class TaskHumanity:
     Rewards_Yesterday: str = 0
     #钱包
     wallet: str = 0
+
+
+@dataclass_json
+@dataclass
+class TaskTheoriq:
+    #总分
+    Your_xp: str = 0
+    #排名
+    Your_rank: str = 0
+    #任务完成情况
+    Completed_Quests: str = 0
