@@ -311,6 +311,10 @@ def missions(chrome, env):
     chrome.wait(2, 4)
 
     chrome.get_tab(url='https://x.com/').ele("t:span@text():Post").click(by_js=True)
+    chrome.wait(2, 4)
+    chrome.get_tab(url='https://x.com/').close()
+    tab.close()
+    tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
 
     if tab.ele('t:span@text():CONTINUE'):
         tab.ele('t:span@text():CONTINUE').click()
@@ -319,6 +323,8 @@ def missions(chrome, env):
         chrome.wait(2, 3)
     if tab.ele('t:span@text():CONTINUE'):
         tab.ele('t:span@text():CONTINUE').click()
+    tab.ele('t:div@text():ONBOARDING MISSIONS').click()
+
     chrome.wait(2, 3)
     count = 0
     while count < 10:
