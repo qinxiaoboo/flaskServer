@@ -83,7 +83,7 @@ class TaskHighlayer:
 class TaskArch:
     #总分
     Level: str = 0
-    Total: str = 0
+    Xp: str = 0
 
 @dataclass_json
 @dataclass
