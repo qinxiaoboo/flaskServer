@@ -68,14 +68,24 @@ def getTab(chrome, env):
         return
 
     logger.info(f"{env.name}   进入任务页面")
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+    chrome.wait(2, 3)
     tab.ele('t:span@text():START MISSIONS').click()
     chrome.wait(2, 3)
-    tab.ele('t:div@text():DAILY MISSIONS').click()
+    tab.ele('t:div@text():WEEKLY MISSIONS').click()
     chrome.wait(6, 9)
 
     if tab.ele('t:button@text():Start'):
         logger.info(f"{env.name}   推特授权成功")
     else:
+        if tab.ele('t:span@text():CONTINUE'):
+            tab.ele('t:span@text():CONTINUE').click()
+        if tab.ele('t:span@text():START MISSIONS'):
+            tab.ele('t:span@text():START MISSIONS').click()
+        if tab.ele('t:span@text():CONTINUE'):
+            tab.ele('t:span@text():CONTINUE').click()
+        chrome.wait(2, 3)
         logger.info(f"{env.name}   推特授权")
         tab.ele('t:button@text():Authorize').click()
         chrome.wait(20, 25)
@@ -160,13 +170,11 @@ def missions(chrome, env):
     tab = chrome.new_tab(url="https://x.com/ArchNtwrk")
     rw = RandomWords()
     random_word = rw.random_word()
-    taskData = getTaskObject(env, name)
-    env_name = env.name
     logger.info(f"{env.name}   开始做入职任务")
     chrome.wait(15, 25)
     chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
     chrome.wait(3, 6)
-    chrome.get_tab(url='https://x.com/').close()
+    tab.close()
     chrome.wait(15, 20)
     tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
     chrome.wait(3, 6)
@@ -211,13 +219,6 @@ def missions(chrome, env):
                             raise Exception(f"{env.name}: 没有导入TW的账号信息")
     except Exception as e:
         pass
-
-    tab = chrome.new_tab(url="https://x.com/compose/post")
-    chrome.wait(3, 6)
-    tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input('I just claimed my Archstronaut spacesuit to complete incentivized missions and explore the Bitcoin galaxy 🚀 Join me and other Archstronauts to rise in the ranks, earn rewards and shape the future of BTCFi through the @ArchNtwrk march to testnet:')
-    chrome.wait(3, 6)
-    tab.ele("t:span@text():Post").click(by_js=True)
-    chrome.wait(3, 6)
     tab.close()
 
     tab = chrome.new_tab(url="https://x.com/compose/post")
@@ -278,12 +279,47 @@ def missions(chrome, env):
 
 
     tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
+
     if tab.ele('t:span@text():CONTINUE'):
         tab.ele('t:span@text():CONTINUE').click()
+    if tab.ele('t:span@text():START MISSIONS'):
+        tab.ele('t:span@text():START MISSIONS').click()
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+    chrome.wait(2, 3)
     tab.ele('t:div@text():ONBOARDING MISSIONS').click()
     chrome.wait(2, 3)
 
     logger.info(f"{env.name}    开始验证")
+    count = 0
+    while count < 14:
+        element = tab.ele('t:button@text():Start')
+        if not element:
+            break
+        else:
+            element.click()
+        count += 1
+    chrome.wait(5, 10)
+
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+    if tab.ele('t:span@text():START MISSIONS'):
+        tab.ele('t:span@text():START MISSIONS').click()
+        chrome.wait(2, 3)
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+    chrome.wait(2, 4)
+
+    chrome.get_tab(url='https://x.com/').ele("t:span@text():Post").click(by_js=True)
+
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+    if tab.ele('t:span@text():START MISSIONS'):
+        tab.ele('t:span@text():START MISSIONS').click()
+        chrome.wait(2, 3)
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+    chrome.wait(2, 3)
     count = 0
     while count < 10:
         element = tab.ele('t:button@text():Start')
@@ -292,42 +328,55 @@ def missions(chrome, env):
         else:
             element.click()
         count += 1
-    chrome.wait(5, 10)
+
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+    if tab.ele('t:span@text():START MISSIONS'):
+        tab.ele('t:span@text():START MISSIONS').click()
+        chrome.wait(2, 3)
     if tab.ele('t:span@text():CONTINUE'):
         tab.ele('t:span@text():CONTINUE').click()
 
+    tab.close()
     return
 
 def weekly(chrome, env):
     logger.info(f"{env.name}    开始做每周任务")
-
     try:
-        tab = chrome.new_tab(url="https://x.com/Saturn_btc")
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
+        tab = chrome.new_tab(url="https://x.com/Saturn_btc/status/1849536952619376729")
+        chrome.get_tab(url='https://x.com/').ele("@data-testid=retweet").click(by_js=True)
+        chrome.wait(3, 6)
+        chrome.get_tab(url='https://x.com/').ele("t:span@text():Repost").click(by_js=True)
         chrome.wait(3, 6)
         chrome.get_tab(url='https://x.com/').close()
     except Exception as e:
         pass
 
     try:
-        tab = chrome.new_tab(url="https://x.com/bimabtc")
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
+        tab = chrome.new_tab(url="https://x.com/bimabtc/status/1849461396976623696")
+        chrome.get_tab(url='https://x.com/').ele("@data-testid=retweet").click(by_js=True)
+        chrome.wait(3, 6)
+        chrome.get_tab(url='https://x.com/').ele("t:span@text():Repost").click(by_js=True)
         chrome.wait(3, 6)
         chrome.get_tab(url='https://x.com/').close()
     except Exception as e:
         pass
 
     try:
-        tab = chrome.new_tab(url="https://x.com/BoundUSD")
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
+        tab = chrome.new_tab(url="https://x.com/BoundUSD/status/1849639926805008675")
+        chrome.get_tab(url='https://x.com/').ele("@data-testid=retweet").click(by_js=True)
+        chrome.wait(3, 6)
+        chrome.get_tab(url='https://x.com/').ele("t:span@text():Repost").click(by_js=True)
         chrome.wait(3, 6)
         chrome.get_tab(url='https://x.com/').close()
     except Exception as e:
         pass
 
     try:
-        tab = chrome.new_tab(url="https://x.com/funkybit_fun")
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
+        tab = chrome.new_tab(url="https://x.com/funkybit_fun/status/1849548066040230335")
+        chrome.get_tab(url='https://x.com/').ele("@data-testid=retweet").click(by_js=True)
+        chrome.wait(3, 6)
+        chrome.get_tab(url='https://x.com/').ele("t:span@text():Repost").click(by_js=True)
         chrome.wait(3, 6)
         chrome.get_tab(url='https://x.com/').close()
     except Exception as e:
@@ -345,7 +394,53 @@ def weekly(chrome, env):
     tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
     if tab.ele('t:span@text():CONTINUE'):
         tab.ele('t:span@text():CONTINUE').click()
+        chrome.wait(2, 3)
+    if tab.ele('t:span@text():START MISSIONS'):
+        tab.ele('t:span@text():START MISSIONS').click()
+        chrome.wait(2, 3)
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+    chrome.wait(2, 3)
 
+    tab.ele('t:div@text():WEEKLY MISSIONS').click()
+    chrome.wait(2, 3)
+
+    try:
+        tab.ele('t:button@text():Start', index=8).click()
+        chrome.wait(5, 10)
+        chrome.get_tab(url='https://x.com/').ele("t:span@text():Post").click(by_js=True)
+        chrome.wait(3, 6)
+        chrome.get_tab(url='https://x.com/').close()
+    except Exception as e:
+        pass
+    chrome.wait(3, 6)
+
+    count = 0
+    while count < 14:
+        element = tab.ele('t:button@text():Start')
+        if not element:
+            break
+        else:
+            element.click()
+        count += 1
+    chrome.wait(5, 10)
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+    if tab.ele('t:span@text():START MISSIONS'):
+        tab.ele('t:span@text():START MISSIONS').click()
+        chrome.wait(2, 3)
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+        chrome.wait(2, 3)
+    try:
+        chrome.get_tab(url='https://x.com/').ele("t:span@text():Post").click(by_js=True)
+        chrome.wait(3, 6)
+        chrome.get_tab(url='https://x.com/').close()
+    except Exception as e:
+        pass
+
+    tab.refresh()
+    chrome.wait(3, 6)
     tab.ele('t:div@text():WEEKLY MISSIONS').click()
     chrome.wait(2, 3)
     count = 0
@@ -356,20 +451,39 @@ def weekly(chrome, env):
         else:
             element.click()
         count += 1
-    chrome.wait(5, 10)
+    try:
+        chrome.get_tab(url='https://x.com/').ele("t:span@text():Post").click(by_js=True)
+        chrome.wait(3, 6)
+        chrome.get_tab(url='https://x.com/').close()
+    except Exception as e:
+        pass
+    if tab.ele('t:span@text():START MISSIONS'):
+        tab.ele('t:span@text():START MISSIONS').click()
+        chrome.wait(2, 3)
     if tab.ele('t:span@text():CONTINUE'):
         tab.ele('t:span@text():CONTINUE').click()
+    if tab.ele('t:span@text():START MISSIONS'):
+        tab.ele('t:span@text():START MISSIONS').click()
+    chrome.wait(2, 3)
+    tab.close()
     return
 
 def daily(chrome, env):
     logger.info(f"{env.name}   开始做每日任务")
     tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
+    if tab.ele('t:span@text():START MISSIONS'):
+        tab.ele('t:span@text():START MISSIONS').click()
+        chrome.wait(2, 3)
     if tab.ele('t:span@text():CONTINUE'):
         tab.ele('t:span@text():CONTINUE').click()
+        chrome.wait(2, 3)
+    if tab.ele('t:span@text():START MISSIONS'):
+        tab.ele('t:span@text():START MISSIONS').click()
+    chrome.wait(2, 3)
     tab.ele('t:div@text():DAILY MISSIONS').click()
     chrome.wait(2, 3)
     count = 0
-    while count < 10:
+    while count < 14:
         element = tab.ele('t:button@text():Start')
         if not element:
             break
@@ -379,20 +493,95 @@ def daily(chrome, env):
     chrome.wait(5, 10)
     if tab.ele('t:span@text():CONTINUE'):
         tab.ele('t:span@text():CONTINUE').click()
+    if tab.ele('t:span@text():START MISSIONS'):
+        tab.ele('t:span@text():START MISSIONS').click()
+        chrome.wait(2, 3)
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+
+    tab.close()
     return
 
+
+def community(chrome, env):
+    logger.info(f"{env.name}   开始做社区任务")
+    tab = chrome.new_tab(url="https://x.com/Saturn_btc")
+    try:
+        chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
+        chrome.wait(3, 6)
+        chrome.get_tab(url='https://x.com/').close()
+    except Exception as e:
+        pass
+
+    tab = chrome.new_tab(url="https://x.com/bimabtc")
+    try:
+        chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
+        chrome.wait(3, 6)
+        chrome.get_tab(url='https://x.com/').close()
+    except Exception as e:
+        pass
+
+    tab = chrome.new_tab(url="https://x.com/BoundUSD")
+    try:
+        chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
+        chrome.wait(3, 6)
+        chrome.get_tab(url='https://x.com/').close()
+    except Exception as e:
+        pass
+
+    tab = chrome.new_tab(url="https://x.com/funkybit_fun")
+    try:
+        chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
+        chrome.wait(3, 6)
+        chrome.get_tab(url='https://x.com/').close()
+    except Exception as e:
+        pass
+
+    tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+
+    if tab.ele('t:span@text():START MISSIONS'):
+        tab.ele('t:span@text():START MISSIONS').click()
+        chrome.wait(2, 3)
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+    chrome.wait(2, 3)
+
+    tab.ele('t:div@text():COMMUNITY MISSIONS').click()
+
+    chrome.wait(2, 3)
+    count = 0
+    while count < 14:
+        element = tab.ele('t:button@text():Start')
+        if not element:
+            break
+        else:
+            element.click()
+        count += 1
+    chrome.wait(5, 10)
+
+    tab.close()
+    return
 
 def count(chrome, env):
     tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
     taskData = getTaskObject(env, name)
     env_name = env.name
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+    if tab.ele('t:span@text():START MISSIONS'):
+        tab.ele('t:span@text():START MISSIONS').click()
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+    chrome.wait(2, 3)
 
     logger.info(f"{env.name}   开始数据统计")
     try:
+        chrome.wait(2, 4)
         xp = tab.ele('@class=absolute inset-0 flex items-center justify-center text-[18px] font-bold leading-normal text-lighter-yellow', index=1).text
+        chrome.wait(2, 4)
         level = tab.ele('@class=text-lightest-yellow text-[15px] leading-6 uppercase').text
-        print(xp)
-        print(level)
         taskData.Xp = xp
         taskData.Level = level
         updateTaskRecord(env.name, name, taskData, 1)
@@ -410,6 +599,7 @@ def arch(env):
             missions(chrome, env)
             weekly(chrome, env)
             daily(chrome, env)
+            community(chrome, env)
             count(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
