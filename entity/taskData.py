@@ -57,7 +57,7 @@ class TaskDeek:
 @dataclass_json
 @dataclass
 class TaskPortal:
-    XP: int = 0
+    XP: str = 0
 
 @dataclass_json
 @dataclass

@@ -82,7 +82,6 @@ def generate_random_word(length=4):
     except Exception as e:
         logger,input(e)
 
-
 def getDiscord(chrome,env):
     try:
         chrome.wait(10,15)
@@ -149,31 +148,35 @@ def getSigninTW(chrome,env):
                 else:
                     raise Exception(f"{env.name}: 没有导入TW的账号信息")
         elif tab.s_ele('@class=Button EdgeButton EdgeButton--primary') or tab.s_ele('@value=Send email') or tab.s_ele('@value=Continue to X'):
-            if tab.s_ele('@value=Send email'):
-                logger.info(f'{env.name}:需要人工验证twitter')
+            if tab.s_ele('@class=Button EdgeButton EdgeButton--primary'):
+                logger.info(f'{env.name}:需要人工验证twitter，是Send email')
                 time.sleep(1)
-                quitChrome(env, chrome)
+                return
             elif tab.s_ele('@value=Start'):
                 tab.ele('@value=Start').click()
                 time.sleep(15)
                 if tab.s_ele('@value=Continue to X'):
                     tab.ele('@value=Continue to X').click()
                 elif tab.s_ele('@value=Send email'):
-                    logger.info(f'{env.name}:需要人工验证twitter')
+                    logger.info(f'{env.name}:需要人工验证twitter,是Send email')
                     time.sleep(1)
-                    quitChrome(env, chrome)
+                    return
                 else:
                     time.sleep(10)
                     tab.ele('@value=Continue to X').click()
             elif tab.s_ele('@value=Continue to X'):
                 tab.ele('@value=Continue to X').click()
+        elif tab.s_ele('Your account is suspended'):
+            print(f'{env.name}:此号被封')
+            return
     except Exception as e:
         logger.info(e)
-        quitChrome(env, chrome)
+        return
 #登录zearly平台
 def getZearly(chrome,env):
     tab = chrome.new_tab(url='https://zealy.io/cw/portaltobitcoin/questboard')
     chrome.wait(2, 3)
+    tab.set.window.max()
     try:
         #logger.info(f'{env.name}:判断弹窗')
         if tab.ele('t:button@tx():Only necessary'):
@@ -731,26 +734,14 @@ def getStayingExplore(chrome,env):
     except Exception as e:
         logger.info(e)
 
-def getCount(chrome, env):
-    portal_url = getrandom_url()
-    tab = chrome.new_tab(url='https://zealy.io/cw/portaltobitcoin/leaderboard')
-    print('邀请码:', portal_url)
-    try:
-        num = tab.ele('@class=body-component-md-bold ml-auto whitespace-nowrap').text
-        portal_xp = num.split('/')[0]
-        print('portal_xp:', portal_xp)
-        taskData = getTaskObject(env, name)
-        taskData.XP = portal_xp
-        updateTaskRecord(env.name, name, taskData, 1)
-        time.sleep(10)
-    except Exception as e:
-        logger.info(e)
+
 
 def getPortal(chrome,env):
     try:
         portal_url = getrandom_url()
         print('邀请码:', portal_url)
         tab = chrome.new_tab(url=portal_url)
+
         print('开始做任务了')
         time.sleep(2)
         if tab.ele('t:button@tx():Join Portal To Bitcoin'):
@@ -788,6 +779,20 @@ def getPortal(chrome,env):
     except Exception as e:
         logger.info(e)
 
+def getCount(chrome, env):
+    portal_url = getrandom_url()
+    tab = chrome.new_tab(url='https://zealy.io/cw/portaltobitcoin/leaderboard')
+    print('邀请码:', portal_url)
+    try:
+        num = tab.ele('@class=body-component-md-bold ml-auto whitespace-nowrap').text
+        portal_xp = num.split('/')[0]
+        print('portal_xp:', portal_xp)
+        taskData = getTaskObject(env, name)
+        taskData.XP = portal_xp
+        updateTaskRecord(env.name, name, taskData, 1)
+        time.sleep(10)
+    except Exception as e:
+        logger.info(e)
 
 def portal(env):
     with app.app_context():
