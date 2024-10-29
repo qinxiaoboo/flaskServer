@@ -14,8 +14,8 @@ from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 import requests
 
 name = 'Theoriq'
-Theoriq_url = 'https://quests.theoriq.ai?r=NpRqz3aq'
-# Theoriq_url = 'https://quests.theoriq.ai?r=GBtqYb9x'
+# Theoriq_url = 'https://quests.theoriq.ai?r=NpRqz3aq'
+Theoriq_url = 'https://quests.theoriq.ai?r=GBtqYb9x'
 
 okx_js = '''
 let button =
@@ -49,6 +49,7 @@ def LoginDiscord(chrome:ChromiumPage,env):
         updateAccountStatus(env.discord_id, 2)
         logger.info(f"{env.name}登录Discord成功！")
     return get_Custome_Tab(tab)
+
 def getSigninTW(chrome,env):
     try:
         tab = chrome.new_tab(url='https://x.com/')
@@ -81,27 +82,30 @@ def getSigninTW(chrome,env):
                 else:
                     raise Exception(f"{env.name}: 没有导入TW的账号信息")
         elif tab.s_ele('@class=Button EdgeButton EdgeButton--primary') or tab.s_ele('@value=Send email') or tab.s_ele('@value=Continue to X'):
-            if tab.s_ele('@value=Send email'):
-                logger.info(f'{env.name}:需要人工验证twitter')
+            if tab.s_ele('@class=Button EdgeButton EdgeButton--primary'):
+                logger.info(f'{env.name}:需要人工验证twitter，是Send email')
                 time.sleep(1)
-                quitChrome(env, chrome)
+                return
             elif tab.s_ele('@value=Start'):
                 tab.ele('@value=Start').click()
                 time.sleep(15)
                 if tab.s_ele('@value=Continue to X'):
                     tab.ele('@value=Continue to X').click()
                 elif tab.s_ele('@value=Send email'):
-                    logger.info(f'{env.name}:需要人工验证twitter')
+                    logger.info(f'{env.name}:需要人工验证twitter,是Send email')
                     time.sleep(1)
-                    quitChrome(env, chrome)
+                    return
                 else:
                     time.sleep(10)
                     tab.ele('@value=Continue to X').click()
             elif tab.s_ele('@value=Continue to X'):
                 tab.ele('@value=Continue to X').click()
+        elif tab.s_ele('Your account is suspended'):
+            print(f'{env.name}:此号被封')
+            return False
     except Exception as e:
         logger.info(e)
-        quitChrome(env, chrome)
+        return
 
 
 
@@ -211,7 +215,12 @@ def getTab(chrome,env):
 
 def getSocialTasks(chrome,env):
     try:
-        getSigninTW(chrome, env)
+        tw = getSigninTW(chrome, env)
+        if tw == False:
+            print('此号被封，无法进行下面任务了')
+            quitChrome(env, chrome)
+        else:
+            pass
     except Exception as e:
         logger.error(e)
     tab = chrome.new_tab(url=Theoriq_url)
@@ -244,7 +253,12 @@ def getAgenttasks(chrome,env):
             chrome.wait(5, 13)
             try:
                 if not chrome.get_tab(url='https://x.com/').ele('Authorize app'):
-                    getSigninTW(chrome, env)
+                    tw = getSigninTW(chrome, env)
+                    if tw == False:
+                        print('此号被封，无法进行下面任务了')
+                        quitChrome(env, chrome)
+                    else:
+                        pass
                     chrome.wait(2, 3)
                     getAgenttasks(chrome, env)
                 else:
