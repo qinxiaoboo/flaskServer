@@ -173,7 +173,67 @@ def missions(chrome, env):
     logger.info(f"{env.name}   开始做入职任务")
     chrome.wait(15, 25)
     chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
-    chrome.wait(3, 6)
+    chrome.wait(2, 3)
+    if tab.ele('t:span@text():Refresh'):
+        tab.ele('t:span@text():Refresh').click()
+        chrome.wait(3, 6)
+        tw_tab = chrome.get_tab(url="x.com")
+        if tw_tab:
+                if "login" in tw_tab.url:
+                        logger.info(f"{env.name}: 推特未登录,尝试重新登录")
+                        with app.app_context():
+                            tw: Account = Account.query.filter_by(id=env.tw_id).first()
+                        if tw:
+                                tw_tab.ele("@autocomplete=username").input(tw.name)
+                                tw_tab.ele("@@type=button@@text()=Next").click()
+                                tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                                tw_tab.ele("@@type=button@@text()=Log in").click()
+                                fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                                if "login" in tab.url and len(fa2) > 10:
+                                    tw2faV(tab, fa2)
+                                chrome.wait(25, 30)
+                        else:
+                                raise Exception(f"{env.name}: 没有导入TW的账号信息")
+        try:
+            if chrome.get_tab(url='https://x.com/').ele("t:span@text():Log in"):
+                        chrome.get_tab(url='https://x.com/').ele("t:span@text():Log in").click()
+                        logger.info(f"{env.name}: 推特未登录,尝试重新登录")
+                        with app.app_context():
+                            tw: Account = Account.query.filter_by(id=env.tw_id).first()
+                            if tw:
+                                tw_tab.ele("@autocomplete=username").input(tw.name)
+                                tw_tab.ele("@@type=button@@text()=Next").click()
+                                tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                                tw_tab.ele("@@type=button@@text()=Log in").click()
+                                fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                                if "login" in tab.url and len(fa2) > 10:
+                                    tw2faV(tab, fa2)
+                                chrome.wait(25, 30)
+                            else:
+                                raise Exception(f"{env.name}: 没有导入TW的账号信息")
+        except Exception as e:
+            pass
+
+    try:
+        if chrome.get_tab(url='https://x.com/').ele("t:span@text():Log in"):
+                    chrome.get_tab(url='https://x.com/').ele("t:span@text():Log in").click()
+                    logger.info(f"{env.name}: 推特未登录,尝试重新登录")
+                    with app.app_context():
+                        tw: Account = Account.query.filter_by(id=env.tw_id).first()
+                        if tw:
+                            tw_tab.ele("@autocomplete=username").input(tw.name)
+                            tw_tab.ele("@@type=button@@text()=Next").click()
+                            tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                            tw_tab.ele("@@type=button@@text()=Log in").click()
+                            fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                            if "login" in tab.url and len(fa2) > 10:
+                                tw2faV(tab, fa2)
+                            chrome.wait(25, 30)
+                        else:
+                            raise Exception(f"{env.name}: 没有导入TW的账号信息")
+    except Exception as e:
+        pass
+
     tab.close()
     chrome.wait(15, 20)
     tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
@@ -222,7 +282,11 @@ def missions(chrome, env):
     tab.close()
 
     tab = chrome.new_tab(url="https://x.com/compose/post")
-    chrome.wait(3, 6)
+    chrome.wait(5, 10)
+    if tab.ele('t:span@text():Log in'):
+        logger.info(f"{env.name}    推特登录失败")
+        quitChrome(env, chrome)
+
     tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input('Want to earn points and help build bridgeless Bitcoin DeFi?\n\nJoin me: https://dashboard.arch.network?referralCode=254c68f9-1b28-4e66-bdf1-4e42c48085f9 #JoinArch ')
     chrome.wait(3, 6)
     tab.ele("t:span@text():Post").click(by_js=True)
@@ -291,30 +355,34 @@ def missions(chrome, env):
     chrome.wait(2, 3)
 
     logger.info(f"{env.name}    开始验证")
-    count = 0
-    while count < 14:
-        element = tab.ele('t:button@text():Start')
-        if not element:
-            break
-        else:
-            element.click()
-        count += 1
-    chrome.wait(5, 10)
+    try:
+        count = 0
+        while count < 14:
+            element = tab.ele('t:button@text():Start')
+            if not element:
+                break
+            else:
+                element.click()
+            count += 1
+        chrome.wait(5, 10)
 
-    if tab.ele('t:span@text():CONTINUE'):
-        tab.ele('t:span@text():CONTINUE').click()
-    if tab.ele('t:span@text():START MISSIONS'):
-        tab.ele('t:span@text():START MISSIONS').click()
-        chrome.wait(2, 3)
-    if tab.ele('t:span@text():CONTINUE'):
-        tab.ele('t:span@text():CONTINUE').click()
-    chrome.wait(2, 4)
+        if tab.ele('t:span@text():CONTINUE'):
+            tab.ele('t:span@text():CONTINUE').click()
+        if tab.ele('t:span@text():START MISSIONS'):
+            tab.ele('t:span@text():START MISSIONS').click()
+            chrome.wait(2, 3)
+        if tab.ele('t:span@text():CONTINUE'):
+            tab.ele('t:span@text():CONTINUE').click()
+        chrome.wait(2, 4)
 
-    chrome.get_tab(url='https://x.com/').ele("t:span@text():Post").click(by_js=True)
-    chrome.wait(2, 4)
-    chrome.get_tab(url='https://x.com/').close()
-    tab.close()
-    tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
+        chrome.get_tab(url='https://x.com/').ele("t:span@text():Post").click(by_js=True)
+        chrome.wait(2, 4)
+        chrome.get_tab(url='https://x.com/').close()
+        tab.close()
+        tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
+    except Exception as e:
+        pass
+
 
     if tab.ele('t:span@text():CONTINUE'):
         tab.ele('t:span@text():CONTINUE').click()
