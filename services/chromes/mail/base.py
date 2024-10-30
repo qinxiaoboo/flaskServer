@@ -11,7 +11,7 @@ class BaseClient:
     def login(self):
         raise NotImplementedError()
 
-    def getCode(self, text, wtime, num):
+    def getCode(self, text, wtime=10, num=2):
         raise NotImplementedError()
 
 

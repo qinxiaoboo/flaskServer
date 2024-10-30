@@ -9,7 +9,6 @@ from loguru import logger
 class Outlook(BaseClient):
 
     def login(self):
-        # updateAccountStatus(self.id, 0, "重置了OutLook登录状态")
         self.tab = self.chrome.new_tab(url="https://outlook.live.com/mail/0/")
         self.chrome.wait(2, 3)
         if "microsoft" in self.tab.url:
@@ -23,7 +22,16 @@ class Outlook(BaseClient):
             self.tab.ele("@@type=submit@@text()=Yes").click()
             if "https://outlook.live.com/mail/0" in self.tab.url:
                 logger.info(f"{self.envName}: 登录OUTLOOK成功")
-        # updateAccountStatus(self.id, 2)
+        if self.tab.s_ele("@@type=submit@@id=iNext"):
+            self.tab.ele("@@type=submit@@id=iNext").click()
+        if self.tab.s_ele("@id=userDisplayName"):
+            text = self.tab.ele("@id=userDisplayName").text
+            if text == self.username:
+                self.tab.ele("@name=passwd").input(self.password)
+                self.tab.ele("@type=submit").click()
+                if self.tab.s_ele("@@type=submit@@id=iNext"):
+                    self.tab.ele("@@type=submit@@id=iNext").click()
+                logger.info(f"{self.envName}: 登录OUTLOOK成功")
         self.tab.wait(3)
         self.tab.ele("#meInitialsButton").click()
         user = self.tab.ele("#mectrl_currentAccount_secondary")
@@ -39,8 +47,10 @@ class Outlook(BaseClient):
                 self.tab.ele("#idSIButton9").click()
                 if self.tab.s_ele("@@class=btn btn-block btn-primary@@value=Send code"):
                     raise Exception(f"{self.envName}请手动验证登录邮箱:{self.username}")
+                logger.info(f"{self.envName}: 登录OUTLOOK成功")
 
-    def getCode(self, text, wtime, num):
+
+    def getCode(self, text, wtime=10, num=2):
         '''
         :param text: 邮件主题
         :param wtime: 循环一次等待时间

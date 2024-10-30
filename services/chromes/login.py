@@ -4,7 +4,7 @@ import requests
 from DrissionPage import ChromiumOptions
 from DrissionPage import ChromiumPage
 from loguru import logger
-
+from flaskServer.services.chromes.mail.factory import Email
 from flaskServer.config.config import WALLET_PASSWORD
 from flaskServer.config.connect import app
 from flaskServer.mode.account import Account
@@ -189,22 +189,21 @@ def tw2faV(tab,fa2):
         tab.ele("@data-testid=ocfEnterTextTextInput").input(code,clear=True)
         tab.ele("@@type=button@@text()=Next").click()
 
-def checkTw(tab,env):
-    tab.wait(2,3)
+def checkTw(chrome, tab, env):
+    tab.wait(2, 3)
     print(f"{env.name}: {tab.url}")
     if ".com/home" in tab.url:
         logger.info(f"{env.name}: 登录推特成功")
         endCheckTW(tab,env)
     elif "account/access" in tab.url:
-        tab.wait(1,2)
+        tab.wait(1, 2)
         start = tab.s_ele("@@type=submit@@value=Start")
         if start:
             tab.ele("@@type=submit@@value=Start").click(by_js=True)
             tab.wait(1, 2)
-            send = tab.s_ele("@@type=submit@@value=Send email")
-            if send:
-                updateAccountStatus(env.tw_id, 1, "该环境TW需要邮箱验证，请前往验证")
-                raise Exception(f"{env.name}: 该环境TW需要邮箱验证，请前往验证")
+            if tab.s_ele("@@type=submit@@value=Send email"):
+                tab.ele("@@type=submit@@value=Send email").click()
+                verifyTw(chrome, tab, env)
             else:
                 reload = tab.s_ele("Reload Challenge")
                 if reload:
@@ -221,8 +220,25 @@ def checkTw(tab,env):
                     updateAccountStatus(env.tw_id, 1, "TW验证码元素未找到")
                     raise Exception(f"{env.name}: TW验证码元素未找到")
         else:
-            updateAccountStatus(env.tw_id, 1, "tw账号需要认证，请人工通过认证")
-            logger.error(f"{env.name}: 需要验证 TW 登录失败")
+            if tab.s_ele("@@type=submit@@value=Send email"):
+                tab.ele("@@type=submit@@value=Send email").click()
+                verifyTw(chrome, tab, env)
+
+            if tab.s_ele("@@type=submit@@value=Verify"):
+                verifyTw(chrome, tab, env)
+
+            if tab.s_ele("@@type=submit@@value=Continue to X"):
+                tab.ele("@@type=submit@@value=Continue to X").click(by_js=True)
+                logger.info(f"{env.name}: TW邮箱验证成功")
+                tab.wait.doc_loaded()
+                tab.wait(5, 6)
+                endCheckTW(tab, env)
+            else:
+                if ".com/home" in tab.url:
+                    logger.info(f"{env.name}: 登录推特成功")
+                else:
+                    updateAccountStatus(env.tw_id, 1, "TW邮箱验证失败，请人工前往验证")
+                    raise Exception(f"{env.name}: TW邮箱验证失败，请人工前往验证")
     else:
         tab.wait(1,2)
         if ".com/home" in tab.url:
@@ -233,13 +249,31 @@ def checkTw(tab,env):
             raise Exception(f"{env.name}: TW 登录失败")
     return tab
 
+def verifyTw(chrome, tab, env):
+    with app.app_context():
+        tw: Account = Account.query.filter_by(id=env.tw_id).first()
+        if tw:
+            client = Email.from_account(env.id, chrome, env.name, tw.email_name, tw.email_pass)
+            code = client.getCode("confirm your email address to access all of")
+            tab.ele("@@type=text@@name=token").input(code)
+            tab.ele("@@type=submit@@value=Verify").click()
+            if tab.s_ele("@@type=submit@@value=Continue to X"):
+                tab.ele("@@type=submit@@value=Continue to X").click(by_js=True)
+                logger.info(f"{env.name}: TW邮箱验证成功")
+                tab.wait.doc_loaded()
+                tab.wait(5, 6)
+                endCheckTW(tab, env)
+            else:
+                updateAccountStatus(env.tw_id, 1, "TW邮箱验证失败，请人工前往验证")
+                raise Exception(f"{env.name}: TW邮箱验证失败，请人工前往验证")
+
 def endCheckTW(tab,env):
     sheetDialog = tab.s_ele("@data-testid=sheetDialog")
     if sheetDialog:
         logger.info(f"{env.name}: 推特出现弹窗需要处理！")
         confram = tab.ele("@data-testid=sheetDialog").ele("@role=button")
-        if "Yes" in confram.text:
-            logger.info(f"{env.name}: 弹窗中包含yes的按钮：{confram.text} 点击")
+        if "Yes" in confram.text or "Got it" in confram.text:
+            logger.info(f"{env.name}: 弹窗中包含yes含义的按钮：{confram.text} 点击")
             confram.click()
         else:
             logger.warning(f"{env.name}: 弹窗不包含Yes，没有点击")
@@ -274,7 +308,7 @@ def LoginTW(chrome:ChromiumPage,env):
             else:
                 updateAccountStatus(env.tw_id, 1, "没有导入TW的账号信息")
                 raise Exception(f"{env.name}: 没有导入TW的账号信息")
-    return checkTw(get_Custome_Tab(tab),env)
+    return checkTw(chrome, get_Custome_Tab(tab), env)
 
 
 def LoginDiscord(chrome:ChromiumPage,env):
@@ -310,7 +344,7 @@ def LoginDiscord(chrome:ChromiumPage,env):
 def LoginOutlook(chrome:ChromiumPage,env):
     updateAccountStatus(env.outlook_id, 0, "重置了OutLook登录状态")
     tab = chrome.new_tab(url="https://outlook.live.com/mail/0/")
-    chrome.wait(2,3)
+    chrome.wait(2, 3)
     if "microsoft" in tab.url:
         with app.app_context():
             outlook:Account = Account.query.filter_by(id=env.outlook_id).first()
@@ -332,8 +366,21 @@ def LoginOutlook(chrome:ChromiumPage,env):
                     return
             else:
                 logger.info(f"{env.name}: 邮箱 账号为空，跳过登录")
+    if tab.s_ele("@@type=submit@@id=iNext"):
+        tab.ele("@@type=submit@@id=iNext").click()
+    if tab.s_ele("@id=userDisplayName"):
+        text = tab.ele("@id=userDisplayName").text
+        with app.app_context():
+            outlook:Account = Account.query.filter_by(id=env.outlook_id).first()
+            if outlook:
+                if text == outlook.name:
+                    tab.ele("@name=passwd").input(aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
+                    tab.ele("@type=submit").click()
+                    if tab.s_ele("@@type=submit@@id=iNext"):
+                        tab.ele("@@type=submit@@id=iNext").click()
+                    logger.info(f"{env.name}: 登录OUTLOOK成功")
+
     updateAccountStatus(env.outlook_id, 2)
-    tab.close()
 
 
 def OKXChrome(env):
