@@ -341,9 +341,15 @@ def LoginDiscord(chrome:ChromiumPage,env):
         logger.info(f"{env.name}登录Discord成功！")
     return get_Custome_Tab(tab)
 
+def preCheckOutlook(chrome):
+    tab = chrome.get_tab(url=".com/mail/0/")
+    if tab is None:
+        tab = chrome.new_tab(url="https://outlook.live.com/mail/0/")
+    return tab
+
 def LoginOutlook(chrome:ChromiumPage,env):
     updateAccountStatus(env.outlook_id, 0, "重置了OutLook登录状态")
-    tab = chrome.new_tab(url="https://outlook.live.com/mail/0/")
+    tab = preCheckOutlook(chrome)
     chrome.wait(2, 3)
     if "microsoft" in tab.url:
         with app.app_context():
@@ -417,9 +423,9 @@ def GalxeChrome(env):
             chrome = getChrome(proxy,env)
             LoginINITWallet(chrome,env)
             LoginOKXWallet(chrome, env)
+            LoginOutlook(chrome, env)
             LoginTW(chrome, env)
             LoginDiscord(chrome, env)
-            LoginOutlook(chrome, env)
             logger.info(f"{env.name}: {chrome.address}")
             return chrome
         except Exception as e:
@@ -434,9 +440,9 @@ def LoginChrome(env):
             LoginINITWallet(chrome, env)
             LoginOKXWallet(chrome, env)
             LoginPhantomWallet(chrome, env)
+            LoginOutlook(chrome, env)
             LoginTW(chrome, env)
             LoginDiscord(chrome, env)
-            LoginOutlook(chrome, env)
             LoginBitlight(chrome, env)
             logger.info(ChromiumOptions().address)
             updateEnvStatus(env.name, 2)
@@ -452,9 +458,9 @@ def DebugChrome(env):
         LoginINITWallet(chrome, env)
         LoginOKXWallet(chrome, env)
         LoginPhantomWallet(chrome, env)
+        LoginOutlook(chrome, env)
         LoginTW(chrome, env)
         LoginDiscord(chrome, env)
-        LoginOutlook(chrome, env)
         LoginBitlight(chrome, env)
         logger.info(ChromiumOptions().address)
         updateEnvStatus(env.name, 2)
