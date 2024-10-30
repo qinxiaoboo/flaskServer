@@ -35,7 +35,6 @@ click_wallet_js = """
             const button = document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-connect-view").shadowRoot.querySelector("wui-flex > w3m-wallet-login-list").shadowRoot.querySelector("wui-flex > w3m-connect-injected-widget").shadowRoot.querySelector("wui-flex > wui-list-wallet:nth-child(1)").shadowRoot.querySelector("button > wui-text").shadowRoot.querySelector("slot");
             return button
             """
-
 deek_network_js = """
             const button = document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-unsupported-chain-view").shadowRoot.querySelector("wui-flex > wui-flex:nth-child(2) > wui-list-network").shadowRoot.querySelector("button");            
             return button
@@ -50,23 +49,77 @@ def getTab(chrome, env):
         tab.ele('Join now').click()
         chrome.wait(3, 6)
 
-    try:
-        if tab.ele('t:span@text():Login with X'):
-            logger.info(f"{env.name}开始授权 X")
-            tab.ele('t:span@text():Login with X').click()
-            chrome.wait(4, 8)
-            for _ in range(3):
-                if tab.ele('t:div@text():Authorization failed, please try again'):
-                    chrome.get_tab(url='https://api.x.com/').close()
-                    tab.refresh()
-                    chrome.wait(2)
-                    tab.ele('t:span@text():Login with X').click()
-                    chrome.wait(2, 3)
+    if tab.ele('t:span@text():Login with X'):
+        logger.info(f"{env.name}开始授权 X")
+        tab.ele('t:span@text():Login with X').click()
+        chrome.wait(30, 35)
+        for _ in range(3):
+            if tab.ele('t:div@text():please try again'):
+                chrome.get_tab(url='https://api.x.com/').close()
+                tab.refresh()
+                chrome.wait(2)
+                tab.ele('t:span@text():Login with X').click()
+                chrome.wait(30, 35)
 
+        try:
+            tw_tab = chrome.get_tab(url="twitter")
+            if tw_tab:
+                    if "login" in tw_tab.url:
+                        logger.info(f"{env.name}: 推特未登录,尝试重新登录")
+                        with app.app_context():
+                            tw: Account = Account.query.filter_by(id=env.tw_id).first()
+                            if tw:
+                                tw_tab.ele("@autocomplete=username").input(tw.name)
+                                tw_tab.ele("@@type=button@@text()=Next").click()
+                                tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                                tw_tab.ele("@@type=button@@text()=Log in").click()
+                                fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                                if "login" in tab.url and len(fa2) > 10:
+                                    tw2faV(tab, fa2)
+                                chrome.wait(25, 30)
+                            else:
+                                    raise Exception(f"{env.name}: 没有导入TW的账号信息")
+        except Exception as e:
+            logger.info(f"y{env.name}: 推特登陆失败")
+            return
+
+        try:
+            if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Send email"):
+                logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
+                quitChrome(env, chrome)
+        except Exception as e:
+            pass
+
+        try:
+                if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Start"):
+                    chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Start").click()
+                    chrome.wait(10, 15)
+                    if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Send email"):
+                        logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
+                        quitChrome(env, chrome)
+        except Exception as e:
+            pass
+
+        try:
+                if chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Continue to X"):
+                            chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Continue to X").click()
+                            chrome.wait(20, 25)
+                if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Start"):
+                            chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Start").click()
+                            chrome.wait(10, 15)
+                if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Send email"):
+                            logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
+                            quitChrome(env, chrome)
+        except Exception as e:
+            pass
+
+        try:
             logger.info(f"{env.name}授权 X")
             tab.wait.ele_displayed(chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected"), timeout=120)
             chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected").click()
             logger.info(f"{env.name}授权 X 完成")
+        except Exception as e:
+            pass
 
         try:
             tab.wait.ele_displayed('t:button@text():Create', timeout=120)
@@ -91,68 +144,11 @@ def getTab(chrome, env):
                 chrome.wait(3, 6)
 
         except Exception as e:
-
-            if tab.ele('t:button@text():Create'):
-                chrome.wait(2, 3)
-                tab.ele('t:button@text():Create').click()
-                logger.info(f"{env.name}创建账户")
-                chrome.wait(2, 3)
-                for _ in range(3):
-                    if tab.ele('t:button@text():Create'):
-                        tab.refresh()
-                        chrome.wait(2, 3)
-                        tab.ele('t:button@text():Create').click()
-                        chrome.wait(1, 2)
-
-                tab.wait.load_start()
-                tab.ele('@placeholder=Enter invite code').click().input('13VRQ3', clear=True)
-                logger.info(f"{env.name}输入邀请码")
-                chrome.wait(1, 2)
-                tab.ele('t:button@text():Confirm').click()
-                logger.info(f"{env.name}提交邀请码")
-                chrome.wait(3, 6)
-
-        try:
-            if tab.ele('@placeholder=Enter invite code'):
-                tab.ele('@placeholder=Enter invite code').click().input('13VRQ3', clear=True)
-                logger.info(f"{env.name}输入邀请码")
-                chrome.wait(1, 2)
-                tab.ele('t:button@text():Confirm').click()
-                logger.info(f"{env.name}提交邀请码")
-        except Exception as e:
-            logger.info(f"{env.name}邀请码已经输入了")
-
-
-        if tab.ele('t:button@text():Connect Wallet'):
-            logger.info(f"{env.name}主页登录成功")
-
-    except Exception as e:
-        try:
-            tab.refresh()
-            chrome.wait(2, 3)
-            if tab.ele('t:span@text():Login with X'):
-                tab.ele('t:span@text():Login with X').click()
-                chrome.wait(4, 8)
-                for _ in range(3):
-                    if tab.ele('t:div@text():Authorization failed, please try again'):
-                        tab.refresh()
-                        chrome.get_tab(url='https://api.x.com/').close()
-                        chrome.wait(2)
-                        tab.ele('t:span@text():Login with X').click()
-                        chrome.wait(2, 3)
-
-                logger.info(f"{env.name}授权X")
-                tab.wait.ele_displayed(chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected"), timeout=120)
-                chrome.get_tab(url='https://api.x.com/').ele("@class=submit button selected").click()
-                logger.info(f"{env.name}授权X完成")
-
-
             try:
-                tab.wait.ele_displayed('t:button@text():Create', timeout=60)
                 if tab.ele('t:button@text():Create'):
-                    logger.info(f"{env.name}创建账户")
                     chrome.wait(2, 3)
                     tab.ele('t:button@text():Create').click()
+                    logger.info(f"{env.name}创建账户")
                     chrome.wait(2, 3)
                     for _ in range(3):
                         if tab.ele('t:button@text():Create'):
@@ -168,44 +164,11 @@ def getTab(chrome, env):
                     tab.ele('t:button@text():Confirm').click()
                     logger.info(f"{env.name}提交邀请码")
                     chrome.wait(3, 6)
-
             except Exception as e:
-                try:
-                    tab.ele('@placeholder=Enter invite code').click().input('13VRQ3', clear=True)
-                    logger.info(f"{env.name}输入邀请码")
-                    chrome.wait(1, 2)
-                    tab.ele('t:button@text():Confirm').click()
-                    logger.info(f"{env.name}提交邀请码")
-                    chrome.wait(3, 6)
-                except Exception as e:
-                    logger.info(f"{env.name}邀请码已经输入了")
+                pass
 
-            if tab.ele('t:button@text():Create'):
-                chrome.wait(2, 3)
-                tab.ele('t:button@text():Create').click()
-                logger.info(f"{env.name}创建账户")
-                chrome.wait(2, 3)
-                for _ in range(3):
-                    if tab.ele('t:button@text():Create'):
-                        tab.refresh()
-                        chrome.wait(2, 3)
-                        tab.ele('t:button@text():Create').click()
-                        chrome.wait(1, 2)
-
-            if tab.ele('@placeholder=Enter invite code'):
-                tab.ele('@placeholder=Enter invite code').click().input('13VRQ3', clear=True)
-                logger.info(f"{env.name}输入邀请码")
-                chrome.wait(1, 2)
-                tab.ele('t:button@text():Confirm').click()
-                logger.info(f"{env.name}提交邀请码")
-
-        except Exception as e:
-            logger.info(f"{env.name}主页登录失败")
-            return
-
-    if tab.ele('t:button@text():Connect Wallet'):
-        logger.info(f"{env.name}主页登录成功")
-    return
+        if tab.ele('t:button@text():Connect Wallet'):
+            logger.info(f"{env.name}主页登录成功")
 
 def getDeek(chrome, env):
     tab = chrome.new_tab(url='https://www.deek.network/')
@@ -352,33 +315,44 @@ def getDeek(chrome, env):
 
 def dailyTask(chrome, env):
 
-    try:
-        tab = chrome.new_tab(url='https://www.deek.network/')
-        chrome.wait(3, 6)
-        if chrome.get_tab(title="OKX Wallet"):
-            logger.info(f"{env.name}  okx钱包授权")
-            chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
-            chrome.wait(10, 12)
-        tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=2).click(by_js=None)
-        chrome.wait(10, 12)
-        if chrome.get_tab(url='https://x.com/').ele('@data-testid=tweetButton'):
-            logger.info(f"{env.name}  每日任务一")
-            chrome.get_tab(url='https://x.com/').ele('@data-testid=tweetButton').click(by_js=None)
-            chrome.wait(2, 3)
-            chrome.get_tab(url='https://x.com/').close()
-            chrome.wait(10, 12)
+        try:
 
-        tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=3).click(by_js=None)
-        chrome.wait(10, 12)
-        if chrome.get_tab(url='https://x.com/').ele('@type=text'):
+            tab = chrome.new_tab(url='https://www.deek.network/')
+            chrome.wait(3, 6)
+            if chrome.get_tab(title="OKX Wallet"):
+                logger.info(f"{env.name}  okx钱包授权")
+                chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+                chrome.wait(10, 12)
+            tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=2).click(by_js=None)
+            chrome.wait(10, 12)
+            if chrome.get_tab(url='https://x.com/').ele('@data-testid=tweetButton'):
+                logger.info(f"{env.name}  每日任务一")
+                chrome.get_tab(url='https://x.com/').ele('@data-testid=tweetButton').click(by_js=None)
+                chrome.wait(2, 3)
+                chrome.get_tab(url='https://x.com/').close()
+                chrome.wait(10, 12)
+            tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=3).click(by_js=None)
+            chrome.wait(10, 12)
+            chrome.get_tab(url='https://x.com/').close()
+        except Exception as e:
+            pass
+
+        try:
+
+            tab = chrome.new_tab(url='https://x.com/settings/profile')
             logger.info(f"{env.name}  每日任务二")
-            chrome.get_tab(url='https://x.com/').ele('@type=text').input(' DEEK')
+            chrome.wait(3, 5)
+            tab.ele('@class=css-146c3p1 r-bcqeeo r-1ttztb7 r-qvutc0 r-37j5jr r-135wba7 r-16dba41 r-1awozwy r-6koalj r-1inkyih r-13qz1uu', index=1).input(' DEEK')
             chrome.wait(2, 3)
-            chrome.get_tab(url='https://x.com/').ele('@data-testid=Profile_Save_Button').click(by_js=None)
+            tab.ele('@data-testid=Profile_Save_Button').click(by_js=None)
+            chrome.wait(3, 6)
             chrome.get_tab(url='https://x.com/').close()
             chrome.wait(10, 12)
 
+        except Exception as e:
+            pass
 
+        tab = chrome.new_tab(url='https://www.deek.network/')
         if chrome.get_tab(title="OKX Wallet"):
             logger.info(f"{env.name}  okx钱包授权")
             chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
@@ -389,12 +363,9 @@ def dailyTask(chrome, env):
         chrome.wait(10, 12)
         tab.ele('t:button@text():Verify', index=2).click()
         chrome.wait(10, 12)
-
         logger.info(f"{env.name}  每日任务完成")
-    except Exception as e:
-        logger.info(f"{env.name}  每日任务失败")
 
-    return
+        return
 
 def deekCount(chrome, env):
 
@@ -446,9 +417,6 @@ def deekCount(chrome, env):
     top = tab.ele('@class=font-sf-pro-display text-5-s20-l30-w700 not-italic text-content-primary').text
     text = str(top)
     number = text.split()[2]
-    # print(number)
-    # print(points)
-
     taskData.Points = points
     taskData.top = number
     updateTaskRecord(env.name, name, taskData, 1)
@@ -460,10 +428,10 @@ def deek(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
-            getTab(chrome, env)
+            # getTab(chrome, env)
             # getDeek(chrome, env)
             dailyTask(chrome, env)
-            # deekCount(chrome, env)
+            deekCount(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")

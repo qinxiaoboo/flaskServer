@@ -104,14 +104,7 @@ def getTab(chrome, env):
         tab.ele('t:div@text():Connect new handle').click()
         logger.info(f"{env.name}    点击推特授权")
 
-    chrome.wait(25, 30)
-
-    try:
-        if chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Send email"):
-            logger.info(f"{env.name}    退出，推特需要邮箱验证！！")
-            return
-    except Exception as e:
-        pass
+    chrome.wait(30, 35)
 
     try:
         tw_tab = chrome.get_tab(url="twitter")
@@ -132,12 +125,39 @@ def getTab(chrome, env):
                     else:
                         raise Exception(f"{env.name}: 没有导入TW的账号信息")
     except Exception as e:
-        logger.info(f"{env.name}: 推特授权失败")
+        logger.info(f"y{env.name}: 推特登陆失败")
         return
 
-    if chrome.get_tab(url='https://twitter.com/account/access'):
-        logger.info(f"{env.name}: 推特授权失败,需要机器人验证")
-        return
+    try:
+        if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Send email"):
+            logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
+            quitChrome(env, chrome)
+    except Exception as e:
+        pass
+
+    try:
+        if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Start"):
+            chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Start").click()
+            chrome.wait(10, 15)
+            if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Send email"):
+                logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
+                quitChrome(env, chrome)
+            chrome.wait(25, 30)
+    except Exception as e:
+        pass
+
+    try:
+        if chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Continue to X"):
+            chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Continue to X").click()
+            chrome.wait(20, 25)
+        if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Start"):
+            chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Start").click()
+            chrome.wait(10, 15)
+        if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Send email"):
+            logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
+            quitChrome(env, chrome)
+    except Exception as e:
+        pass
 
     try:
         chrome.wait(10, 15)
@@ -178,27 +198,28 @@ def getTab(chrome, env):
         chrome.wait(10, 15)
         try:
             tab.ele('t:div@text():Visit telegram group').click()
+            chrome.wait(3, 5)
             logger.info(f"{env.name}    加入tg")
-            chrome.wait(10, 15)
         except Exception as e:
             logger.info(f"{env.name}    加入tg失败")
 
         try:
             tab.ele('@class=cta-link dashboard-button cta-button-bottom fw-300 ls-1 xs', index=3).click()
+            chrome.wait(3, 5)
             logger.info(f"{env.name}    加入X")
-            chrome.wait(10, 15)
         except Exception as e:
             logger.info(f"{env.name}    加入X失败")
 
         try:
             tab.ele('t:div@text():Visit blog and learn').click()
+            chrome.wait(3, 5)
             logger.info(f"{env.name}    Visit blog")
-            chrome.wait(10, 15)
         except Exception  as e:
             logger.info(f"{env.name}    Visit blog失败")
 
         try:
             tab.ele('t:div@text():Visit website').click()
+            chrome.wait(3, 5)
             logger.info(f"{env.name}    Visit website")
             chrome.wait(12, 16)
         except Exception as e:
