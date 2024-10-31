@@ -100,7 +100,7 @@ def getTab(chrome, env):
                         if tw:
                             tw_tab.ele("@autocomplete=username").input(tw.name)
                             tw_tab.ele("@@type=button@@text()=Next").click()
-                            tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                            tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
                             tw_tab.ele("@@type=button@@text()=Log in").click()
                             fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
                             if "login" in tab.url and len(fa2) > 10:
@@ -108,9 +108,25 @@ def getTab(chrome, env):
                             chrome.wait(25, 30)
                         else:
                             raise Exception(f"{env.name}: 没有导入TW的账号信息")
+
+            if chrome.get_tab(url='https://x.com/').ele("t:span@text():Log in"):
+                chrome.get_tab(url='https://x.com/').ele("t:span@text():Log in").click()
+                logger.info(f"{env.name}: 推特未登录,尝试重新登录")
+                with app.app_context():
+                    tw: Account = Account.query.filter_by(id=env.tw_id).first()
+                    if tw:
+                        tw_tab.ele("@autocomplete=username").input(tw.name)
+                        tw_tab.ele("@@type=button@@text()=Next").click()
+                        tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
+                        tw_tab.ele("@@type=button@@text()=Log in").click()
+                        fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                        if "login" in tab.url and len(fa2) > 10:
+                            tw2faV(tab, fa2)
+                        chrome.wait(25, 30)
+                    else:
+                        raise Exception(f"{env.name}: 没有导入TW的账号信息")
         except Exception as e:
-            logger.info(f"y{env.name}: 推特登陆失败")
-            return
+            pass
 
         try:
             if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Send email"):
@@ -172,12 +188,8 @@ def missions(chrome, env):
     random_word = rw.random_word()
     logger.info(f"{env.name}   开始做入职任务")
     chrome.wait(15, 25)
-    chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
-    chrome.wait(2, 3)
-    if tab.ele('t:span@text():Refresh'):
-        tab.ele('t:span@text():Refresh').click()
-        chrome.wait(3, 6)
-        tw_tab = chrome.get_tab(url="x.com")
+    tw_tab = chrome.get_tab(url="x.com")
+    try:
         if tw_tab:
                 if "login" in tw_tab.url:
                         logger.info(f"{env.name}: 推特未登录,尝试重新登录")
@@ -186,7 +198,7 @@ def missions(chrome, env):
                         if tw:
                                 tw_tab.ele("@autocomplete=username").input(tw.name)
                                 tw_tab.ele("@@type=button@@text()=Next").click()
-                                tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                                tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
                                 tw_tab.ele("@@type=button@@text()=Log in").click()
                                 fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
                                 if "login" in tab.url and len(fa2) > 10:
@@ -194,8 +206,8 @@ def missions(chrome, env):
                                 chrome.wait(25, 30)
                         else:
                                 raise Exception(f"{env.name}: 没有导入TW的账号信息")
-        try:
-            if chrome.get_tab(url='https://x.com/').ele("t:span@text():Log in"):
+
+        if chrome.get_tab(url='https://x.com/'):
                         chrome.get_tab(url='https://x.com/').ele("t:span@text():Log in").click()
                         logger.info(f"{env.name}: 推特未登录,尝试重新登录")
                         with app.app_context():
@@ -203,7 +215,7 @@ def missions(chrome, env):
                             if tw:
                                 tw_tab.ele("@autocomplete=username").input(tw.name)
                                 tw_tab.ele("@@type=button@@text()=Next").click()
-                                tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                                tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
                                 tw_tab.ele("@@type=button@@text()=Log in").click()
                                 fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
                                 if "login" in tab.url and len(fa2) > 10:
@@ -211,28 +223,32 @@ def missions(chrome, env):
                                 chrome.wait(25, 30)
                             else:
                                 raise Exception(f"{env.name}: 没有导入TW的账号信息")
-        except Exception as e:
+    except Exception as e:
             pass
 
-    try:
-        if chrome.get_tab(url='https://x.com/').ele("t:span@text():Log in"):
-                    chrome.get_tab(url='https://x.com/').ele("t:span@text():Log in").click()
+    chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
+    chrome.wait(2, 3)
+    if tab.ele('t:span@text():Refresh'):
+        tab.ele('t:span@text():Refresh').click()
+        chrome.wait(25, 30)
+        tw_tab = chrome.get_tab(url="x.com")
+        if tw_tab:
+            if "login" in tw_tab.url:
                     logger.info(f"{env.name}: 推特未登录,尝试重新登录")
                     with app.app_context():
                         tw: Account = Account.query.filter_by(id=env.tw_id).first()
-                        if tw:
-                            tw_tab.ele("@autocomplete=username").input(tw.name)
-                            tw_tab.ele("@@type=button@@text()=Next").click()
-                            tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
-                            tw_tab.ele("@@type=button@@text()=Log in").click()
-                            fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
-                            if "login" in tab.url and len(fa2) > 10:
-                                tw2faV(tab, fa2)
-                            chrome.wait(25, 30)
-                        else:
-                            raise Exception(f"{env.name}: 没有导入TW的账号信息")
-    except Exception as e:
-        pass
+
+                    if tw:
+                        tw_tab.ele("@autocomplete=username").input(tw.name)
+                        tw_tab.ele("@@type=button@@text()=Next").click()
+                        tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
+                        tw_tab.ele("@@type=button@@text()=Log in").click()
+                        fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                        if "login" in tab.url and len(fa2) > 10:
+                            tw2faV(tab, fa2)
+                        chrome.wait(25, 30)
+                    else:
+                        raise Exception(f"{env.name}: 没有导入TW的账号信息")
 
     tab.close()
     chrome.wait(15, 20)
@@ -244,7 +260,8 @@ def missions(chrome, env):
     chrome.wait(3, 6)
 
     tw_tab = chrome.get_tab(url="x.com")
-    if tw_tab:
+    try:
+        if tw_tab:
             if "login" in tw_tab.url:
                     logger.info(f"{env.name}: 推特未登录,尝试重新登录")
                     with app.app_context():
@@ -252,7 +269,7 @@ def missions(chrome, env):
                     if tw:
                             tw_tab.ele("@autocomplete=username").input(tw.name)
                             tw_tab.ele("@@type=button@@text()=Next").click()
-                            tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                            tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
                             tw_tab.ele("@@type=button@@text()=Log in").click()
                             fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
                             if "login" in tab.url and len(fa2) > 10:
@@ -260,8 +277,8 @@ def missions(chrome, env):
                             chrome.wait(25, 30)
                     else:
                             raise Exception(f"{env.name}: 没有导入TW的账号信息")
-    try:
-        if chrome.get_tab(url='https://x.com/').ele("t:span@text():Log in"):
+
+        if chrome.get_tab(url='https://x.com/'):
                     chrome.get_tab(url='https://x.com/').ele("t:span@text():Log in").click()
                     logger.info(f"{env.name}: 推特未登录,尝试重新登录")
                     with app.app_context():
@@ -269,7 +286,7 @@ def missions(chrome, env):
                         if tw:
                             tw_tab.ele("@autocomplete=username").input(tw.name)
                             tw_tab.ele("@@type=button@@text()=Next").click()
-                            tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                            tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
                             tw_tab.ele("@@type=button@@text()=Log in").click()
                             fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
                             if "login" in tab.url and len(fa2) > 10:

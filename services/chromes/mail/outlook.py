@@ -9,7 +9,9 @@ from loguru import logger
 class Outlook(BaseClient):
 
     def login(self):
-        self.tab = self.chrome.new_tab(url="https://outlook.live.com/mail/0/")
+        self.tab = self.chrome.get_tab(url=".com/mail/0/")
+        if self.tab is None:
+            self.tab = self.chrome.new_tab(url="https://outlook.live.com/mail/0/")
         self.chrome.wait(2, 3)
         if "microsoft" in self.tab.url:
             logger.info(f"{self.envName}: 开始登陆 outlook邮箱")
