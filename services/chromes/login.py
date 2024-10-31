@@ -100,8 +100,6 @@ def ConfirmOKXWallet(chrome,tab,env):
     else:
         ele.click()
         logger.info(f"OKX 钱包 确认成功")
-
-
 def LoginOKXWallet(chrome,env):
     tab = chrome.get_tab(title="OKX Wallet")
     if "unlock" in tab.url:

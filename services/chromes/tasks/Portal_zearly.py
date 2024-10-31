@@ -116,38 +116,48 @@ def getDiscord(chrome,env):
         logger.error(e)
 
 
-def getSigninTW(chrome,env):
+def getSigninTW(chrome, env):
     try:
         tab = chrome.new_tab(url='https://x.com/')
         chrome.wait(8, 10)
         logger.info('开始判断')
-        if tab.s_ele("Sign in") or tab.s_ele("Log in", index=4) or tab.s_ele('Retry') or tab.s_ele('Refish'):
+
+        # 登录处理逻辑
+        if any(tab.s_ele(selector) for selector in ["Sign in", "Log in", "Retry", "Refish"]):
             logger.info(f"{env.name}: 推特未登录，触发登录推特")
             if tab.s_ele('Sign in'):
                 tab.ele('Sign in').click()
             elif tab.s_ele('Log in'):
                 tab.ele('Log in').click()
             elif tab.s_ele('Retry'):
-                print('Retry')
-                tab.refresh(ignore_cache= True)
-            time.sleep(10)
+                logger.info("Refreshing the page due to Retry")
+                tab.refresh(ignore_cache=True)
+
+            time.sleep(10)  # 等待页面加载
+
             with app.app_context():
                 tw: Account = Account.query.filter_by(id=env.tw_id).first()
-                if tw:
-                    tab.ele("@autocomplete=username").input(tw.name, clear=True)
-                    tab.ele("@@type=button@@text()=Next").click()
-                    tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
-                    tab.ele("@@type=button@@text()=Log in").click()
-                    fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
-                    if "login" in tab.url and len(fa2) > 10:
-                        tw2faV(tab, fa2)
-                    tab.ele('@type=button').click()
-                    chrome.wait(2)
-                    logger.info(f'{env.name}:登录完成')
-                    chrome.close_tabs()
-                else:
+                if not tw:
                     raise Exception(f"{env.name}: 没有导入TW的账号信息")
-        elif tab.s_ele('@class=Button EdgeButton EdgeButton--primary') or tab.s_ele('@value=Send email') or tab.s_ele('@value=Continue to X'):
+
+                # 输入用户名和密码
+                tab.ele("@autocomplete=username").input(tw.name, clear=True)
+                tab.ele("@@type=button@@text()=Next").click()
+                tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
+                tab.ele("@@type=button@@text()=Log in").click()
+
+                # 二次验证
+                fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                if "login" in tab.url and len(fa2) > 10:
+                    tw2faV(tab, fa2)
+
+                tab.ele('@type=button').click()
+                chrome.wait(2)
+                logger.info(f'{env.name}: 登录完成')
+                chrome.close_tabs()
+
+        # 处理人工验证和其他状态
+        elif tab.s_ele('@class=Button EdgeButton EdgeButton--primary') or tab.s_ele('@value=Start') or tab.s_ele('@value=Continue to X'):
             if tab.s_ele('@class=Button EdgeButton EdgeButton--primary'):
                 logger.info(f'{env.name}:需要人工验证twitter，是Send email')
                 time.sleep(1)
@@ -168,13 +178,14 @@ def getSigninTW(chrome,env):
                 tab.ele('@value=Continue to X').click()
         elif tab.s_ele('Your account is suspended'):
             print(f'{env.name}:此号被封')
-            return
+            return False
     except Exception as e:
-        logger.info(e)
+        logger.error(f"处理过程中出现错误: {e}")
         return
 #登录zearly平台
 def getZearly(chrome,env):
-    tab = chrome.new_tab(url='https://zealy.io/cw/portaltobitcoin/questboard')
+    portal_url = getrandom_url()
+    tab = chrome.new_tab(url=portal_url)
     chrome.wait(2, 3)
     tab.set.window.max()
     try:
@@ -202,72 +213,11 @@ def getZearly(chrome,env):
             tab.ele('t:button@tx():Log in with Discord').click()
             time.sleep(20)
             #logger.info(f"{env.name}:开始discord登录")
-            try:
-                logger.info(f'{env.name}:开始判断登录discord情况')
-                if chrome.get_tab(title='Discord | Authorize access to your account'):
-                    chrome.get_tab(title='Discord | Authorize access to your account').ele("@type=button",index=2).click()
-                    logger.info(f"{env.name}: 登录discord完成----------------------------------")
-                    time.sleep(10)
-                    chrome.close_tabs()
-                    chrome.new_tab(url='https://zealy.io/cw/portaltobitcoin/questboard')
-                    time.sleep(6)
-
-                elif chrome.get_tab(title='Discord | 授权访问您的账号'):
-                    chrome.get_tab(title='Discord | 授权访问您的账号').ele("@type=button",index=2).click()
-                    logger.info(f"{env.name}: 登录discord完成----------------------------------")
-                    time.sleep(10)
-                    chrome.close_tabs()
-                    chrome.new_tab(url='https://zealy.io/cw/portaltobitcoin/questboard')
-                    time.sleep(6)
-
-                elif chrome.get_tab(title='Discord'):
-                    if tab.s_ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85'):
-                        logger.info(f'{env.name}的discord需要重新登录')
-                        tab.ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85').click()
-                        time.sleep(6)
-                        chrome.close_tabs()
-                        LoginDiscord(chrome, env)
-                        chrome.close_tabs()
-                        getZearly(chrome, env)
-
-                    elif tab.ele('Welcome back!'):
-                        logger.info(f"{env.name}的Discord未登录，尝试重新登录")
-                        LoginDiscord(chrome, env)
-                        chrome.close_tabs()
-                        getZearly(chrome, env)
-
-                else:
-                    logger.info(f'{env.name}:还有其他的语言需要加判断')
-
-            except Exception as e:
-                logger.info(e)
-                logger.info(f"{env.name}：Discord未登录，账号登录失败????????????????????????????????")
-                logger.info(e)
+            getDiscord(chrome, env)
         else:
             logger.info(f'------------{env.name}已经登录了---------------')
     except Exception as e:
         logger.info(e)
-
-#twitter的like,twitter的retweet,twitter的follow
-# def getTW_Three_Elements(chrome,elements,retry_function):
-#     chrome.wait(8, 10)
-#     try:
-#         tab = chrome.get_tab(url='https://x.com/')
-#
-#         if elements == 'Follow':
-#             tab.wait(8).ele('t:span@tx():Follow', index=2).click()
-#             chrome.close_tabs()
-#
-#         elif elements == 'Like':
-#             tab.ele('t:span@tx():Like', index=2).click()
-#             chrome.close_tabs()
-#
-#         elif elements == 'Retweet':
-#             tab.wait(8).ele('t:span@tx():Repost').click()
-#             chrome.close_tabs()
-#     except Exception as e:
-#         logger.info(e)
-
 
 #连接钱包
 def exe_okx(chrome):
@@ -291,10 +241,10 @@ def getStarted(chrome,env):
             logger.info(f'{env.name}:twitter关注任务')
             chrome.wait(2, 3)
             try:
-                if tab.s_ele('Connect Twitter'):
-                    tab.ele('Connect Twitter').click()
-                    chrome.wait(2, 3)
-                    chrome.get_tab(url='https://api.x.com/oauth').ele('@class=submit button selected').click()
+                if tab.s_ele('t:button@tx():Connect Twitter'):
+                    tab.ele('t:button@tx():Connect Twitter').click()
+                    chrome.wait(5, 10)
+                    chrome.get_tab(url='https://api.x.com/').ele('@value=Authorize app').click()
                     chrome.wait(2, 3)
             except Exception as e:
                 logger.info(e)
@@ -314,132 +264,154 @@ def getStarted(chrome,env):
                         tab.ele('t:div@tx():Sign message').click()
                         time.sleep(2)
                         exe_okx(chrome)
-
             except Exception as e:
                 logger.info(e)
 
-            time.sleep(10)
-            try:
-                tab.ele('@class=shrink-0 w-button-icon-lg h-button-icon-lg').click()
-                time.sleep(6)
-                # print('跳转到twitter关注')
-                # logger.info('开始点')
-                chrome.get_tab(url='https://x.com/').ele('Follow @PortaltoBitcoin').click()
-                # logger.info('结束')
-                chrome.close_tabs()
-                time.sleep(2)
-                tab.ele('t:button@tx():Claim').click()
-                time.sleep(6)
-                chrome.close_tabs()
-                logger.info(f'{env.name}:twitter任务完成$$$$$$$$$$$$$$$$')
-            except Exception as e:
-                logger.info(e)
+            chrome.wait(5, 10)
+            num = 0
+            while num < 5:
+                try:
+                    tab = chrome.get_tab(
+                        url='https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/02a57e83-c01d-4c07-a859-b344ee0b7a32')
+                    chrome.wait(2, 3)
+                    chrome.refresh(ignore_cache=True)
+                    chrome.wait(2, 3)
+                    if tab.s_ele('t:button@tx():Connect Discord'):
+                        tab.ele('t:button@tx():Connect Discord').click()
+                        chrome.wait(2, 3)
+                        getDiscord(chrome, env)
+                        chrome.wait(2, 3)
+                        num += 1
+                        chrome.refresh(ignore_cache=True)
+                        chrome.wait(5, 10)
+                    else:
+                        break
+                except Exception as e:
+                    logger.info(e)
+
     except Exception as e:
        logger.error(e)
 
-    try:
-        tab = chrome.new_tab('https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/9b0d1ff3-847e-4a69-abe4-eef9e2475555')
-        if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
-            logger.info(f'{env.name}:任务已经完成')
-            chrome.close_tabs()
-        else:
-            print('开始做discord任务')
-            tab.ele('@class=text-ellipsis line-clamp-1 justify-start').click()
-            time.sleep(6)
-            print('点击确认')
-            time.sleep(10)
-            getDiscord(chrome,env)
-            time.sleep(15)
-            try:
-                print('点击关注')
-                print('title', chrome.get_tab(url='https://discord.com/').title)
-                title_url = chrome.get_tab(url='https://discord.com/').title
-                chrome.get_tab(title=title_url).ele('@class=contents_dd4f85 innerButton_faf5ab').click()
-                time.sleep(2)
-                print('点击对号')
-                chrome.get_tab(title=title_url).ele(
-                    '@class=checkboxWrapper_f6cde8 alignCenter_f6cde8 checkbox_bd5b94').click()
-                time.sleep(2)
-                print('点击同意')
-                chrome.get_tab(title=title_url).ele(
-                    '@class=submitButton_a74b6f button_dd4f85 lookFilled_dd4f85 colorGreen_dd4f85 sizeMedium_dd4f85 grow_dd4f85').click()
-                time.sleep(2)
-                chrome.close_tabs()
-            except Exception as e:
-                logger.info(e)
-                chrome.close_tabs()
-            time.sleep(2)
-            tab.ele('t:button@tx():Claim').click()
-            time.sleep(6)
-            chrome.close_tabs()
-    except Exception as e:
-        logger.info('discord有问题需要人工')
+    # time.sleep(10)
+    # try:
+    #     tab.ele('@class=shrink-0 w-button-icon-lg h-button-icon-lg').click()
+    #     time.sleep(6)
+    #     # print('跳转到twitter关注')
+    #     # logger.info('开始点')
+    #     chrome.get_tab(url='https://x.com/').ele('Follow @PortaltoBitcoin').click()
+    #     # logger.info('结束')
+    #     chrome.close_tabs()
+    #     time.sleep(2)
+    #     tab.ele('t:button@tx():Claim').click()
+    #     time.sleep(6)
+    #     chrome.close_tabs()
+    #     logger.info(f'{env.name}:twitter任务完成$$$$$$$$$$$$$$$$')
+    # except Exception as e:
+    #     logger.info(e)
 
-#     # print('Follow our Medium')
-#     # --------------Follow our Medium------------
-    try:
-        tab = chrome.new_tab(
-            url='https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/b5817b0f-4b29-4478-a961-c8f3024ead2e')
-        if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
-            logger.info(f'{env.name}:任务已经完成')
-            chrome.close_tabs()
-        else:
-            tab.ele('@class=flex flex-col gap-embed-url-texts flex-1 w-full p-embed-url-container').click()
-            time.sleep(1)
-            chrome.close_tabs()
-            time.sleep(2)
-            tab.ele('t:button@tx():Claim').click()
-            time.sleep(6)
-            chrome.close_tabs()
-    except Exception as e:
-        logger.info(e)
-#     # print('Subscribe to our YouTube Channel and watch a video!')
-#     # ---------------Subscribe to our YouTube Channel and watch a video!---------------------------------
-    try:
-        tab = chrome.new_tab(
-            url='https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/55b14c1a-3c8e-4a4e-9239-81d263268360')
-        if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
-            logger.info(f'{env.name}:任务已经完成')
-            chrome.close_tabs()
-        else:
-            tab.ele('@class=flex flex-col gap-embed-url-texts flex-1 w-full p-embed-url-container').click()
-            time.sleep(1)
-            chrome.close_tabs()
-            time.sleep(2)
-            tab.ele('t:button@tx():Claim').click()
-            time.sleep(6)
-            chrome.close_tabs()
-    except Exception as e:
-        logger.info(e)
-#  #-----------------Join us on Telegram and like/react to a few posts!-------------------
-#     #-----------------------------------------------------------------------------------------------------------------------------------
-    try:
-        tab = chrome.new_tab('https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/e30d9ed1-b71f-43f4-bbd8-8c7677e6acae')
-        if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
-            logger.info(f'{env.name}:任务已经完成')
-            chrome.close_tabs()
-        else:
-            time.sleep(2)
-            tab.ele('t:button@tx():Claim').click()
-            time.sleep(6)
-            chrome.close_tabs()
-    except Exception as e:
-        logger.info(e)
-# #---------------------Follow us on Telegram and React!---------------------
-    try:
-        tab = chrome.new_tab('https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/ead3833b-7a28-4b85-90d4-55f5270156de')
-        if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
-            logger.info(f'{env.name}:任务已经完成')
-            chrome.close_tabs()
-        else:
-            time.sleep(2)
-            tab.ele('t:button@tx():Claim').click()
-            time.sleep(6)
-            chrome.close_tabs()
-    except Exception as e:
-        logger.info(e)
-
-#----------------------------------------------------------------------------------------------------------------------------------------------------------
+#     try:
+#         tab = chrome.new_tab('https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/9b0d1ff3-847e-4a69-abe4-eef9e2475555')
+#         if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
+#             logger.info(f'{env.name}:任务已经完成')
+#             chrome.close_tabs()
+#         else:
+#             print('开始做discord任务')
+#             tab.ele('@class=text-ellipsis line-clamp-1 justify-start').click()
+#             time.sleep(6)
+#             print('点击确认')
+#             time.sleep(10)
+#             getDiscord(chrome,env)
+#             time.sleep(15)
+#             try:
+#                 print('点击关注')
+#                 print('title', chrome.get_tab(url='https://discord.com/').title)
+#                 title_url = chrome.get_tab(url='https://discord.com/').title
+#                 chrome.get_tab(title=title_url).ele('@class=contents_dd4f85 innerButton_faf5ab').click()
+#                 time.sleep(2)
+#                 print('点击对号')
+#                 chrome.get_tab(title=title_url).ele(
+#                     '@class=checkboxWrapper_f6cde8 alignCenter_f6cde8 checkbox_bd5b94').click()
+#                 time.sleep(2)
+#                 print('点击同意')
+#                 chrome.get_tab(title=title_url).ele(
+#                     '@class=submitButton_a74b6f button_dd4f85 lookFilled_dd4f85 colorGreen_dd4f85 sizeMedium_dd4f85 grow_dd4f85').click()
+#                 time.sleep(2)
+#                 chrome.close_tabs()
+#             except Exception as e:
+#                 logger.info(e)
+#                 chrome.close_tabs()
+#             time.sleep(2)
+#             tab.ele('t:button@tx():Claim').click()
+#             time.sleep(6)
+#             chrome.close_tabs()
+#     except Exception as e:
+#         logger.info('discord有问题需要人工')
+#
+# #     # print('Follow our Medium')
+# #     # --------------Follow our Medium------------
+#     try:
+#         tab = chrome.new_tab(
+#             url='https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/b5817b0f-4b29-4478-a961-c8f3024ead2e')
+#         if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
+#             logger.info(f'{env.name}:任务已经完成')
+#             chrome.close_tabs()
+#         else:
+#             tab.ele('@class=flex flex-col gap-embed-url-texts flex-1 w-full p-embed-url-container').click()
+#             time.sleep(1)
+#             chrome.close_tabs()
+#             time.sleep(2)
+#             tab.ele('t:button@tx():Claim').click()
+#             time.sleep(6)
+#             chrome.close_tabs()
+#     except Exception as e:
+#         logger.info(e)
+# #     # print('Subscribe to our YouTube Channel and watch a video!')
+# #     # ---------------Subscribe to our YouTube Channel and watch a video!---------------------------------
+#     try:
+#         tab = chrome.new_tab(
+#             url='https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/55b14c1a-3c8e-4a4e-9239-81d263268360')
+#         if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
+#             logger.info(f'{env.name}:任务已经完成')
+#             chrome.close_tabs()
+#         else:
+#             tab.ele('@class=flex flex-col gap-embed-url-texts flex-1 w-full p-embed-url-container').click()
+#             time.sleep(1)
+#             chrome.close_tabs()
+#             time.sleep(2)
+#             tab.ele('t:button@tx():Claim').click()
+#             time.sleep(6)
+#             chrome.close_tabs()
+#     except Exception as e:
+#         logger.info(e)
+# #  #-----------------Join us on Telegram and like/react to a few posts!-------------------
+# #     #-----------------------------------------------------------------------------------------------------------------------------------
+#     try:
+#         tab = chrome.new_tab('https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/e30d9ed1-b71f-43f4-bbd8-8c7677e6acae')
+#         if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
+#             logger.info(f'{env.name}:任务已经完成')
+#             chrome.close_tabs()
+#         else:
+#             time.sleep(2)
+#             tab.ele('t:button@tx():Claim').click()
+#             time.sleep(6)
+#             chrome.close_tabs()
+#     except Exception as e:
+#         logger.info(e)
+# # #---------------------Follow us on Telegram and React!---------------------
+#     try:
+#         tab = chrome.new_tab('https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/ead3833b-7a28-4b85-90d4-55f5270156de')
+#         if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
+#             logger.info(f'{env.name}:任务已经完成')
+#             chrome.close_tabs()
+#         else:
+#             time.sleep(2)
+#             tab.ele('t:button@tx():Claim').click()
+#             time.sleep(6)
+#             chrome.close_tabs()
+#     except Exception as e:
+#         logger.info(e)
+#
+# #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #BitScalerLaunch
 def getBitScalerLaunch(chrome,env):
@@ -755,24 +727,24 @@ def getPortal(chrome,env):
         time.sleep(2)
         logger.info(f'{env.name}:GET STARTED结束')
         # #-----------------------------------------------
-        # #---------------------------BitScaler(完成)--------------------------
-        logger.info(f'{env.name}:BitScaler任务结束')
-        getBitScalerLaunch(chrome, env)
-        time.sleep(2)
-        getBitScalerWhitepaper(chrome, env)
-        time.sleep(2)
-        logger.info(f'{env.name}:BitScaler任务结束')
-        # #--------------------------------------------------------------
-        # #-------------PARTNERSHIP(完成)-----------------------
-        logger.info(f'{env.name}:PARTNERSHIP的任务开始')
-        getPartnership(chrome, env)
-        time.sleep(2)
-        logger.info(f'{env.name}:PARTNERSHIP的任务结束')
-        # # -----------------------------------------------
-        # -------------Staying on top of twitter!-----------------------
-        logger.info(f'{env.name}:Staying on top of 任务开始')
-        getStayingExplore(chrome, env)
-        logger.info(f'{env.name}:Staying on top of 任务结束')
+        # # #---------------------------BitScaler(完成)--------------------------
+        # logger.info(f'{env.name}:BitScaler任务结束')
+        # getBitScalerLaunch(chrome, env)
+        # time.sleep(2)
+        # getBitScalerWhitepaper(chrome, env)
+        # time.sleep(2)
+        # logger.info(f'{env.name}:BitScaler任务结束')
+        # # #--------------------------------------------------------------
+        # # #-------------PARTNERSHIP(完成)-----------------------
+        # logger.info(f'{env.name}:PARTNERSHIP的任务开始')
+        # getPartnership(chrome, env)
+        # time.sleep(2)
+        # logger.info(f'{env.name}:PARTNERSHIP的任务结束')
+        # # # -----------------------------------------------
+        # # -------------Staying on top of twitter!-----------------------
+        # logger.info(f'{env.name}:Staying on top of 任务开始')
+        # getStayingExplore(chrome, env)
+        # logger.info(f'{env.name}:Staying on top of 任务结束')
         # -----------------------------------------------
         logger.info(f'{env.name}:脚本任务全部完成，转人工')
 
@@ -780,9 +752,7 @@ def getPortal(chrome,env):
         logger.info(e)
 
 def getCount(chrome, env):
-    portal_url = getrandom_url()
     tab = chrome.new_tab(url='https://zealy.io/cw/portaltobitcoin/leaderboard')
-    print('邀请码:', portal_url)
     try:
         num = tab.ele('@class=body-component-md-bold ml-auto whitespace-nowrap').text
         portal_xp = num.split('/')[0]
@@ -798,19 +768,19 @@ def portal(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
-            getZearly(chrome, env)
-            time.sleep(5)
-            chrome.close_tabs()
-            time.sleep(5)
+            # getZearly(chrome, env)
+            # time.sleep(5)
+            # chrome.close_tabs()
+            # time.sleep(5)
             getPortal(chrome, env)
-            getCount(chrome, env)
-            time.sleep(10)
+            # getCount(chrome, env)
+            # time.sleep(10)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
             return ("失败", e)
-        finally:
-            quitChrome(env, chrome)
+        # finally:
+        #     quitChrome(env, chrome)
 
 
 
