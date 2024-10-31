@@ -392,7 +392,7 @@ def OKXChrome(env):
             proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
             chrome = getChrome(proxy,env)
             LoginOKXWallet(chrome,env)
-            LoginPhantomWallet(chrome,env)
+            # LoginPhantomWallet(chrome,env)
             chrome.get_tab(title="Initia Wallet").close()
             return chrome
         except Exception as e:
@@ -435,7 +435,7 @@ def LoginChrome(env):
             chrome = getChrome(proxy,env)
             LoginINITWallet(chrome, env)
             LoginOKXWallet(chrome, env)
-            LoginPhantomWallet(chrome, env)
+            # LoginPhantomWallet(chrome, env)
             LoginOutlook(chrome, env)
             LoginTW(chrome, env)
             LoginDiscord(chrome, env)
@@ -453,7 +453,7 @@ def DebugChrome(env):
         chrome = getChrome(proxy,env)
         LoginINITWallet(chrome, env)
         LoginOKXWallet(chrome, env)
-        LoginPhantomWallet(chrome, env)
+        # LoginPhantomWallet(chrome, env)
         LoginOutlook(chrome, env)
         LoginTW(chrome, env)
         LoginDiscord(chrome, env)
