@@ -98,7 +98,7 @@ def getTab(chrome, env):
                     with app.app_context():
                         tw: Account = Account.query.filter_by(id=env.tw_id).first()
                         if tw:
-                            tw_tab.ele("@autocomplete=username").input(tw.name)
+                            tw_tab.ele("@autocomplete=username").input(tw.name, clear=True)
                             tw_tab.ele("@@type=button@@text()=Next").click()
                             tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
                             tw_tab.ele("@@type=button@@text()=Log in").click()
@@ -115,7 +115,7 @@ def getTab(chrome, env):
                 with app.app_context():
                     tw: Account = Account.query.filter_by(id=env.tw_id).first()
                     if tw:
-                        tw_tab.ele("@autocomplete=username").input(tw.name)
+                        tw_tab.ele("@autocomplete=username").input(tw.name, clear=True)
                         tw_tab.ele("@@type=button@@text()=Next").click()
                         tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
                         tw_tab.ele("@@type=button@@text()=Log in").click()
@@ -196,7 +196,7 @@ def missions(chrome, env):
                         with app.app_context():
                             tw: Account = Account.query.filter_by(id=env.tw_id).first()
                         if tw:
-                                tw_tab.ele("@autocomplete=username").input(tw.name)
+                                tw_tab.ele("@autocomplete=username").input(tw.name, clear=True)
                                 tw_tab.ele("@@type=button@@text()=Next").click()
                                 tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
                                 tw_tab.ele("@@type=button@@text()=Log in").click()
@@ -213,7 +213,7 @@ def missions(chrome, env):
                         with app.app_context():
                             tw: Account = Account.query.filter_by(id=env.tw_id).first()
                             if tw:
-                                tw_tab.ele("@autocomplete=username").input(tw.name)
+                                tw_tab.ele("@autocomplete=username").input(tw.name, clear=True)
                                 tw_tab.ele("@@type=button@@text()=Next").click()
                                 tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
                                 tw_tab.ele("@@type=button@@text()=Log in").click()
@@ -239,7 +239,7 @@ def missions(chrome, env):
                         tw: Account = Account.query.filter_by(id=env.tw_id).first()
 
                     if tw:
-                        tw_tab.ele("@autocomplete=username").input(tw.name)
+                        tw_tab.ele("@autocomplete=username").input(tw.name, clear=True)
                         tw_tab.ele("@@type=button@@text()=Next").click()
                         tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
                         tw_tab.ele("@@type=button@@text()=Log in").click()
@@ -267,7 +267,7 @@ def missions(chrome, env):
                     with app.app_context():
                         tw: Account = Account.query.filter_by(id=env.tw_id).first()
                     if tw:
-                            tw_tab.ele("@autocomplete=username").input(tw.name)
+                            tw_tab.ele("@autocomplete=username").input(tw.name, clear=True)
                             tw_tab.ele("@@type=button@@text()=Next").click()
                             tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
                             tw_tab.ele("@@type=button@@text()=Log in").click()
@@ -284,7 +284,7 @@ def missions(chrome, env):
                     with app.app_context():
                         tw: Account = Account.query.filter_by(id=env.tw_id).first()
                         if tw:
-                            tw_tab.ele("@autocomplete=username").input(tw.name)
+                            tw_tab.ele("@autocomplete=username").input(tw.name, clear=True)
                             tw_tab.ele("@@type=button@@text()=Next").click()
                             tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
                             tw_tab.ele("@@type=button@@text()=Log in").click()
