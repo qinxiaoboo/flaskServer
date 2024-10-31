@@ -14,8 +14,7 @@ from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 import requests
 
 name = 'Theoriq'
-# Theoriq_url = 'https://quests.theoriq.ai?r=NpRqz3aq'
-Theoriq_url = 'https://quests.theoriq.ai?r=GBtqYb9x'
+Theoriq_url = 'https://quests.theoriq.ai?r=NpRqz3aq'
 
 okx_js = '''
 let button =
@@ -50,38 +49,49 @@ def LoginDiscord(chrome:ChromiumPage,env):
         logger.info(f"{env.name}登录Discord成功！")
     return get_Custome_Tab(tab)
 
-def getSigninTW(chrome,env):
+
+def getSigninTW(chrome, env):
     try:
         tab = chrome.new_tab(url='https://x.com/')
         chrome.wait(8, 10)
         logger.info('开始判断')
-        if tab.s_ele("Sign in") or tab.s_ele("Log in", index=4) or tab.s_ele('Retry') or tab.s_ele('Refish'):
+
+        # 登录处理逻辑
+        if any(tab.s_ele(selector) for selector in ["Sign in", "Log in", "Retry", "Refish"]):
             logger.info(f"{env.name}: 推特未登录，触发登录推特")
             if tab.s_ele('Sign in'):
                 tab.ele('Sign in').click()
             elif tab.s_ele('Log in'):
                 tab.ele('Log in').click()
             elif tab.s_ele('Retry'):
-                print('Retry')
-                tab.refresh(ignore_cache= True)
-            time.sleep(10)
+                logger.info("Refreshing the page due to Retry")
+                tab.refresh(ignore_cache=True)
+
+            time.sleep(10)  # 等待页面加载
+
             with app.app_context():
                 tw: Account = Account.query.filter_by(id=env.tw_id).first()
-                if tw:
-                    tab.ele("@autocomplete=username").input(tw.name, clear=True)
-                    tab.ele("@@type=button@@text()=Next").click()
-                    tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
-                    tab.ele("@@type=button@@text()=Log in").click()
-                    fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
-                    if "login" in tab.url and len(fa2) > 10:
-                        tw2faV(tab, fa2)
-                    tab.ele('@type=button').click()
-                    chrome.wait(2)
-                    logger.info(f'{env.name}:登录完成')
-                    chrome.close_tabs()
-                else:
+                if not tw:
                     raise Exception(f"{env.name}: 没有导入TW的账号信息")
-        elif tab.s_ele('@class=Button EdgeButton EdgeButton--primary') or tab.s_ele('@value=Send email') or tab.s_ele('@value=Continue to X'):
+
+                # 输入用户名和密码
+                tab.ele("@autocomplete=username").input(tw.name, clear=True)
+                tab.ele("@@type=button@@text()=Next").click()
+                tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
+                tab.ele("@@type=button@@text()=Log in").click()
+
+                # 二次验证
+                fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                if "login" in tab.url and len(fa2) > 10:
+                    tw2faV(tab, fa2)
+
+                tab.ele('@type=button').click()
+                chrome.wait(2)
+                logger.info(f'{env.name}: 登录完成')
+                chrome.close_tabs()
+
+        # 处理人工验证和其他状态
+        elif tab.s_ele('@class=Button EdgeButton EdgeButton--primary') or tab.s_ele('@value=Start') or tab.s_ele('@value=Continue to X'):
             if tab.s_ele('@class=Button EdgeButton EdgeButton--primary'):
                 logger.info(f'{env.name}:需要人工验证twitter，是Send email')
                 time.sleep(1)
@@ -104,9 +114,8 @@ def getSigninTW(chrome,env):
             print(f'{env.name}:此号被封')
             return False
     except Exception as e:
-        logger.info(e)
+        logger.error(f"处理过程中出现错误: {e}")
         return
-
 
 
 def exe_okx(chrome,env):
@@ -244,37 +253,44 @@ def getSocialTasks(chrome,env):
 
 
 
-def getAgenttasks(chrome,env):
+def getAgenttasks(chrome, env, retry_count=0, max_retries=3):
+    def wait_and_click(selector, tab, wait_time):
+        chrome.wait(wait_time[0], wait_time[1])
+        if tab.s_ele(selector):
+            tab.ele(selector).click()
+
     tab = chrome.new_tab(url='https://infinity.theoriq.ai/login')
-    chrome.wait(5, 10)
+    wait_and_click('Continue with X / Twitter', tab, (5, 10))
+
     try:
-        if tab.s_ele('Continue with X / Twitter'):
-            tab.ele('Continue with X / Twitter').click()
-            chrome.wait(5, 13)
-            try:
-                if not chrome.get_tab(url='https://x.com/').ele('Authorize app'):
-                    tw = getSigninTW(chrome, env)
-                    if tw == False:
-                        print('此号被封，无法进行下面任务了')
-                        quitChrome(env, chrome)
-                    else:
-                        pass
-                    chrome.wait(2, 3)
-                    getAgenttasks(chrome, env)
-                else:
-                    print('没有问题，继续')
-            except Exception as e:
-                logger.error(e)
-            chrome.get_tab(url='https://x.com/').ele('Authorize app').click()
-            chrome.wait(5, 13)
-            tab.ele('Connect Wallet').click()
-            chrome.wait(2, 3)
-            tab.run_js(okx_js)
-            chrome.wait(2, 3)
-            exe_okx(chrome,env)
+        twitter_tab = chrome.get_tab(url='https://x.com/')
+        if not twitter_tab.ele('Authorize app'):
+            if not getSigninTW(chrome, env):
+                print('此号被封，无法进行下面任务了')
+                quitChrome(env, chrome)
+                return  # 确保退出后不继续执行
+
+            # 增加重试逻辑
+            if retry_count < max_retries:
+                print(f'重试中... 尝试次数: {retry_count + 1}')
+                chrome.wait(2, 3)
+                getAgenttasks(chrome, env, retry_count + 1, max_retries)
+                return  # 结束当前函数
+
+            print('达到最大重试次数，停止执行。')
+            return  # 超过最大重试次数后停止
+
+        print('没有问题，继续')
+        twitter_tab.ele('Authorize app').click()
+        wait_and_click('Connect Wallet', tab, (5, 13))
+
+        chrome.wait(2, 3)
+        tab.run_js(okx_js)
+        chrome.wait(2, 3)
+        exe_okx(chrome, env)
 
     except Exception as e:
-        logger.info(e)
+        logger.error(f"处理过程中出现错误: {e}")
 
     try:
         chrome.wait(5, 10)
