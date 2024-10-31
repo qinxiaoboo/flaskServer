@@ -101,8 +101,11 @@ def getTab(chrome, env):
     else:
         tab.refresh()
         chrome.wait(3, 6)
-        tab.ele('t:div@text():Connect new handle').click()
-        logger.info(f"{env.name}    点击推特授权")
+        try:
+            tab.ele('t:div@text():Connect new handle').click()
+            logger.info(f"{env.name}    点击推特授权")
+        except Exception as e:
+            pass
 
     chrome.wait(30, 35)
 
