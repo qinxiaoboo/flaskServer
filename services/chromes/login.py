@@ -155,7 +155,6 @@ def LoginBitlight(chrome:ChromiumPage,env):
         tab.ele("@type=button").click()
         logger.info(f"{env.name}: 解锁Bitlight钱包成功！")
     tab.close()
-
 def AuthTW(chrome:ChromiumPage,env):
     tab = chrome.get_tab(url=r"oauth2/authorize")
     if tab :
