@@ -87,8 +87,11 @@ def getTab(chrome, env):
             tab.ele('t:span@text():CONTINUE').click()
         chrome.wait(2, 3)
         logger.info(f"{env.name}   推特授权")
-        tab.ele('t:button@text():Authorize').click()
-        chrome.wait(20, 25)
+        try:
+            tab.ele('t:button@text():Authorize').click()
+        except Exception as e:
+            pass
+        chrome.wait(15, 20)
 
         try:
             tw_tab = chrome.get_tab(url="twitter")
@@ -688,9 +691,9 @@ def arch(env):
             chrome: ChromiumPage = OKXChrome(env)
             getTab(chrome, env)
             missions(chrome, env)
-            weekly(chrome, env)
-            daily(chrome, env)
-            community(chrome, env)
+            # weekly(chrome, env)
+            # daily(chrome, env)
+            # community(chrome, env)
             count(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:

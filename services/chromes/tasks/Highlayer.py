@@ -107,7 +107,7 @@ def getTab(chrome, env):
         except Exception as e:
             pass
 
-    chrome.wait(30, 35)
+    chrome.wait(20, 25)
 
     try:
         tw_tab = chrome.get_tab(url="twitter")
@@ -124,7 +124,7 @@ def getTab(chrome, env):
                         fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
                         if "login" in tab.url and len(fa2) > 10:
                             tw2faV(tab, fa2)
-                        chrome.wait(25, 30)
+                        chrome.wait(20, 25)
                     else:
                         raise Exception(f"{env.name}: 没有导入TW的账号信息")
     except Exception as e:
@@ -163,10 +163,10 @@ def getTab(chrome, env):
         pass
 
     try:
-        chrome.wait(10, 15)
+        chrome.wait(5, 10)
         chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
         logger.info(f"{env.name}    授权 X 完成")
-        chrome.wait(20, 25)
+        chrome.wait(15, 20)
 
     except Exception as e:
                 max_attempts = 5
@@ -192,7 +192,6 @@ def getTab(chrome, env):
 
 
     tab = chrome.new_tab(url="https://dashboard.highlayer.io/daily")
-    chrome.wait(5, 7)
 
     if tab.ele('@class=cta-link dashboard-button cta-button-bottom fw-300 ls-1 xs'):
         chrome.wait(5, 10)
@@ -232,13 +231,13 @@ def getTab(chrome, env):
 
     else:
         logger.info(f"{env.name}    推特授权失败，每日任务失败")
+        return
 
     logger.info(f"{env.name}    统计总分")
     tab = chrome.new_tab(url="https://dashboard.highlayer.io/?referral=TOKATO")
     tab.refresh()
-    chrome.wait(5, 10)
+    chrome.wait(2, 4)
     total = tab.ele('@class=stat-value', index=6).text
-    print(total)
     taskData.Total = total
     updateTaskRecord(env.name, name, taskData, 1)
 
