@@ -107,7 +107,7 @@ def getTab(chrome, env):
         except Exception as e:
             pass
 
-    chrome.wait(20, 25)
+    chrome.wait(10, 15)
 
     try:
         tw_tab = chrome.get_tab(url="twitter")
@@ -163,10 +163,9 @@ def getTab(chrome, env):
         pass
 
     try:
-        chrome.wait(5, 10)
         chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
         logger.info(f"{env.name}    授权 X 完成")
-        chrome.wait(15, 20)
+        chrome.wait(10, 15)
 
     except Exception as e:
                 max_attempts = 5
@@ -175,16 +174,15 @@ def getTab(chrome, env):
                         tab.close()
                         tab = chrome.new_tab(url="https://dashboard.highlayer.io/socials")
                         tab.refresh()
-                        chrome.wait(10, 15)
 
                         if tab.ele('t:div@text():Connect new handle'):
                             tab.ele('t:div@text():Connect new handle').click()
                             logger.info(f"{env.name}    点击推特授权2")
-                            chrome.wait(25, 30)
+                            chrome.wait(10, 15)
                         try:
                             chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
                             logger.info(f"{env.name}    授权 X 完成")
-                            chrome.wait(30, 40)
+                            chrome.wait(10, 15)
                             break
                         except Exception as e:
                             pass
@@ -223,7 +221,7 @@ def getTab(chrome, env):
             tab.ele('t:div@text():Visit website').click()
             chrome.wait(3, 5)
             logger.info(f"{env.name}    Visit website")
-            chrome.wait(12, 16)
+            chrome.wait(10, 15)
         except Exception as e:
             logger.info(f"{env.name}    Visit website失败")
 
@@ -236,7 +234,7 @@ def getTab(chrome, env):
     logger.info(f"{env.name}    统计总分")
     tab = chrome.new_tab(url="https://dashboard.highlayer.io/?referral=TOKATO")
     tab.refresh()
-    chrome.wait(2, 4)
+    chrome.wait(3, 4)
     total = tab.ele('@class=stat-value', index=6).text
     taskData.Total = total
     updateTaskRecord(env.name, name, taskData, 1)
