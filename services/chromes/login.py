@@ -357,9 +357,23 @@ def LoginOutlook(chrome:ChromiumPage,env):
                     tab.ele("@data-testid=i0116").input(outlook.name)
                     tab.ele("@type=submit").click()
                     tab.ele("@name=passwd").input(aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
-                    tab.ele("@type=submit").click()
-                    tab.ele("@type=checkbox").click()
-                    tab.ele("@@type=submit@@text()=Yes").click()
+                    chrome.wait(2, 4)
+                    try:
+                        tab.ele("t:button@tx():Sign in").click()
+                    except Exception as e:
+                        logger.info(e)
+                    try:
+                        tab.ele("t:button@tx():Next").click()
+                    except Exception as e:
+                        logger.info(e)
+                    try:
+                        tab.ele("@type=checkbox").click()
+                    except Exception as e:
+                        logger.info(e)
+                    try:
+                        tab.ele('t:button@tx():Yes').click()
+                    except Exception as e:
+                        logger.info(e)
                     if "https://outlook.live.com/mail/0" in tab.url:
                         logger.info(f"{env.name}: 登录OUTLOOK成功")
                 else:
