@@ -1,4 +1,5 @@
 import asyncio
+import gc
 import time
 from flaskServer.services.internal.tls.client import TLSClient
 from flaskServer.entity.galxeAccount import AccountInfo
@@ -49,10 +50,12 @@ async def toKeep(token,proxy,env_name,username):
             elapsed_time = time.time() - start_time
             sleep_time = max(0, 300 - elapsed_time)
             await asyncio.sleep(sleep_time)
-
+            await client.close()
         except Exception as e:
             print(account)
             await asyncio.sleep(5)
+            await client.close()
+            gc.collect()
 
 async def main():
     with open(r"C:\Users\Joye\Desktop\nodepay.txt", "r") as f:
