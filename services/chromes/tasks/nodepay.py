@@ -7,14 +7,14 @@ from flaskServer.config.connect import app
 
 async def toKeep(token,proxy,env_name,username):
     a = 10
+    custom_headers = {
+        "authorization": token,
+        "origin": "chrome-extension://lgmpfmgeabnnlemejacfljbmonaomfmm"
+    }
+    account = AccountInfo(idx=env_name, proxy=proxy, email_username=username)
+    client = TLSClient(account, custom_headers)
     while True:
         start_time = time.time()  # 记录开始时间
-        custom_headers = {
-                "authorization": token,
-                 "origin": "chrome-extension://lgmpfmgeabnnlemejacfljbmonaomfmm"
-            }
-        account = AccountInfo(idx=env_name,proxy=proxy,email_username=username)
-        client = TLSClient(account, custom_headers)
         try:
             request = await client.post("https://api.nodepay.org/api/auth/session")
             a += 1
@@ -50,11 +50,9 @@ async def toKeep(token,proxy,env_name,username):
             elapsed_time = time.time() - start_time
             sleep_time = max(0, 300 - elapsed_time)
             await asyncio.sleep(sleep_time)
-            await client.close()
         except Exception as e:
             print(account)
             await asyncio.sleep(5)
-            await client.close()
             gc.collect()
 
 async def main():
