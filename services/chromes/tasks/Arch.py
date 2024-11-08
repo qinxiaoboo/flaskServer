@@ -132,17 +132,17 @@ def getTab(chrome, env):
             pass
 
         try:
-            if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Send email"):
+            if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Send email"):
                 logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
                 quitChrome(env, chrome)
         except Exception as e:
             pass
 
         try:
-            if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Start"):
-                    chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Start").click()
+            if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Start"):
+                    chrome.get_tab(url='https://x.com/').ele("@@type=submit@@value=Start").click()
                     chrome.wait(10, 15)
-                    if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Send email"):
+                    if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Send email"):
                         logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
                         quitChrome(env, chrome)
                     chrome.wait(25, 30)
@@ -150,13 +150,13 @@ def getTab(chrome, env):
             pass
 
         try:
-            if chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Continue to X"):
-                    chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Continue to X").click()
+            if chrome.get_tab(url='https://x.com/').ele("@@type=submit@@value=Continue to X"):
+                    chrome.get_tab(url='https://x.com/').ele("@@type=submit@@value=Continue to X").click()
                     chrome.wait(20, 25)
-            if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Start"):
-                chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Start").click()
+            if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Start"):
+                chrome.get_tab(url='https://x.com/').ele("@@type=submit@@value=Start").click()
                 chrome.wait(10, 15)
-            if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Send email"):
+            if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Send email"):
                 logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
                 quitChrome(env, chrome)
         except Exception as e:
@@ -169,7 +169,7 @@ def getTab(chrome, env):
                     chrome.wait(15, 20)
         except Exception as e:
                 tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
-                tab.ele('t:div@text():DAILY MISSIONS').click()
+                tab.ele('t:div@text():WEEKLY MISSIONS').click()
                 chrome.wait(2, 4)
 
                 if tab.ele('t:button@text():Start'):
@@ -228,6 +228,30 @@ def missions(chrome, env):
                                 raise Exception(f"{env.name}: 没有导入TW的账号信息")
     except Exception as e:
             pass
+
+    try:
+        if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Start"):
+            chrome.get_tab(url='https://x.com/').ele("@@type=submit@@value=Start").click()
+            chrome.wait(10, 15)
+            if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Send email"):
+                logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
+                quitChrome(env, chrome)
+            chrome.wait(25, 30)
+    except Exception as e:
+        pass
+
+    try:
+        if chrome.get_tab(url='https://x.com/').ele("@@type=submit@@value=Continue to X"):
+            chrome.get_tab(url='https://x.com/').ele("@@type=submit@@value=Continue to X").click()
+            chrome.wait(20, 25)
+        if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Start"):
+            chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Start").click()
+            chrome.wait(10, 15)
+        if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Send email"):
+            logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
+            quitChrome(env, chrome)
+    except Exception as e:
+        pass
 
     chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
     chrome.wait(2, 3)
@@ -321,47 +345,6 @@ def missions(chrome, env):
     except Exception as e:
         pass
 
-    try:
-        tab = chrome.new_tab(url="https://x.com/proofofmud")
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').close()
-    except Exception as e:
-        pass
-
-    try:
-        tab = chrome.new_tab(url="https://x.com/0xfinetuned")
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').close()
-    except Exception as e:
-        pass
-
-    try:
-        tab = chrome.new_tab(url="https://x.com/Nick4Iezos")
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').close()
-    except Exception as e:
-        pass
-
-    try:
-        tab = chrome.new_tab(url="https://x.com/ArchNtwrk/status/1848774876322042228")
-        chrome.get_tab(url='https://x.com/').ele("@data-testid=reply").click(by_js=True)
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').ele("t:div@text():Post your reply").input(random_word)
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').ele("@data-testid=tweetButton").click(by_js=True)
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').ele("@data-testid=retweet").click(by_js=True)
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Repost").click(by_js=True)
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').close()
-    except Exception as e:
-        pass
-
-
     tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
 
     if tab.ele('t:span@text():CONTINUE'):
@@ -377,7 +360,7 @@ def missions(chrome, env):
     logger.info(f"{env.name}    开始验证")
     try:
         count = 0
-        while count < 14:
+        while count < 6:
             element = tab.ele('t:button@text():Start')
             if not element:
                 break
@@ -415,7 +398,7 @@ def missions(chrome, env):
 
     chrome.wait(2, 3)
     count = 0
-    while count < 10:
+    while count < 6:
         element = tab.ele('t:button@text():Start')
         if not element:
             break
@@ -437,53 +420,85 @@ def missions(chrome, env):
 def weekly(chrome, env):
     logger.info(f"{env.name}    开始做每周任务")
     try:
-        tab = chrome.new_tab(url="https://x.com/Saturn_btc/status/1849536952619376729")
+        tab = chrome.new_tab(url="https://x.com/ArchNtwrk/status/1851860771065471078")
+        chrome.get_tab(url='https://x.com/').ele('@data-testid=like').click(by_js=True)
+        chrome.wait(3, 6)
         chrome.get_tab(url='https://x.com/').ele("@data-testid=retweet").click(by_js=True)
         chrome.wait(3, 6)
         chrome.get_tab(url='https://x.com/').ele("t:span@text():Repost").click(by_js=True)
         chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').close()
+        tab.close()
     except Exception as e:
         pass
 
-    try:
-        tab = chrome.new_tab(url="https://x.com/bimabtc/status/1849461396976623696")
-        chrome.get_tab(url='https://x.com/').ele("@data-testid=retweet").click(by_js=True)
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Repost").click(by_js=True)
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').close()
-    except Exception as e:
-        pass
-
-    try:
-        tab = chrome.new_tab(url="https://x.com/BoundUSD/status/1849639926805008675")
-        chrome.get_tab(url='https://x.com/').ele("@data-testid=retweet").click(by_js=True)
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Repost").click(by_js=True)
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').close()
-    except Exception as e:
-        pass
-
-    try:
-        tab = chrome.new_tab(url="https://x.com/funkybit_fun/status/1849548066040230335")
-        chrome.get_tab(url='https://x.com/').ele("@data-testid=retweet").click(by_js=True)
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Repost").click(by_js=True)
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').close()
-    except Exception as e:
-        pass
-
-    try:
-        tab = chrome.new_tab(url="https://x.com/intent/post?text=I+just+claimed+my+Archstronaut+spacesuit+to+complete+incentivized+missions+and+explore+the+Bitcoin+galaxy+%F0%9F%9A%80%0A%0AJoin+me+and+other+Archstronauts+to+rise+in+the+ranks%2C+earn+rewards+and+shape+the+future+of+BTCFi+through+the+%40ArchNtwrk+march+to+testnet%3A+https%3A%2F%2Fdashboard.arch.network%3FreferralCode%3D25fffa06-f376-44cb-b87d-f93616e3b551")
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Post").click(by_js=True)
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').close()
-    except Exception as e:
-        pass
-    chrome.wait(3, 6)
+    # try:
+    #     tab = chrome.new_tab(url="https://x.com/compose/post")
+    #     chrome.wait(5, 10)
+    #     if tab.ele('t:span@text():Log in'):
+    #         logger.info(f"{env.name}    推特登录失败")
+    #         quitChrome(env, chrome)
+    #
+    #     tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input('Calling all thread-writers and video creators — apply to become an Arch Ambassador and earn future rewards \nfor helping spread the word about @ArchNtwrk.\nhttps://0chrcuqp28m.typeform.com/to/IMRB1VXI ')
+    #     chrome.wait(3, 6)
+    #     tab.ele("t:span@text():Post").click(by_js=True)
+    #     chrome.wait(3, 6)
+    #     tab.close()
+    # except Exception as e:
+    #     pass
+    #
+    # try:
+    #     tab = chrome.new_tab(url="https://x.com/compose/post")
+    #     chrome.wait(5, 10)
+    #
+    #     tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input("The cross-chain liquidity protocol @funkybit_fun is \nabout to make unlocking DeFi groovy again. Check out \nwhat they're building on @ArchNtwrk: \nhttps://x.com/funkybit_fun/status/1849548066040230335 ")
+    #     chrome.wait(3, 6)
+    #     tab.ele("t:span@text():Post").click(by_js=True)
+    #     chrome.wait(3, 6)
+    #     tab.close()
+    # except Exception as e:
+    #     pass
+    #
+    # try:
+    #     tab = chrome.new_tab(url="https://x.com/compose/post")
+    #     chrome.wait(5, 10)
+    #
+    #     tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input("Stablecoins are revolutionizing DeFi, especially \n@bimabtc, the omni-chain stable for BTC built on \n@ArchNtwrk. You can learn more about USBD here: \nhttps://x.com/bimabtc/status/1849461396976623696")
+    #     chrome.wait(3, 6)
+    #     tab.ele("t:span@text():Post").click(by_js=True)
+    #     chrome.wait(3, 6)
+    #     tab.close()
+    # except Exception as e:
+    #     pass
+    #
+    # try:
+    #     tab = chrome.new_tab(url="https://x.com/compose/post")
+    #     chrome.wait(5, 10)
+    #     if tab.ele('t:span@text():Log in'):
+    #         logger.info(f"{env.name}    推特登录失败")
+    #         quitChrome(env, chrome)
+    #
+    #     tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input("It's time for Bitcoin's first-dollar backed stablecoin. \n@BoundUSD is building it on @ArchNtwrk — learn more: \nhttps://x.com/BoundUSD/status/1844084795317575836")
+    #     chrome.wait(3, 6)
+    #     tab.ele("t:span@text():Post").click(by_js=True)
+    #     chrome.wait(3, 6)
+    #     tab.close()
+    # except Exception as e:
+    #     pass
+    #
+    # try:
+    #     tab = chrome.new_tab(url="https://x.com/compose/post")
+    #     chrome.wait(5, 10)
+    #     if tab.ele('t:span@text():Log in'):
+    #         logger.info(f"{env.name}    推特登录失败")
+    #         quitChrome(env, chrome)
+    #
+    #     tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input("We have lift-off! @Saturn_btc has launched the first \nAMM swap on the Bitcoin base layer, with help from the \n@ArchNtwrk. Learn more: \nhttps://x.com/Saturn_btc/status/1851332444324012089 ")
+    #     chrome.wait(3, 6)
+    #     tab.ele("t:span@text():Post").click(by_js=True)
+    #     chrome.wait(3, 6)
+    #     tab.close()
+    # except Exception as e:
+    #     pass
 
     tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
     if tab.ele('t:span@text():CONTINUE'):
@@ -494,23 +509,22 @@ def weekly(chrome, env):
         chrome.wait(2, 3)
     if tab.ele('t:span@text():CONTINUE'):
         tab.ele('t:span@text():CONTINUE').click()
-    chrome.wait(2, 3)
 
     tab.ele('t:div@text():WEEKLY MISSIONS').click()
     chrome.wait(2, 3)
 
-    try:
-        tab.ele('t:button@text():Start', index=8).click()
-        chrome.wait(5, 10)
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Post").click(by_js=True)
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').close()
-    except Exception as e:
-        pass
-    chrome.wait(3, 6)
+    # try:
+    #     tab.ele('t:button@text():Start', index=8).click()
+    #     chrome.wait(5, 10)
+    #     chrome.get_tab(url='https://x.com/').ele("t:span@text():Post").click(by_js=True)
+    #     chrome.wait(3, 6)
+    #     chrome.get_tab(url='https://x.com/').close()
+    # except Exception as e:
+    #     pass
+    # chrome.wait(3, 6)
 
     count = 0
-    while count < 14:
+    while count < 16:
         element = tab.ele('t:button@text():Start')
         if not element:
             break
@@ -518,39 +532,52 @@ def weekly(chrome, env):
             element.click()
         count += 1
     chrome.wait(5, 10)
-    if tab.ele('t:span@text():CONTINUE'):
-        tab.ele('t:span@text():CONTINUE').click()
-    if tab.ele('t:span@text():START MISSIONS'):
-        tab.ele('t:span@text():START MISSIONS').click()
-        chrome.wait(2, 3)
-    if tab.ele('t:span@text():CONTINUE'):
-        tab.ele('t:span@text():CONTINUE').click()
-        chrome.wait(2, 3)
-    try:
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Post").click(by_js=True)
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').close()
-    except Exception as e:
-        pass
+
+    count = 0
+    while count < 20:
+        try:
+            chrome.get_tab(url='https://x.com/').ele("t:span@text():Post").click(by_js=True)
+            chrome.wait(3, 6)
+            chrome.get_tab(url='https://x.com/').close()
+        except Exception as e:
+            pass
+        count += 1
+    chrome.wait(5, 10)
+
+
+    # if tab.ele('t:span@text():CONTINUE'):
+    #     tab.ele('t:span@text():CONTINUE').click()
+    # if tab.ele('t:span@text():START MISSIONS'):
+    #     tab.ele('t:span@text():START MISSIONS').click()
+    #     chrome.wait(2, 3)
+    # if tab.ele('t:span@text():CONTINUE'):
+    #     tab.ele('t:span@text():CONTINUE').click()
+    #     chrome.wait(2, 3)
+    # try:
+    #     chrome.get_tab(url='https://x.com/').ele("t:span@text():Post").click(by_js=True)
+    #     chrome.wait(3, 6)
+    #     chrome.get_tab(url='https://x.com/').close()
+    # except Exception as e:
+    #     pass
 
     tab.refresh()
     chrome.wait(3, 6)
     tab.ele('t:div@text():WEEKLY MISSIONS').click()
     chrome.wait(2, 3)
     count = 0
-    while count < 10:
+    while count < 16:
         element = tab.ele('t:button@text():Start')
         if not element:
             break
         else:
             element.click()
         count += 1
-    try:
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Post").click(by_js=True)
-        chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').close()
-    except Exception as e:
-        pass
+    # try:
+    #     chrome.get_tab(url='https://x.com/').ele("t:span@text():Post").click(by_js=True)
+    #     chrome.wait(3, 6)
+    #     chrome.get_tab(url='https://x.com/').close()
+    # except Exception as e:
+    #     pass
     if tab.ele('t:span@text():START MISSIONS'):
         tab.ele('t:span@text():START MISSIONS').click()
         chrome.wait(2, 3)
@@ -646,7 +673,7 @@ def community(chrome, env):
 
     chrome.wait(2, 3)
     count = 0
-    while count < 14:
+    while count < 8:
         element = tab.ele('t:button@text():Start')
         if not element:
             break
@@ -691,9 +718,9 @@ def arch(env):
             chrome: ChromiumPage = OKXChrome(env)
             getTab(chrome, env)
             missions(chrome, env)
-            # weekly(chrome, env)
+            weekly(chrome, env)
             # daily(chrome, env)
-            # community(chrome, env)
+            community(chrome, env)
             count(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
