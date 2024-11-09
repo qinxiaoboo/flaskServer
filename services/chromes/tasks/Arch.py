@@ -65,6 +65,7 @@ def getTab(chrome, env):
         logger.info(f"{env.name}   主页登录成功")
     else:
         logger.info(f"{env.name}   主页登录失败")
+        quitChrome(env, chrome)
         return
 
     logger.info(f"{env.name}   进入任务页面")
