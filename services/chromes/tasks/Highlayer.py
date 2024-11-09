@@ -93,103 +93,110 @@ def getTab(chrome, env):
     except Exception as e:
         logger.info(f"{env.name}    该环境已经更新过用户资料")
 
-    tab = chrome.new_tab(url="https://dashboard.highlayer.io/socials")
-    chrome.wait(3, 6)
-    if tab.ele('t:div@text():Connect new handle'):
-        tab.ele('t:div@text():Connect new handle').click()
-        logger.info(f"{env.name}    点击推特授权")
+    # tab = chrome.new_tab(url="https://dashboard.highlayer.io/socials")
+    tab.ele('t:div@text():Daily tasks').click()
+    if tab.ele('@class=cta-link dashboard-button cta-button-bottom fw-300 ls-1 xs'):
+        pass
     else:
-        tab.refresh()
+        tab.ele('t:div@text():Social tasks').click()
         chrome.wait(3, 6)
-        try:
+        if tab.ele('t:div@text():Connect new handle'):
             tab.ele('t:div@text():Connect new handle').click()
             logger.info(f"{env.name}    点击推特授权")
+        else:
+            tab.refresh()
+            chrome.wait(3, 6)
+            try:
+                tab.ele('t:div@text():Connect new handle').click()
+                logger.info(f"{env.name}    点击推特授权")
+            except Exception as e:
+                pass
+
+        chrome.wait(10, 15)
+
+        try:
+            tw_tab = chrome.get_tab(url="twitter")
+            if tw_tab:
+                if "login" in tw_tab.url:
+                    logger.info(f"{env.name}: 推特未登录,尝试重新登录")
+                    with app.app_context():
+                        tw: Account = Account.query.filter_by(id=env.tw_id).first()
+                        if tw:
+                            tw_tab.ele("@autocomplete=username").input(tw.name, clear=True)
+                            tw_tab.ele("@@type=button@@text()=Next").click()
+                            tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
+                            tw_tab.ele("@@type=button@@text()=Log in").click()
+                            fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                            if "login" in tab.url and len(fa2) > 10:
+                                tw2faV(tab, fa2)
+                            chrome.wait(20, 25)
+                        else:
+                            raise Exception(f"{env.name}: 没有导入TW的账号信息")
         except Exception as e:
-            pass
+            logger.info(f"y{env.name}: 推特登陆失败")
+            return
 
-    chrome.wait(10, 15)
-
-    try:
-        tw_tab = chrome.get_tab(url="twitter")
-        if tw_tab:
-            if "login" in tw_tab.url:
-                logger.info(f"{env.name}: 推特未登录,尝试重新登录")
-                with app.app_context():
-                    tw: Account = Account.query.filter_by(id=env.tw_id).first()
-                    if tw:
-                        tw_tab.ele("@autocomplete=username").input(tw.name)
-                        tw_tab.ele("@@type=button@@text()=Next").click()
-                        tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
-                        tw_tab.ele("@@type=button@@text()=Log in").click()
-                        fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
-                        if "login" in tab.url and len(fa2) > 10:
-                            tw2faV(tab, fa2)
-                        chrome.wait(20, 25)
-                    else:
-                        raise Exception(f"{env.name}: 没有导入TW的账号信息")
-    except Exception as e:
-        logger.info(f"y{env.name}: 推特登陆失败")
-        return
-
-    try:
-        if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Send email"):
-            logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
-            quitChrome(env, chrome)
-    except Exception as e:
-        pass
-
-    try:
-        if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Start"):
-            chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Start").click()
-            chrome.wait(10, 15)
+        try:
             if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Send email"):
                 logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
                 quitChrome(env, chrome)
-            chrome.wait(25, 30)
-    except Exception as e:
-        pass
+        except Exception as e:
+            pass
 
-    try:
-        if chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Continue to X"):
-            chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Continue to X").click()
-            chrome.wait(20, 25)
-        if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Start"):
-            chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Start").click()
+        try:
+            if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Start"):
+                chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Start").click()
+                chrome.wait(10, 15)
+                if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Send email"):
+                    logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
+                    quitChrome(env, chrome)
+                chrome.wait(25, 30)
+        except Exception as e:
+            pass
+
+        try:
+            if chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Continue to X"):
+                chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Continue to X").click()
+                chrome.wait(20, 25)
+            if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Start"):
+                chrome.get_tab(url='https://twitter.com/').ele("@@type=submit@@value=Start").click()
+                chrome.wait(10, 15)
+            if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Send email"):
+                logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
+                quitChrome(env, chrome)
+        except Exception as e:
+            pass
+
+        try:
+            chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
+            logger.info(f"{env.name}    授权 X 完成")
             chrome.wait(10, 15)
-        if chrome.get_tab(url='https://twitter.com/').s_ele("@@type=submit@@value=Send email"):
-            logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
-            quitChrome(env, chrome)
-    except Exception as e:
-        pass
 
-    try:
-        chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
-        logger.info(f"{env.name}    授权 X 完成")
-        chrome.wait(10, 15)
+        except Exception as e:
+                    max_attempts = 5
+                    attempt = 0
+                    while attempt < max_attempts:
+                            tab.close()
+                            tab = chrome.new_tab(url="https://dashboard.highlayer.io/socials")
+                            tab.refresh()
 
-    except Exception as e:
-                max_attempts = 5
-                attempt = 0
-                while attempt < max_attempts:
-                        tab.close()
-                        tab = chrome.new_tab(url="https://dashboard.highlayer.io/socials")
-                        tab.refresh()
-
-                        if tab.ele('t:div@text():Connect new handle'):
-                            tab.ele('t:div@text():Connect new handle').click()
-                            logger.info(f"{env.name}    点击推特授权2")
-                            chrome.wait(10, 15)
-                        try:
-                            chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
-                            logger.info(f"{env.name}    授权 X 完成")
-                            chrome.wait(10, 15)
-                            break
-                        except Exception as e:
-                            pass
-                        attempt += 1
+                            if tab.ele('t:div@text():Connect new handle'):
+                                tab.ele('t:div@text():Connect new handle').click()
+                                logger.info(f"{env.name}    点击推特授权2")
+                                chrome.wait(10, 15)
+                            try:
+                                chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
+                                logger.info(f"{env.name}    授权 X 完成")
+                                chrome.wait(10, 15)
+                                break
+                            except Exception as e:
+                                pass
+                            attempt += 1
 
 
-    tab = chrome.new_tab(url="https://dashboard.highlayer.io/daily")
+    # tab = chrome.new_tab(url="https://dashboard.highlayer.io/daily")
+    tab.ele('t:div@text():Daily tasks').click()
+    chrome.wait(3, 6)
 
     if tab.ele('@class=cta-link dashboard-button cta-button-bottom fw-300 ls-1 xs'):
         chrome.wait(5, 10)
@@ -232,10 +239,11 @@ def getTab(chrome, env):
         return
 
     logger.info(f"{env.name}    统计总分")
-    tab = chrome.new_tab(url="https://dashboard.highlayer.io/?referral=TOKATO")
+    # tab = chrome.new_tab(url="https://dashboard.highlayer.io/?referral=TOKATO")
     tab.refresh()
-    chrome.wait(3, 4)
+    chrome.wait(8, 9)
     total = tab.ele('@class=stat-value', index=6).text
+    total1= tab.ele('@class=stat-title', index=6).text
     taskData.Total = total
     updateTaskRecord(env.name, name, taskData, 1)
 
