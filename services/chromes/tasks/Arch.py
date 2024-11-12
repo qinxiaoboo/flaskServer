@@ -719,7 +719,7 @@ def arch(env):
             chrome: ChromiumPage = OKXChrome(env)
             getTab(chrome, env)
             missions(chrome, env)
-            weekly(chrome, env)
+            # weekly(chrome, env)
             # daily(chrome, env)
             community(chrome, env)
             count(chrome, env)
