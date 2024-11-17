@@ -368,7 +368,7 @@ def LoginOutlook(chrome:ChromiumPage,env):
                                 if tab.s_ele("@data-testid=secondaryContent"):
                                     othertab_button = tab.ele("@data-testid=secondaryContent").children()[2]
                                     othertab_button.click()
-                                    tab.wait(2, 3)
+                                    tab.wait(3, 3.1)
                                     if tab.s_ele("@data-testid=i0116"):
                                         tab.ele("@data-testid=i0116").input(outlook.name, clear=True)
                                     if tab.s_ele("@type=submit"):
