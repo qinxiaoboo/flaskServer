@@ -51,7 +51,7 @@ def wait_pages(chrome, wait_page_list):
                     continue
         if len(wait_page_list) > 0:
             chrome.wait(1,2)
-            refreshInitTab(chrome)
+            refreshInitTab(chrome, wait_page_list)
             count-= 1
         else:
             break
@@ -62,13 +62,16 @@ def setTitle(chrome,env):
     tab = chrome.get_tab(title=f"Browser Fingerprint")
     tab.run_js(f"document.title='{env.name}'")
 
-def refreshInitTab(chrome):
+def refreshInitTab(chrome, wait_page_list):
     tab = chrome.get_tab(title="www.okx.com")
     if tab:
         tab.refresh()
     okx = chrome.get_tab(title="OKX Wallet")
     if okx:
         okx.refresh()
+        if "Welcome to OKX" in wait_page_list:
+            wait_page_list.remove("Welcome to OKX")
+            chrome.wait(1, 1.5)
 
 def closeInitTab(chrome):
     tab = chrome.get_tab(title="Welcome to OKX")
