@@ -47,6 +47,8 @@ class Outlook(BaseClient):
             if self.tab.s_ele("@@data-testid=i0118@@type=password"):
                 self.tab.ele("@@data-testid=i0118@@type=password").input(self.password)
                 self.tab.ele("#idSIButton9").click()
+                if self.tab.s_ele('t:button@tx():Yes'):
+                    self.tab.ele('t:button@tx():Yes').click()
                 if self.tab.s_ele("@@class=btn btn-block btn-primary@@value=Send code"):
                     raise Exception(f"{self.envName}请手动验证登录邮箱:{self.username}")
                 logger.info(f"{self.envName}: 登录OUTLOOK成功")
