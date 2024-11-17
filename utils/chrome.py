@@ -41,7 +41,7 @@ def wait_captcha_page(tab,env):
 
 
 def wait_pages(chrome, wait_page_list):
-    count = 66
+    count = 60
     while count:
         for tab_id in chrome.tab_ids:
             tab = chrome.get_tab(id_or_num=tab_id)
@@ -51,7 +51,7 @@ def wait_pages(chrome, wait_page_list):
                     continue
         if len(wait_page_list) > 0:
             chrome.wait(1,2)
-            refreshInitTab(chrome, wait_page_list)
+            refreshInitTab(chrome, count, wait_page_list)
             count-= 1
         else:
             break
@@ -62,16 +62,15 @@ def setTitle(chrome,env):
     tab = chrome.get_tab(title=f"Browser Fingerprint")
     tab.run_js(f"document.title='{env.name}'")
 
-def refreshInitTab(chrome, wait_page_list):
+def refreshInitTab(chrome, count, wait_page_list):
     tab = chrome.get_tab(title="www.okx.com")
     if tab:
         tab.refresh()
     okx = chrome.get_tab(title="OKX Wallet")
     if okx:
         okx.refresh()
-        if "Welcome to OKX" in wait_page_list:
+        if "Welcome to OKX" in wait_page_list and count < 20:
             wait_page_list.remove("Welcome to OKX")
-            chrome.wait(1, 1.5)
 
 def closeInitTab(chrome):
     tab = chrome.get_tab(title="Welcome to OKX")
