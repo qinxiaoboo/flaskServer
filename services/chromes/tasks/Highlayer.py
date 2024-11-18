@@ -288,7 +288,7 @@ def getTab(chrome, env):
     total = tab.ele('@class=stat-value', index=6).text
     # 获取当前时间字符串
     current_time = time.strftime("%m-%d")
-    file_path = r'C:\Users\13771\Desktop\highlayer_{}.xlsx'.format(current_time)
+    file_path = r'C:\Users\Public\Documents\highlayer_{}.xlsx'.format(current_time)
 
         # 打开已存在的 Excel 文件（arch.xlsx）
     try:
