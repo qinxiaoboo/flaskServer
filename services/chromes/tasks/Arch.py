@@ -35,9 +35,6 @@ name = "Arch"
 def getTab(chrome, env):
     tab = chrome.new_tab(url="https://dashboard.arch.network?referralCode=f9c6ab90-03a4-4724-9cbd-080a192f74d2")
     rw = RandomWords()
-    random_word = rw.random_word()
-    taskData = getTaskObject(env, name)
-    env_name = env.name
     tab.set.window.max()
     chrome.wait(2, 3)
 
@@ -189,6 +186,7 @@ def getTab(chrome, env):
 def missions(chrome, env):
     tab = chrome.new_tab(url="https://x.com/ArchNtwrk")
     rw = RandomWords()
+    outlook: Account = Account.query.filter_by(id=env.outlook_id).first()
     random_word = rw.random_word()
     logger.info(f"{env.name}   开始做入职任务")
     chrome.wait(15, 25)
@@ -236,8 +234,7 @@ def missions(chrome, env):
             chrome.wait(10, 15)
             if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Send email"):
                 logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
-                quitChrome(env, chrome)
-            chrome.wait(25, 30)
+                chrome.wait(30, 40)
     except Exception as e:
         pass
 
@@ -254,8 +251,12 @@ def missions(chrome, env):
     except Exception as e:
         pass
 
-    chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
-    chrome.wait(2, 3)
+    try:
+        chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
+        chrome.wait(2, 3)
+    except Exception as e:
+        pass
+
     if tab.ele('t:span@text():Refresh'):
         tab.ele('t:span@text():Refresh').click()
         chrome.wait(25, 30)
@@ -346,6 +347,8 @@ def missions(chrome, env):
     except Exception as e:
         pass
 
+    tab = chrome.new_tab(url="https://www.youtube.com/channel/UCSsjwRKAUnCb6sj38wk0YvQ")
+    chrome.wait(3, 6)
     tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
 
     if tab.ele('t:span@text():CONTINUE'):
@@ -355,8 +358,37 @@ def missions(chrome, env):
     if tab.ele('t:span@text():CONTINUE'):
         tab.ele('t:span@text():CONTINUE').click()
     chrome.wait(2, 3)
+    tab.ele('t:div@text():NOTIFICATIONS').click()
+    chrome.wait(2, 3)
+    tab.ele('t:div@text():Next').click()
+    chrome.wait(2, 3)
+    if chrome.get_tab(title="OKX Wallet"):
+        logger.info(f"{env.name}   OKX钱包授权")
+        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+        chrome.wait(10, 15)
+    if tab.ele('@placeholder=Email address'):
+        tab.ele('@placeholder=Email address').input(outlook.name, clear=True)
+        chrome.wait(2, 3)
+    if tab.ele('@class=notifi-ftu-target-edit-button-text'):
+        tab.ele('@class=notifi-ftu-target-edit-button-text').click()
+        chrome.wait(3, 6)
+    if tab.ele('@class=btn notifi-ftu-target-list-button'):
+        tab.ele('@class=btn notifi-ftu-target-list-button').click()
+        chrome.wait(3, 6)
+    if tab.ele('@class=btn notifi-ftu-alert-edit-button'):
+        tab.ele('@class=btn notifi-ftu-alert-edit-button').click()
+
+    tab.close()
+    tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+    if tab.ele('t:span@text():START MISSIONS'):
+        tab.ele('t:span@text():START MISSIONS').click()
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
     tab.ele('t:div@text():ONBOARDING MISSIONS').click()
     chrome.wait(2, 3)
+
 
     logger.info(f"{env.name}    开始验证")
     try:
@@ -686,6 +718,8 @@ def community(chrome, env):
     tab.close()
     return
 
+import openpyxl
+import time
 def count(chrome, env):
     tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
     taskData = getTaskObject(env, name)
@@ -699,16 +733,57 @@ def count(chrome, env):
     chrome.wait(2, 3)
 
     logger.info(f"{env.name}   开始数据统计")
+
+    xp = tab.ele('@class=absolute inset-0 flex items-center justify-center text-[18px] font-bold leading-normal text-lighter-yellow', index=1).text
+    chrome.wait(2, 4)
+    level = tab.ele('@class=text-lightest-yellow text-[15px] leading-6 uppercase').text
+
+        # 使用原始字符串方式指定文件路径
+    current_time = time.strftime("%m-%d")
+    file_path = r'C:\Users\13771\Desktop\arch_{}.xlsx'.format(current_time)
+
+        # 打开已存在的 Excel 文件（arch.xlsx）
     try:
-        chrome.wait(2, 4)
-        xp = tab.ele('@class=absolute inset-0 flex items-center justify-center text-[18px] font-bold leading-normal text-lighter-yellow', index=1).text
-        chrome.wait(2, 4)
-        level = tab.ele('@class=text-lightest-yellow text-[15px] leading-6 uppercase').text
-        taskData.Xp = xp
-        taskData.Level = level
-        updateTaskRecord(env.name, name, taskData, 1)
-    except Exception as e:
-        logger.info(f"{env.name}   数据统计失败")
+            wb = openpyxl.load_workbook(file_path)
+            ws = wb.active
+            # 设置表头
+            ws['A1'] = '环境编号'
+            ws['B1'] = 'XP'
+            ws['C1'] = 'Level'
+    except FileNotFoundError:
+            # 如果文件不存在，创建一个新的工作簿
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            # 设置表头
+            ws['A1'] = '环境编号'
+            ws['B1'] = 'XP'
+            ws['C1'] = 'Level'
+            wb.save(file_path)
+        # 找到下一行位置（避免覆盖）
+    next_row = ws.max_row + 1
+
+    env_name_exists = False
+    for row in range(2, ws.max_row + 1):  # 从第二行开始遍历（跳过表头）
+        if ws[f'A{row}'].value == env_name:
+                # 如果找到相同的 env_name，更新该行的 xp 和 level
+                ws[f'B{row}'] = xp
+                ws[f'C{row}'] = level
+                env_name_exists = True
+                break
+    if not env_name_exists:
+            # 如果没有找到相同的 env_name，追加新行
+            next_row = ws.max_row + 1
+            ws[f'A{next_row}'] = env_name
+            ws[f'B{next_row}'] = xp
+            ws[f'C{next_row}'] = level
+
+        # 保存文件（不会覆盖，直接追加）
+    wb.save(file_path)
+
+        # 更新任务记录
+    taskData.Xp = xp
+    taskData.Level = level
+    updateTaskRecord(env.name, name, taskData, 1)
 
     return
 
