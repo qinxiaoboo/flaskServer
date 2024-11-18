@@ -1,3 +1,4 @@
+import openpyxl
 from DrissionPage import ChromiumPage,ChromiumOptions
 from loguru import logger
 # 连接数据库
@@ -7,7 +8,6 @@ from flaskServer.services.chromes.login import OKXChrome
 from flaskServer.services.dto.task_record import updateTaskRecord, getTaskObject
 import time
 import random
-
 from flaskServer.utils.chrome import quitChrome
 
 #项目名称
@@ -277,6 +277,7 @@ def getCount(chrome, env):
         taskData = getTaskObject(env, name)
         tab = chrome.new_tab(now_chain_url)
         time.sleep(10)
+
         # 统计总数
         try:
             print('统计总数')
@@ -332,8 +333,65 @@ def getCount(chrome, env):
         updateTaskRecord(env.name, name, taskData, 1)
         time.sleep(10)
 
+        #存储数据到桌面
+        current_time = time.strftime("%m-%d")
+        file_path = r'C:\Users\Public\Documents\nowchain_{}.xlsx'.format(current_time)
+
+        # 打开已存在的 Excel 文件（arch.xlsx）
+        try:
+            wb = openpyxl.load_workbook(file_path)
+            ws = wb.active
+            # 设置表头
+            ws['A1'] = '环境编号'
+            ws['B1'] = 'check_in'
+            ws['C1'] = 'PointsCount'
+            ws['D1'] = 'Liquidity'
+            ws['E1'] = 'Faucet'
+            ws['F1'] = 'Bridge'
+        except FileNotFoundError:
+            # 如果文件不存在，创建一个新的工作簿
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            # 设置表头
+            ws['A1'] = '环境编号'
+            ws['B1'] = 'check_in'
+            ws['C1'] = 'PointsCount'
+            ws['D1'] = 'Liquidity'
+            ws['E1'] = 'Faucet'
+            ws['F1'] = 'Bridge'
+            wb.save(file_path)
+        # 找到下一行位置（避免覆盖）
+        next_row = ws.max_row + 1
+
+        env_name_exists = False
+        env_name = env.name
+        for row in range(2, ws.max_row + 1):  # 从第二行开始遍历（跳过表头）
+            if ws[f'A{row}'].value == env_name:
+                # 如果找到相同的 env_name，更新该行的 xp 和 level
+                ws[f'B{row}'] = check_in
+                ws[f'C{row}'] = PointsCount
+                ws[f'D{row}'] = Liquidity
+                ws[f'E{row}'] = Faucet
+                ws[f'F{row}'] = Bridge
+
+                env_name_exists = True
+                break
+        if not env_name_exists:
+            # 如果没有找到相同的 env_name，追加新行
+            next_row = ws.max_row + 1
+            ws[f'A{next_row}'] = env_name
+            ws[f'B{next_row}'] = check_in
+            ws[f'C{next_row}'] = PointsCount
+            ws[f'D{next_row}'] = Liquidity
+            ws[f'E{next_row}'] = Faucet
+            ws[f'F{next_row}'] = Bridge
+
+        # 保存文件（不会覆盖，直接追加）
+        wb.save(file_path)
     except Exception as e:
         logger.error(e)
+
+
 def NowChain(env):
     with app.app_context():
         try:

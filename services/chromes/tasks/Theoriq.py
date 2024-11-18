@@ -1,3 +1,4 @@
+import openpyxl
 from flaskServer.mode.account import Account
 from flaskServer.services.chromes.login import OKXChrome, tw2faV
 from DrissionPage import ChromiumPage
@@ -253,45 +254,8 @@ def getSocialTasks(chrome,env):
 
 
 
-def getAgenttasks(chrome, env, retry_count=0, max_retries=3):
-    def wait_and_click(selector, tab, wait_time):
-        chrome.wait(wait_time[0], wait_time[1])
-        if tab.s_ele(selector):
-            tab.ele(selector).click()
-
+def getAgenttasks(chrome, env):
     tab = chrome.new_tab(url='https://infinity.theoriq.ai/login')
-    wait_and_click('Continue with X / Twitter', tab, (5, 10))
-
-    try:
-        twitter_tab = chrome.get_tab(url='https://x.com/')
-        if not twitter_tab.ele('Authorize app'):
-            if not getSigninTW(chrome, env):
-                print('此号被封，无法进行下面任务了')
-                quitChrome(env, chrome)
-                return  # 确保退出后不继续执行
-
-            # 增加重试逻辑
-            if retry_count < max_retries:
-                print(f'重试中... 尝试次数: {retry_count + 1}')
-                chrome.wait(2, 3)
-                getAgenttasks(chrome, env, retry_count + 1, max_retries)
-                return  # 结束当前函数
-
-            print('达到最大重试次数，停止执行。')
-            return  # 超过最大重试次数后停止
-
-        print('没有问题，继续')
-        twitter_tab.ele('Authorize app').click()
-        wait_and_click('Connect Wallet', tab, (5, 13))
-
-        chrome.wait(2, 3)
-        tab.run_js(okx_js)
-        chrome.wait(2, 3)
-        exe_okx(chrome, env)
-
-    except Exception as e:
-        logger.error(f"处理过程中出现错误: {e}")
-
     try:
         chrome.wait(5, 10)
         tab.ele('Launch Infinity Studio').click()
@@ -304,7 +268,9 @@ def getAgenttasks(chrome, env, retry_count=0, max_retries=3):
         print('Bondex Agent')
         tab.ele('@class=size-6 text-green-500').click()
         chrome.wait(2, 3)
-        tab.ele('Bondex Agent').click()
+        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Bondex Agent')
+        chrome.wait(2, 3)
+        tab.ele('@class=h-full px-1 lg:px-5').click()
         chrome.wait(2, 3)
         tab.ele('Create Session').click()
         chrome.wait(2, 3)
@@ -320,7 +286,9 @@ def getAgenttasks(chrome, env, retry_count=0, max_retries=3):
         print('Filecoin Documentation Agent')
         tab.ele('@class=size-6 text-green-500').click()
         chrome.wait(2, 3)
-        tab.ele('Filecoin Documentation Agent').click()
+        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Filecoin Documentation Agent')
+        chrome.wait(2, 3)
+        tab.ele('@class=h-full px-1 lg:px-5').click()
         chrome.wait(2, 3)
         tab.ele('Create Session').click()
         chrome.wait(2, 3)
@@ -336,7 +304,9 @@ def getAgenttasks(chrome, env, retry_count=0, max_retries=3):
         print('Eigenlayer Discord Agent')
         tab.ele('@class=size-6 text-green-500').click()
         chrome.wait(2, 3)
-        tab.ele('@class=mb-2 cursor-pointer rounded-xl border border-dark-300 bg-dark-400 p-2 lg:p-4 ', index=6).click()
+        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Eigenlayer Discord Agent')
+        chrome.wait(2, 3)
+        tab.ele('@class=h-full px-1 lg:px-5').click()
         chrome.wait(2, 3)
         tab.ele('Create Session').click()
         chrome.wait(2, 3)
@@ -354,7 +324,7 @@ def getAgenttasks(chrome, env, retry_count=0, max_retries=3):
         chrome.wait(2, 3)
         tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Eigenlayer Twitter Agent')
         chrome.wait(2, 3)
-        tab.ele('Eigenlayer Twitter Agent').click()
+        tab.ele('@class=h-full px-1 lg:px-5').click()
         chrome.wait(2, 3)
         tab.ele('Create Session').click()
         chrome.wait(2, 3)
@@ -371,7 +341,7 @@ def getAgenttasks(chrome, env, retry_count=0, max_retries=3):
         chrome.wait(2, 3)
         tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Eigenlayer Documentation Agent')
         chrome.wait(2, 3)
-        tab.ele('Eigenlayer Documentation Agent').click()
+        tab.ele('@class=h-full px-1 lg:px-5').click()
         chrome.wait(2, 3)
         tab.ele('Create Session').click()
         chrome.wait(2, 3)
@@ -386,7 +356,9 @@ def getAgenttasks(chrome, env, retry_count=0, max_retries=3):
         print('Eigenlayer Collective')
         tab.ele('@class=size-6 text-green-500').click()
         chrome.wait(2, 3)
-        tab.ele('@class=mb-2 cursor-pointer rounded-xl border border-dark-300 bg-dark-400 p-2 lg:p-4 ', index=5).click()
+        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Eigenlayer Collective')
+        chrome.wait(2, 3)
+        tab.ele('@class=h-full px-1 lg:px-5').click()
         chrome.wait(2, 3)
         tab.ele('Create Session').click()
         chrome.wait(2, 3)
@@ -396,6 +368,73 @@ def getAgenttasks(chrome, env, retry_count=0, max_retries=3):
     except Exception as e:
         logger.info(e)
     chrome.wait(5, 8)
+
+    chrome.wait(5, 8)
+    try:
+        print('Bondex Collective')
+        tab.ele('@class=size-6 text-green-500').click()
+        chrome.wait(2, 3)
+        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Bondex Collective')
+        chrome.wait(2, 3)
+        tab.ele('@class=h-full px-1 lg:px-5').click()
+        chrome.wait(2, 3)
+        tab.ele('Create Session').click()
+        chrome.wait(2, 3)
+        tab.ele('@data-testid=suggested-question', index=2).click()
+        chrome.wait(2, 3)
+        tab.ele('@class=flex h-11 w-12 items-center justify-center rounded-full transition-colors duration-300 bg-green-500 hover:bg-green-300 ').click()
+    except Exception as e:
+        logger.info(e)
+    chrome.wait(5, 8)
+
+    try:
+        print('Bondex Collective')
+        tab.ele('@class=size-6 text-green-500').click()
+        chrome.wait(2, 3)
+        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Bondex Collective')
+        chrome.wait(2, 3)
+        tab.ele('@class=h-full px-1 lg:px-5').click()
+        chrome.wait(2, 3)
+        tab.ele('Create Session').click()
+        chrome.wait(2, 3)
+        tab.ele('@data-testid=suggested-question', index=2).click()
+        chrome.wait(2, 3)
+        tab.ele('@class=flex h-11 w-12 items-center justify-center rounded-full transition-colors duration-300 bg-green-500 hover:bg-green-300 ').click()
+    except Exception as e:
+        logger.info(e)
+    chrome.wait(5, 8)
+    try:
+        print('Crypto Game')
+        tab.ele('@class=size-6 text-green-500').click()
+        chrome.wait(2, 3)
+        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Crypto Game')
+        chrome.wait(2, 3)
+        tab.ele('@class=h-full px-1 lg:px-5').click()
+        chrome.wait(2, 3)
+        tab.ele('Create Session').click()
+        chrome.wait(2, 3)
+        tab.ele('@data-testid=suggested-question', index=2).click()
+        chrome.wait(2, 3)
+        tab.ele('@class=flex h-11 w-12 items-center justify-center rounded-full transition-colors duration-300 bg-green-500 hover:bg-green-300 ').click()
+    except Exception as e:
+        logger.info(e)
+
+    chrome.wait(5, 8)
+    try:
+        print('DAO Agent')
+        tab.ele('@class=size-6 text-green-500').click()
+        chrome.wait(2, 3)
+        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('DAO Agent')
+        chrome.wait(2, 3)
+        tab.ele('@class=h-full px-1 lg:px-5').click()
+        chrome.wait(2, 3)
+        tab.ele('Create Session').click()
+        chrome.wait(2, 3)
+        tab.ele('@data-testid=suggested-question', index=2).click()
+        chrome.wait(2, 3)
+        tab.ele('@class=flex h-11 w-12 items-center justify-center rounded-full transition-colors duration-300 bg-green-500 hover:bg-green-300 ').click()
+    except Exception as e:
+        logger.info(e)
 
     return
 
@@ -417,6 +456,52 @@ def getCount(chrome, env):
         taskData.Completed_Quests = Completed_Quests
         updateTaskRecord(env.name, name, taskData, 1)
 
+
+        current_time = time.strftime("%m-%d")
+        file_path = r'C:\Users\Public\Documents\humanity_{}.xlsx'.format(current_time)
+
+        # 打开已存在的 Excel 文件（arch.xlsx）
+        try:
+            wb = openpyxl.load_workbook(file_path)
+            ws = wb.active
+            # 设置表头
+            ws['A1'] = '环境编号'
+            ws['B1'] = 'Your_rank'
+            ws['C1'] = 'Your_xp'
+            ws['D1'] = 'Completed_Quests'
+        except FileNotFoundError:
+            # 如果文件不存在，创建一个新的工作簿
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            # 设置表头
+            ws['A1'] = '环境编号'
+            ws['B1'] = 'Your_rank'
+            ws['C1'] = 'Your_xp'
+            ws['D1'] = 'Completed_Quests'
+            wb.save(file_path)
+        # 找到下一行位置（避免覆盖）
+        next_row = ws.max_row + 1
+
+        env_name_exists = False
+        env_name = env.name
+        for row in range(2, ws.max_row + 1):  # 从第二行开始遍历（跳过表头）
+            if ws[f'A{row}'].value == env_name:
+                # 如果找到相同的 env_name，更新该行的 xp 和 level
+                ws[f'B{row}'] = Your_rank
+                ws[f'C{row}'] = Your_xp
+                ws[f'D{row}'] = Completed_Quests
+                env_name_exists = True
+                break
+        if not env_name_exists:
+            # 如果没有找到相同的 env_name，追加新行
+            next_row = ws.max_row + 1
+            ws[f'A{next_row}'] = env_name
+            ws[f'B{next_row}'] = Your_rank
+            ws[f'C{next_row}'] = Your_xp
+            ws[f'D{next_row}'] = Completed_Quests
+        # 保存文件（不会覆盖，直接追加）
+        wb.save(file_path)
+
     except Exception as e:
         logger.error(e)
 
@@ -427,12 +512,12 @@ def theoriq(env):
         try:
             chrome: ChromiumPage = OKXChrome(env)
             getTab(chrome, env)
-            getSocialTasks(chrome, env)
+            # getSocialTasks(chrome, env)
             getAgenttasks(chrome, env)
             getCount(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
             return ("失败", e)
-        finally:
-            quitChrome(env, chrome)
+        # finally:
+        #     quitChrome(env, chrome)

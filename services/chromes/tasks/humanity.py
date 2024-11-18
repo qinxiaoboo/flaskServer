@@ -1,5 +1,6 @@
 import string
 
+import openpyxl
 import requests
 from DrissionPage import ChromiumPage,ChromiumOptions
 from loguru import logger
@@ -228,8 +229,67 @@ def getCount(chrome, env):
         taskData.Rewards_Yesterday = Rewards_Yesterday
         taskData.wallet = wallet
         updateTaskRecord(env.name, name, taskData, 1)
+
+
+        current_time = time.strftime("%m-%d")
+        file_path = r'C:\Users\Public\Documents\humanity_{}.xlsx'.format(current_time)
+
+        # 打开已存在的 Excel 文件（arch.xlsx）
+        try:
+            wb = openpyxl.load_workbook(file_path)
+            ws = wb.active
+            # 设置表头
+            ws['A1'] = '环境编号'
+            ws['B1'] = '总分'
+            ws['C1'] = '排名'
+            ws['D1'] = '签到总分'
+            ws['E1'] = '昨天得分'
+            ws['F1'] = 'wallet'
+        except FileNotFoundError:
+            # 如果文件不存在，创建一个新的工作簿
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            # 设置表头
+            ws['A1'] = '环境编号'
+            ws['B1'] = '总分'
+            ws['C1'] = '排名'
+            ws['D1'] = '签到总分'
+            ws['E1'] = '昨天得分'
+            ws['F1'] = 'wallet'
+            wb.save(file_path)
+        # 找到下一行位置（避免覆盖）
+        next_row = ws.max_row + 1
+
+        env_name_exists = False
+        env_name = env.name
+        for row in range(2, ws.max_row + 1):  # 从第二行开始遍历（跳过表头）
+            if ws[f'A{row}'].value == env_name:
+                # 如果找到相同的 env_name，更新该行的 xp 和 level
+                ws[f'B{row}'] = Rewards_Balance
+                ws[f'C{row}'] = Ranking
+                ws[f'D{row}'] = Rewards
+                ws[f'E{row}'] = Rewards_Yesterday
+                ws[f'F{row}'] = wallet
+
+                env_name_exists = True
+                break
+        if not env_name_exists:
+            # 如果没有找到相同的 env_name，追加新行
+            next_row = ws.max_row + 1
+            ws[f'A{next_row}'] = env_name
+            ws[f'B{next_row}'] = Rewards_Balance
+            ws[f'C{next_row}'] = Ranking
+            ws[f'D{next_row}'] = Rewards
+            ws[f'E{next_row}'] = Rewards_Yesterday
+            ws[f'F{next_row}'] = wallet
+
+        # 保存文件（不会覆盖，直接追加）
+        wb.save(file_path)
     except Exception as e:
         logger.error(e)
+
+
+
 
 def Humanity(env):
     with app.app_context():
