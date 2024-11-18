@@ -346,7 +346,7 @@ def preCheckOutlook(chrome):
 def LoginOutlook(chrome:ChromiumPage,env):
     updateAccountStatus(env.outlook_id, 0, "重置了OutLook登录状态")
     tab = preCheckOutlook(chrome)
-    chrome.wait(2, 3)
+    tab.wait.url_change("https://outlook.live.com/mail/0/", timeout=8, raise_err=False)
     if "microsoft" in tab.url or "login.srf" in tab.url:
         with app.app_context():
             outlook:Account = Account.query.filter_by(id=env.outlook_id).first()
