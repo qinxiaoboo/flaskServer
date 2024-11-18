@@ -458,7 +458,7 @@ def getCount(chrome, env):
 
 
         current_time = time.strftime("%m-%d")
-        file_path = r'D:\桌面\每日报表\humanity_{}.xlsx'.format(current_time)
+        file_path = r'C:\Users\Public\Documents\humanity_{}.xlsx'.format(current_time)
 
         # 打开已存在的 Excel 文件（arch.xlsx）
         try:
