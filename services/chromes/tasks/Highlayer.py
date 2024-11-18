@@ -46,6 +46,8 @@ from flaskServer.utils.chrome import getChrome,get_Custome_Tab, quitChrome
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 from flaskServer.services.content import Content
 from flaskServer.services.dto.account import updateAccountStatus
+import openpyxl
+import time
 name = 'Highlayer'
 click_wallet_js = """
                 const button = document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-connect-view").shadowRoot.querySelector("wui-flex > wui-list-wallet:nth-child(3)").shadowRoot.querySelector("button > wui-text").shadowRoot.querySelector("slot");
@@ -236,14 +238,93 @@ def getTab(chrome, env):
 
     else:
         logger.info(f"{env.name}    推特授权失败，每日任务失败")
-        return
+
+
+    tab = chrome.new_tab(url="https://dashboard.highlayer.io/daily")
+    tab.ele('t:div@text():Daily tasks').click()
+    chrome.wait(3, 6)
+
+    if tab.ele('@class=cta-link dashboard-button cta-button-bottom fw-300 ls-1 xs'):
+        chrome.wait(5, 10)
+        tab.ele('@class=cta-link dashboard-button cta-button-bottom fw-300 ls-1 xs', index=1).click()
+        logger.info(f"{env.name}    加入discord")
+        chrome.wait(10, 15)
+        try:
+            tab.ele('t:div@text():Visit telegram group').click()
+            chrome.wait(3, 5)
+            logger.info(f"{env.name}    加入tg")
+        except Exception as e:
+            logger.info(f"{env.name}    加入tg失败")
+
+        try:
+            tab.ele('@class=cta-link dashboard-button cta-button-bottom fw-300 ls-1 xs', index=3).click()
+            chrome.wait(3, 5)
+            logger.info(f"{env.name}    加入X")
+        except Exception as e:
+            logger.info(f"{env.name}    加入X失败")
+
+        try:
+            tab.ele('t:div@text():Visit blog and learn').click()
+            chrome.wait(3, 5)
+            logger.info(f"{env.name}    Visit blog")
+        except Exception  as e:
+            logger.info(f"{env.name}    Visit blog失败")
+
+        try:
+            tab.ele('t:div@text():Visit website').click()
+            chrome.wait(3, 5)
+            logger.info(f"{env.name}    Visit website")
+            chrome.wait(10, 15)
+        except Exception as e:
+            logger.info(f"{env.name}    Visit website失败")
+
+        logger.info(f"{env.name}    每日任务已完成！")
+
 
     logger.info(f"{env.name}    统计总分")
     # tab = chrome.new_tab(url="https://dashboard.highlayer.io/?referral=TOKATO")
     tab.refresh()
     chrome.wait(8, 9)
     total = tab.ele('@class=stat-value', index=6).text
-    total1= tab.ele('@class=stat-title', index=6).text
+    # 获取当前时间字符串
+    current_time = time.strftime("%m-%d")
+    file_path = r'C:\Users\13771\Desktop\highlayer_{}.xlsx'.format(current_time)
+
+        # 打开已存在的 Excel 文件（arch.xlsx）
+    try:
+            wb = openpyxl.load_workbook(file_path)
+            ws = wb.active
+            # 设置表头
+            ws['A1'] = '环境编号'
+            ws['B1'] = '积分'
+    except FileNotFoundError:
+            # 如果文件不存在，创建一个新的工作簿
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            # 设置表头
+            ws['A1'] = '环境编号'
+            ws['B1'] = '积分'
+            wb.save(file_path)
+        # 找到下一行位置（避免覆盖）
+    next_row = ws.max_row + 1
+
+    env_name_exists = False
+    for row in range(2, ws.max_row + 1):  # 从第二行开始遍历（跳过表头）
+        if ws[f'A{row}'].value == env_name:
+                # 如果找到相同的 env_name，更新该行的 xp 和 level
+                ws[f'B{row}'] = total
+                env_name_exists = True
+                break
+    if not env_name_exists:
+            # 如果没有找到相同的 env_name，追加新行
+            next_row = ws.max_row + 1
+            ws[f'A{next_row}'] = env_name
+            ws[f'B{next_row}'] = total
+
+
+        # 保存文件（不会覆盖，直接追加）
+    wb.save(file_path)
+
     taskData.Total = total
     updateTaskRecord(env.name, name, taskData, 1)
 
