@@ -264,6 +264,9 @@ def verifyTw(chrome, tab, env):
                 raise Exception(f"{env.name}: TW邮箱验证失败，请人工前往验证")
 
 def endCheckTW(tab,env):
+    if tab.s_ele("@@role=button@@text()=Retry"):
+        logger.info(f"{env.name}点击Retry, tw页面刷新")
+        tab.ele("@@role=button@@text()=Retry").click()
     sheetDialog = tab.s_ele("@data-testid=sheetDialog")
     if sheetDialog:
         logger.info(f"{env.name}: 推特出现弹窗需要处理！")
