@@ -294,6 +294,7 @@ def LoginTW(chrome:ChromiumPage,env):
         with app.app_context():
             tw:Account = Account.query.filter_by(id=env.tw_id).first()
             if tw:
+                tab.wait.eles_loaded('@autocomplete=username', timeout=8, raise_err=False)
                 tab.ele("@autocomplete=username").input(tw.name, clear=True)
                 tab.ele("@@type=button@@text()=Next").click()
                 tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
