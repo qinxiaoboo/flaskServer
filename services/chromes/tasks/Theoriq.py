@@ -519,5 +519,5 @@ def theoriq(env):
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
             return ("失败", e)
-        # finally:
-        #     quitChrome(env, chrome)
+        finally:
+            quitChrome(env, chrome)
