@@ -50,8 +50,8 @@ def wait_pages(chrome, wait_page_list):
                     wait_page_list.remove(title)
                     continue
         if len(wait_page_list) > 0:
-            chrome.wait(1,2)
             refreshInitTab(chrome, count, wait_page_list)
+            chrome.wait(1,2)
             count-= 1
         else:
             break
@@ -71,6 +71,9 @@ def refreshInitTab(chrome, count, wait_page_list):
         okx.refresh()
         if "Welcome to OKX" in wait_page_list and count < 20:
             wait_page_list.remove("Welcome to OKX")
+    init = chrome.get_tab(title="Initia Wallet")
+    if init:
+        init.refresh()
 
 def closeInitTab(chrome):
     tab = chrome.get_tab(title="Welcome to OKX")
@@ -96,6 +99,7 @@ def getChromiumPage(env, proxy): # 获取一个ChromiumPage对象
                 chrome = ChromiumPage(addr_or_opts=getChromiumOptions(ChromiumOptions(ini_path=ini_path)))
             else:
                 raise Exception(f"{env.name}: ini_path配置文件不存在")
+        chrome.set.auto_handle_alert(accept=False, all_tabs=True)
         return chrome
     except Exception as e:
         quitChrome(env, chrome)

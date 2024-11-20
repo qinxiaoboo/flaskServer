@@ -264,6 +264,9 @@ def verifyTw(chrome, tab, env):
                 raise Exception(f"{env.name}: TW邮箱验证失败，请人工前往验证")
 
 def endCheckTW(tab,env):
+    if tab.s_ele("@@role=button@@text()=Retry"):
+        logger.info(f"{env.name}点击Retry, tw页面刷新")
+        tab.ele("@@role=button@@text()=Retry").click()
     sheetDialog = tab.s_ele("@data-testid=sheetDialog")
     if sheetDialog:
         logger.info(f"{env.name}: 推特出现弹窗需要处理！")
@@ -294,6 +297,7 @@ def LoginTW(chrome:ChromiumPage,env):
         with app.app_context():
             tw:Account = Account.query.filter_by(id=env.tw_id).first()
             if tw:
+                tab.wait.eles_loaded('@autocomplete=username', timeout=8, raise_err=False)
                 tab.ele("@autocomplete=username").input(tw.name, clear=True)
                 tab.ele("@@type=button@@text()=Next").click()
                 tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
@@ -346,7 +350,8 @@ def preCheckOutlook(chrome):
 def LoginOutlook(chrome:ChromiumPage,env):
     updateAccountStatus(env.outlook_id, 0, "重置了OutLook登录状态")
     tab = preCheckOutlook(chrome)
-    tab.wait.url_change("https://outlook.live.com/mail/0/", timeout=8, raise_err=False)
+    tab.wait.url_change("microsoft", timeout=3, raise_err=False)
+    tab.wait.url_change("https://outlook.live.com/mail/0/", timeout=5, raise_err=False)
     if "microsoft" in tab.url or "login.srf" in tab.url:
         with app.app_context():
             outlook:Account = Account.query.filter_by(id=env.outlook_id).first()
@@ -356,7 +361,7 @@ def LoginOutlook(chrome:ChromiumPage,env):
                     if "login.srf" not in tab.url:
                         tab = tab.eles("@aria-label=Sign in to Outlook")[4].click.for_new_tab()
                     if tab.s_ele("@data-testid=i0116"):
-                        tab.ele("@data-testid=i0116").input(outlook.name)
+                        tab.ele("@data-testid=i0116").input(outlook.name, clear=True)
                     if tab.s_ele("@type=submit"):
                         tab.ele("@type=submit").click()
                     if tab.s_ele("@name=passwd"):
@@ -368,13 +373,14 @@ def LoginOutlook(chrome:ChromiumPage,env):
                                 if tab.s_ele("@data-testid=secondaryContent"):
                                     othertab_button = tab.ele("@data-testid=secondaryContent").children()[2]
                                     othertab_button.click()
-                                    tab.wait(3, 3.1)
+                                    tab.wait.url_change("https://login.live.com/ppsecure/secure.srf?", timeout=8, raise_err=False)
+                                    tab.wait.eles_loaded('@data-testid=i0116', timeout=3, raise_err=False)
                                     if tab.s_ele("@data-testid=i0116"):
                                         tab.ele("@data-testid=i0116").input(outlook.name, clear=True)
                                     if tab.s_ele("@type=submit"):
                                         tab.ele("@type=submit").click()
                                     tab.ele("@name=passwd").input(aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
-                    chrome.wait(2, 2.1)
+                    tab.wait.eles_loaded('t:button@tx():Sign in', timeout=2.1, raise_err=False)
                     if tab.s_ele("t:button@tx():Sign in"):
                         tab.ele("t:button@tx():Sign in").click()
                     if tab.s_ele("t:button@tx():Next"):
@@ -391,19 +397,6 @@ def LoginOutlook(chrome:ChromiumPage,env):
                     return
             else:
                 logger.info(f"{env.name}: 邮箱 账号为空，跳过登录")
-    if tab.s_ele("@@type=submit@@id=iNext"):
-        tab.ele("@@type=submit@@id=iNext").click()
-    if tab.s_ele("@id=userDisplayName"):
-        text = tab.ele("@id=userDisplayName").text
-        with app.app_context():
-            outlook:Account = Account.query.filter_by(id=env.outlook_id).first()
-            if outlook:
-                if text == outlook.name:
-                    tab.ele("@name=passwd").input(aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
-                    tab.ele("@type=submit").click()
-                    if tab.s_ele("@@type=submit@@id=iNext"):
-                        tab.ele("@@type=submit@@id=iNext").click()
-                    logger.info(f"{env.name}: 登录OUTLOOK成功")
 
     updateAccountStatus(env.outlook_id, 2)
 
