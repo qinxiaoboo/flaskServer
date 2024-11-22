@@ -30,6 +30,8 @@ from flaskServer.utils.chrome import quitChrome
 from flaskServer.utils.decorator import chrome_retry
 from flaskServer.services.dto.task_record import updateTaskRecord, getTaskObject
 from flaskServer.services.chromes.login import LoginTW
+import openpyxl
+import time
 name = "Deek"
 click_wallet_js = """
             const button = document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-connect-view").shadowRoot.querySelector("wui-flex > w3m-wallet-login-list").shadowRoot.querySelector("wui-flex > w3m-connect-injected-widget").shadowRoot.querySelector("wui-flex > wui-list-wallet:nth-child(1)").shadowRoot.querySelector("button > wui-text").shadowRoot.querySelector("slot");
@@ -316,7 +318,6 @@ def getDeek(chrome, env):
 def dailyTask(chrome, env):
 
         try:
-
             tab = chrome.new_tab(url='https://www.deek.network/')
             chrome.wait(3, 6)
             if chrome.get_tab(title="OKX Wallet"):
@@ -417,6 +418,49 @@ def deekCount(chrome, env):
     top = tab.ele('@class=font-sf-pro-display text-5-s20-l30-w700 not-italic text-content-primary').text
     text = str(top)
     number = text.split()[2]
+
+        # 使用原始字符串方式指定文件路径
+    current_time = time.strftime("%m-%d")
+    file_path = r'C:\Users\Public\Documents\deek_{}.xlsx'.format(current_time)
+
+        # 打开已存在的 Excel 文件（arch.xlsx）
+    try:
+            wb = openpyxl.load_workbook(file_path)
+            ws = wb.active
+            # 设置表头
+            ws['A1'] = '环境编号'
+            ws['B1'] = 'points'
+            ws['C1'] = 'number'
+    except FileNotFoundError:
+            # 如果文件不存在，创建一个新的工作簿
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            # 设置表头
+            ws['A1'] = '环境编号'
+            ws['B1'] = 'points'
+            ws['C1'] = 'number'
+            wb.save(file_path)
+        # 找到下一行位置（避免覆盖）
+    next_row = ws.max_row + 1
+
+    env_name_exists = False
+    for row in range(2, ws.max_row + 1):  # 从第二行开始遍历（跳过表头）
+        if ws[f'A{row}'].value == env_name:
+                # 如果找到相同的 env_name，更新该行的 xp 和 level
+                ws[f'B{row}'] = points
+                ws[f'C{row}'] = number
+                env_name_exists = True
+                break
+    if not env_name_exists:
+            # 如果没有找到相同的 env_name，追加新行
+            next_row = ws.max_row + 1
+            ws[f'A{next_row}'] = env_name
+            ws[f'B{next_row}'] = points
+            ws[f'C{next_row}'] = number
+
+        # 保存文件（不会覆盖，直接追加）
+    wb.save(file_path)
+
     taskData.Points = points
     taskData.top = number
     updateTaskRecord(env.name, name, taskData, 1)
@@ -428,8 +472,8 @@ def deek(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
-            # getTab(chrome, env)
-            # getDeek(chrome, env)
+            getTab(chrome, env)
+            getDeek(chrome, env)
             dailyTask(chrome, env)
             deekCount(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
