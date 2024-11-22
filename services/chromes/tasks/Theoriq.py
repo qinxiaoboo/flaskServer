@@ -256,6 +256,34 @@ def getSocialTasks(chrome,env):
 
 def getAgenttasks(chrome, env):
     tab = chrome.new_tab(url='https://infinity.theoriq.ai/login')
+    chrome.wait(5, 10)
+    try:
+        if tab.s_ele('Continue with X / Twitter'):
+            tab.ele('Continue with X / Twitter').click()
+            chrome.wait(5, 13)
+            try:
+                if not chrome.get_tab(url='https://x.com/').ele('Authorize app'):
+                    getSigninTW(chrome, env)
+                    chrome.wait(2, 3)
+                    tab = chrome.new_tab(url='https://infinity.theoriq.ai/login')
+                    if tab.s_ele('Continue with X / Twitter'):
+                        tab.ele('Continue with X / Twitter').click()
+
+                else:
+                    print('没有问题，继续')
+            except Exception as e:
+                logger.error(e)
+            chrome.get_tab(url='https://x.com/').ele('Authorize app').click()
+            chrome.wait(5, 13)
+            tab.ele('Connect Wallet').click()
+            chrome.wait(2, 3)
+            tab.run_js(okx_js)
+            chrome.wait(2, 3)
+            exe_okx(chrome,env)
+
+    except Exception as e:
+        logger.info(e)
+
     try:
         chrome.wait(5, 10)
         tab.ele('Launch Infinity Studio').click()
