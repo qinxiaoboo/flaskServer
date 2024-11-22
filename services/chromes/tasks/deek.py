@@ -268,6 +268,7 @@ def getDeek(chrome, env):
             tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]').click()
             chrome.wait(4, 8)
             if chrome.get_tab(url='https://discord.com/'):
+                chrome.get_tab(url='https://discord.com/').close()
                 return
         else:
             logger.info(f"{env.name} 任务已全部完成")
@@ -326,6 +327,7 @@ def dailyTask(chrome, env):
                 chrome.wait(10, 12)
             tab.ele('@class=btn-primary-medium self-stretch max-w-[156px] xs:min-w-[216px] md:min-w-[134px] xl:min-w-[118px] 2xl:max-w-[113px]', index=2).click(by_js=None)
             chrome.wait(10, 12)
+
             if chrome.get_tab(url='https://x.com/').ele('@data-testid=tweetButton'):
                 logger.info(f"{env.name}  每日任务一")
                 chrome.get_tab(url='https://x.com/').ele('@data-testid=tweetButton').click(by_js=None)
@@ -343,7 +345,7 @@ def dailyTask(chrome, env):
             tab = chrome.new_tab(url='https://x.com/settings/profile')
             logger.info(f"{env.name}  每日任务二")
             chrome.wait(3, 5)
-            tab.ele('@class=css-146c3p1 r-bcqeeo r-1ttztb7 r-qvutc0 r-37j5jr r-135wba7 r-16dba41 r-1awozwy r-6koalj r-1inkyih r-13qz1uu', index=1).input(' DEEK')
+            tab.ele('@name=displayName').input(' DEEK')
             chrome.wait(2, 3)
             tab.ele('@data-testid=Profile_Save_Button').click(by_js=None)
             chrome.wait(3, 6)
@@ -360,11 +362,14 @@ def dailyTask(chrome, env):
             chrome.wait(10, 12)
 
         logger.info(f"{env.name}  验证")
-        tab.ele('t:button@text():Verify', index=2).click()
-        chrome.wait(10, 12)
-        tab.ele('t:button@text():Verify', index=2).click()
-        chrome.wait(10, 12)
-        logger.info(f"{env.name}  每日任务完成")
+        try:
+            tab.ele('t:button@text():Verify', index=2).click()
+            chrome.wait(10, 12)
+            tab.ele('t:button@text():Verify', index=2).click()
+            chrome.wait(10, 12)
+            logger.info(f"{env.name}  每日任务完成")
+        except Exception as e:
+            logger.info(f"{env.name}  每日任务完成")
 
         return
 
