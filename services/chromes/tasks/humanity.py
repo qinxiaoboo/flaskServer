@@ -80,39 +80,80 @@ def generate_random_word(length=7):
 def getDiscord(chrome,env):
     try:
         print('开始discord认证')
-        if chrome.get_tab(title='Discord | Authorize access to your account'):
-            print('Discord | Authorize access to your account进入')
-            chrome.get_tab(title='Discord | Authorize access to your account').ele("@type=button", index=2).click()
-            logger.info(f"{env.name}: 登录discord完成----------------------------------")
-            time.sleep(10)
-        elif chrome.get_tab(title='Discord | 授权访问您的账号'):
-            print('Discord | 授权访问您的账号进入')
-            chrome.get_tab(title='Discord | 授权访问您的账号').ele("@type=button", index=2).click()
-            logger.info(f"{env.name}: 登录discord完成----------------------------------")
-            time.sleep(10)
-        elif chrome.get_tab(title='Discord'):
-            print('Discord 进入')
-            if chrome.get_tab(title='Discord').ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85'):
-                logger.info(f'{env.name}的discord需要重新登录')
-                chrome.get_tab(title='Discord').ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85').click()
-                time.sleep(6)
-                LoginDiscord(chrome, env)
-                time.sleep(6)
-                chrome.close_tabs()
-            elif chrome.get_tab(title='Discord').ele('Welcome back!'):
-                logger.info(f"{env.name}的Discord未登录，尝试重新登录")
-                time.sleep(6)
-                LoginDiscord(chrome, env)
-                time.sleep(6)
-                chrome.close_tabs()
-            if chrome.get_tab(title='Discord').ele("@type=button", index=2):
-                chrome.get_tab(title='Discord').ele("@type=button", index=2).click()
+        tab = chrome.get_tab(title='Discord | Authorize access to your account') or \
+              chrome.get_tab(title='Discord | 授权访问您的账号') or \
+              chrome.get_tab(title='Discord') or \
+              chrome.get_tab('Onboarding | Humanity Protocol')
+
+        if tab:
+            if tab.title == 'Discord | Authorize access to your account' or 'Discord | 授权访问您的账号':
+                print(f'{tab.title}进入')
+                tab.wait.load_start(timeout=6)
+                tab.ele("@type=button", index=2).wait(10).click()  # 等待按钮可点击
+            elif tab.title == 'Discord':
+                print('Discord 进入')
+                login_button = tab.ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85')
+                welcome_message = tab.ele('Welcome back!')
+                # 如果需要重新登录
+                if login_button:
+                    logger.info(f'{env.name}的discord需要重新登录')
+                    login_button.wait(6).click()  # 等待登录按钮可点击
+                    tab.wait.load_start(timeout=6)  # 等待页面加载完成
+                    LoginDiscord(chrome, env)
+                    tab.wait.load_start(timeout=6)  # 等待重新加载的页面完成
+                    chrome.close_tabs()
+
+                # 如果显示 "Welcome back!" 信息
+                elif welcome_message:
+                    logger.info(f"{env.name}的Discord未登录，尝试重新登录")
+                    LoginDiscord(chrome, env)
+                    tab.wait.load_start(timeout=6)  # 等待页面加载完成
+                    chrome.close_tabs()
+                # 点击授权登录按钮
+                print('4')
+                if tab.ele("@type=button", index=2):
+                    print('开始授权')
+                    tab.ele("@type=button", index=2).wait(10).click()  # 等待按钮可点击
+                    logger.info(f"{env.name}: 登录discord完成----------------------------------")
+                    tab.wait.load_start(timeout=5)  # 等待页面加载完成
+            # 处理 Onboarding 页面
+            elif tab.title == 'Onboarding | Humanity Protocol':
+                print('Onboarding | Humanity Protocol进入')
+                tab.ele("@type=button", index=2).wait(10).click()  # 等待按钮可点击
                 logger.info(f"{env.name}: 登录discord完成----------------------------------")
-                time.sleep(10)
-        elif chrome.get_tab('Onboarding | Humanity Protocol'):
-            print('Onboarding | Humanity Protocol进去的')
-            chrome.get_tab(title='Onboarding | Humanity Protocol').ele("@type=button", index=2).click()
-            logger.info(f"{env.name}: 登录discord完成----------------------------------")
+        # if chrome.get_tab(title='Discord | Authorize access to your account'):
+        #     print('Discord | Authorize access to your account进入')
+        #     chrome.get_tab(title='Discord | Authorize access to your account').ele("@type=button", index=2).click()
+        #     logger.info(f"{env.name}: 登录discord完成----------------------------------")
+        #     time.sleep(10)
+        # elif chrome.get_tab(title='Discord | 授权访问您的账号'):
+        #     print('Discord | 授权访问您的账号进入')
+        #     chrome.get_tab(title='Discord | 授权访问您的账号').ele("@type=button", index=2).click()
+        #     logger.info(f"{env.name}: 登录discord完成----------------------------------")
+        #     time.sleep(10)
+        # elif chrome.get_tab(title='Discord'):
+        #     print('Discord 进入')
+        #     if chrome.get_tab(title='Discord').ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85'):
+        #         logger.info(f'{env.name}的discord需要重新登录')
+        #         chrome.get_tab(title='Discord').ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85').click()
+        #         time.sleep(6)
+        #         LoginDiscord(chrome, env)
+        #         time.sleep(6)
+        #         chrome.close_tabs()
+        #     elif chrome.get_tab(title='Discord').ele('Welcome back!'):
+        #         logger.info(f"{env.name}的Discord未登录，尝试重新登录")
+        #         time.sleep(6)
+        #         LoginDiscord(chrome, env)
+        #         time.sleep(6)
+        #         chrome.close_tabs()
+        #     if chrome.get_tab(title='Discord').ele("@type=button", index=2):
+        #         chrome.get_tab(title='Discord').ele("@type=button", index=2).click()
+        #         logger.info(f"{env.name}: 登录discord完成----------------------------------")
+        #         chrome.wait.load_start(timeout=5,raise_err=False)
+        # elif chrome.get_tab('Onboarding | Humanity Protocol'):
+        #     print('Onboarding | Humanity Protocol进去的')
+        #     chrome.get_tab(title='Onboarding | Humanity Protocol').ele("@type=button", index=2).click()
+        #     logger.info(f"{env.name}: 登录discord完成----------------------------------")
         else:
             logger.info(f'{env.name}:还有其他的语言需要加判断')
     except Exception as e:
@@ -121,106 +162,106 @@ def getDiscord(chrome,env):
 def gethumanity(chrome,env):
     tab = chrome.new_tab(url=humanity_url)
     tab.set.window.max()
-    time.sleep(2)
     try:
-        if tab.s_ele('@class=bottom'):
-            print('点击签到')
-            tab.ele('@class=bottom').click()
-            time.sleep(5)
-            try:
-                exe_okx(chrome, env)
-            except Exception as e:
-                print('不需要连接钱包')
-        elif tab.ele('@class=bottom disable'):
-            print('已经签到过不需要签到了')
-            return
+        if tab.s_ele('Almost there!'):
+            print('出现了Almost there!')
     except Exception as e:
         logger.info(e)
-    try:
-        if tab.s_ele('Get Started'):
+    if tab.s_ele('Almost there!'):
+        print('进入 Almost there! 等待状态')
+        num = 0
+        while num < 3:  # 最多尝试3次
             try:
-                tab.run_js(dis_js)
+                # 刷新页面
+                chrome.refresh()
+                # 等待页面加载
+                if tab.wait.load_start(timeout=10 ,raise_err=False):
+                    print("页面加载完成")
+                # 等待 'Get Started' 元素出现
+                if tab.s_ele('Get Started', timeout=10):
+                    print("'Get Started' 元素已加载，跳出循环")
+                    break  # 如果 'Get Started' 元素出现，跳出循环
             except Exception as e:
-                logger.info("之前登录过不需要再登录")
-            time.sleep(2)
-            #disocrd 授权过程
-            try:
-                logger.info(f'{env.name}:开始判断登录discord情况')
-                chrome.wait(10, 20)
-                getDiscord(chrome, env)
-            except Exception as e:
-                logger.error(e)
-            time.sleep(10)
-            try:
-                if tab.s_ele('Choose a name for your Human ID'):
-                    tab.ele('@class=MuiInputBase-input mui-1qvwndf').input(generate_random_word())
-                    time.sleep(5)
-                    tab.ele('@class=MuiBox-root mui-171onha', index=2).click()
-                else:
-                    time.sleep(10)
-                    tab.ele('@class=MuiInputBase-input mui-1qvwndf').input(generate_random_word())
-                    time.sleep(2)
-                    tab.ele('@class=MuiBox-root mui-171onha', index=2).click()
+                print(f"发生错误: {e}")
+            num += 1  # 尝试次数加1
+            if num < 3:
+                # print(f"尝试次数 {num}, 重新刷新页面...")
+                logger.info(f"尝试次数 {num}, 重新刷新页面...")
 
-                time.sleep(5)
-                if tab.s_ele('Complete your profile'):
-                    tab.ele('@class=MuiInputBase-input mui-1qvwndf', index=1).input(generate_random_word())
-                    time.sleep(2)
-                    tab.ele('@class=MuiInputBase-input mui-1qvwndf', index=2).input(generate_random_word())
-                    time.sleep(2)
-                    tab.ele('@class=MuiBox-root mui-171onha', index=2).click()
-                else:
-                    time.sleep(10)
-                    tab.ele('@class=MuiInputBase-input mui-1qvwndf', index=1).input(generate_random_word())
-                    time.sleep(5)
-                    tab.ele('@class=MuiInputBase-input mui-1qvwndf', index=2).input(generate_random_word())
-                    time.sleep(2)
-                    tab.ele('@class=MuiBox-root mui-171onha', index=2).click()
-            except Exception as e:
-                logger.info(e)
-        chrome.wait(10)
-        try:
-            if tab.s_ele('@class=skip'):
-                print('点击skip弹幕')
-                tab.ele('@class=skip').click()
             else:
-                time.sleep(10)
-                tab.ele('@class=skip').click()
-        except Exception as e:
-            print('没有出现skip')
-        time.sleep(2)
-        try:
-            if tab.s_ele('@class=bottom'):
-                print('点击签到')
-                tab.ele('@class=bottom').click()
-                time.sleep(5)
-                try:
-                    exe_okx(chrome, env)
-                except Exception as e:
-                    print('不需要连接钱包')
-            elif tab.ele('@class=bottom disable'):
-                print('已经签到过不需要签到了')
-        except Exception as e:
-            logger.info(e)
-    except Exception as e:
-        logger.error(e)
+                logger.info("尝试3次刷新后仍未找到 'Get Started' 元素。")
+                return
+    else:
+        print('不需要等待')
 
-def getCount(chrome, env):
+    if tab.wait.ele_displayed('@class=bottom', timeout=5, raise_err=False):
+        print('点击签到')
+        tab.ele('@class=bottom').click()
+        tab.wait.load_start(timeout=6)
+    elif tab.wait.ele_displayed('@class=bottom disable', timeout=5, raise_err=False):
+        print('已经签到过不需要签到了')
+
+    else:
+        if tab.wait.eles_loaded('Get Started', timeout=5, raise_err=False):
+            tab.run_js(dis_js)
+            tab.wait.url_change("https://discord.com/", timeout=5, raise_err=False)
+            getDiscord(chrome, env)
+            # try:
+            #     if tab.s_ele('Choose a name for your Human ID'):
+            #         tab.ele('@class=MuiInputBase-input mui-1qvwndf').input(generate_random_word())
+            #         time.sleep(5)
+            #         tab.ele('@class=MuiBox-root mui-171onha', index=2).click()
+            #     else:
+            #         time.sleep(10)
+            #         tab.ele('@class=MuiInputBase-input mui-1qvwndf').input(generate_random_word())
+            #         time.sleep(2)
+            #         tab.ele('@class=MuiBox-root mui-171onha', index=2).click()
+            #
+            #     time.sleep(5)
+            #     if tab.s_ele('Complete your profile'):
+            #         tab.ele('@class=MuiInputBase-input mui-1qvwndf', index=1).input(generate_random_word())
+            #         time.sleep(2)
+            #         tab.ele('@class=MuiInputBase-input mui-1qvwndf', index=2).input(generate_random_word())
+            #         time.sleep(2)
+            #         tab.ele('@class=MuiBox-root mui-171onha', index=2).click()
+            #     else:
+            #         time.sleep(10)
+            #         tab.ele('@class=MuiInputBase-input mui-1qvwndf', index=1).input(generate_random_word())
+            #         time.sleep(5)
+            #         tab.ele('@class=MuiInputBase-input mui-1qvwndf', index=2).input(generate_random_word())
+            #         time.sleep(2)
+            #         tab.ele('@class=MuiBox-root mui-171onha', index=2).click()
+            # except Exception as e:
+            #     logger.info(e)
+        if tab.wait.ele_displayed('@class=skip', timeout=5, raise_err=False):
+            print('点击skip弹幕')
+            tab.ele('@class=skip').click()
+        else:
+            print('没有出现skip')
+
+        if tab.wait.ele_displayed('@class=bottom', timeout=10, raise_err=False):
+            print('点击签到')
+            tab.wait.load_start(timeout=5)
+            tab.ele('@class=bottom').click()
+            tab.wait.load_start(timeout=6)
+        elif tab.ele('@class=bottom disable'):
+            print('已经签到过不需要签到了')
+
+    global Rewards_Balance, Ranking, Rewards, Rewards_Yesterday, wallet
     try:
         taskData = getTaskObject(env, name)
-        tab = chrome.new_tab(url=humanity_url)
-        chrome.wait(10,20)
         print('开始收集数据')
-        Rewards_Balance = tab.ele('@class=number', index=1).text
-        print('总分:', Rewards_Balance)
-        Ranking = tab.ele('@class=number', index=2).text
-        print('排名:', Ranking)
-        Rewards = tab.ele('@class=number', index=3).text
-        print('签到总分:', Rewards)
-        Rewards_Yesterday = tab.ele('@class=number', index=4).text
-        print('昨天得分:', Rewards_Yesterday)
-        wallet = tab.ele('@class=chain', index=2).text
-        print('wallet:', wallet)
+        if tab.wait.ele_displayed('@class=number', timeout=10, raise_err=False):
+            Rewards_Balance = tab.ele('@class=number', index=1).text
+            print('总分:', Rewards_Balance)
+            Ranking = tab.ele('@class=number', index=2).text
+            print('排名:', Ranking)
+            Rewards = tab.ele('@class=number', index=3).text
+            print('签到总分:', Rewards)
+            Rewards_Yesterday = tab.ele('@class=number', index=4).text
+            print('昨天得分:', Rewards_Yesterday)
+            wallet = tab.ele('@class=chain', index=2).text
+            print('wallet:', wallet)
 
         print('开始上传数据')
         taskData.Rewards_Balance = Rewards_Balance
@@ -282,21 +323,17 @@ def getCount(chrome, env):
             ws[f'D{next_row}'] = Rewards
             ws[f'E{next_row}'] = Rewards_Yesterday
             ws[f'F{next_row}'] = wallet
-
         # 保存文件（不会覆盖，直接追加）
         wb.save(file_path)
     except Exception as e:
         logger.error(e)
-
-
-
 
 def Humanity(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
             gethumanity(chrome, env)
-            getCount(chrome, env)
+            # getCount(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
