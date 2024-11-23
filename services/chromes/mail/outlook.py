@@ -54,7 +54,7 @@ class Outlook(BaseClient):
                 logger.info(f"{self.envName}: 登录OUTLOOK成功")
 
 
-    def getCode(self, text, wtime=10, num=2):
+    def getCode(self, text, wtime=10, num=2, type=None):
         '''
         :param text: 邮件主题
         :param wtime: 循环一次等待时间
@@ -63,10 +63,12 @@ class Outlook(BaseClient):
         '''
         if self.tab == None:
             self.login()
+        if type=="other":
+            self.tab.ele("#Pivot77-Tab1").click()
         header = self.tab.ele(".EeHm8",index=2)
         TtcXM = header.ele(".TtcXM")
         if text in TtcXM.text:
-            self.tab.ele(".EeHm8", index=2).click()
+            self.tab.ele(".EeHm8", index=2).click(by_js=True)
             document = self.tab.ele("@role=document").text
             search = re.search("(\d{6})", document)
             if search:

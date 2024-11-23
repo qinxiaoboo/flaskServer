@@ -251,8 +251,15 @@ def verifyTw(chrome, tab, env):
         if tw:
             client = Email.from_account(env.id, chrome, env.name, tw.email_name, tw.email_pass)
             code = client.getCode("confirm your email address to access all of")
+            logger.info(f"{env.name}: TW登录获取验证码：{code}")
             tab.ele("@@type=text@@name=token").input(code)
             tab.ele("@@type=submit@@value=Verify").click()
+            if tab.s_ele(".Form-message is-errored"):
+                logger.info(f"{env.name}: TW登录邮箱验证失败，重新获取验证码")
+                code = client.getCode("confirm your email address to access all of", type="other")
+                logger.info(f"{env.name}: TW登录获取验证码：{code}")
+                tab.ele("@@type=text@@name=token").input(code)
+                tab.ele("@@type=submit@@value=Verify").click()
             if tab.s_ele("@@type=submit@@value=Continue to X"):
                 tab.ele("@@type=submit@@value=Continue to X").click(by_js=True)
                 logger.info(f"{env.name}: TW邮箱验证成功")
