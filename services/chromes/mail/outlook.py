@@ -73,6 +73,9 @@ class Outlook(BaseClient):
                 return search.group(0)
             else:
                 raise Exception("未匹配到验证码！")
+        elif num == 1:
+            self.tab.ele("#Pivot77-Tab1").click()
+            self.getCode(text, wtime, num - 1)
         elif num == 0:
             raise Exception("没有获取到验证码")
         else:
