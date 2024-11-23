@@ -39,25 +39,36 @@ name = "Portal"
 #随机返回数组里面的一个链接
 def getrandom_url():
     items =[
+        'https://zealy.io/cw/portaltobitcoin/invite/KPpciCQ0-7EzyVg84YoAZ',
         'https://zealy.io/cw/portaltobitcoin/invite/ckFoGaoYsQI8NaLS5rh90',
-        'https://zealy.io/cw/portaltobitcoin/invite/axrEs-G-Gs9E2t43dk06D',
-        'https://zealy.io/cw/portaltobitcoin/invite/SuILo3bStLYzYgHHw9SNb',
-        'https://zealy.io/cw/portaltobitcoin/invite/Sr-qCTv0XjZEKA7jgtGv-',
-        'https://zealy.io/cw/portaltobitcoin/invite/6MtWuarcjE0Q_OGwA-Xv9',
+        'https://zealy.io/cw/portaltobitcoin/invite/zqOwOaOYRpTD7yTrRR016',
+        'https://zealy.io/cw/portaltobitcoin/invite/Ad1tFZASJgfZK55Fbogc9',
+        'https://zealy.io/cw/portaltobitcoin/invite/P03EoMxxPni2ecub4XXRU',
+        'https://zealy.io/cw/portaltobitcoin/invite/8QdY25M7dac76DsSuIv0t',
         'https://zealy.io/cw/portaltobitcoin/invite/kXYNqQbuLJtVaR65nLcjU',
         'https://zealy.io/cw/portaltobitcoin/invite/TCh8HSl6XuPqBbLPBYyfb',
-        'https://zealy.io/cw/portaltobitcoin/invite/Z9X3Be0s7u9uwOxvLgM-v',
-        'https://zealy.io/cw/portaltobitcoin/invite/zqOwOaOYRpTD7yTrRR016',
-        'https://zealy.io/cw/portaltobitcoin/invite/lagg9ZO0mEonQ_hRsVIHI',
-        'https://zealy.io/cw/portaltobitcoin/invite/A5rxMfMySJV3G0EA7W0oC',
         'https://zealy.io/cw/portaltobitcoin/invite/hmnnvPZ825LQnGsqXg7wf',
-        'https://zealy.io/cw/portaltobitcoin/invite/h4QWy7Q0NeBuCcWwSrhWj',
-        'https://zealy.io/cw/portaltobitcoin/invite/h0XCiMMMEvWjJTrAcm89A',
-        'https://zealy.io/cw/portaltobitcoin/invite/Ad1tFZASJgfZK55Fbogc9',
-        'https://zealy.io/cw/portaltobitcoin/invite/vnReLbAZtqHk66ZSpp-x4',
+        'https://zealy.io/cw/portaltobitcoin/invite/juHIa43dGkF1_stISTGpt',
+        'https://zealy.io/cw/portaltobitcoin/invite/_-QUoptcccsz0-tiJbW4M',
+        'https://zealy.io/cw/portaltobitcoin/invite/axrEs-G-Gs9E2t43dk06D',
+        'https://zealy.io/cw/portaltobitcoin/invite/J3PL2GT9VLkDobRNrFsoJ',
+        'https://zealy.io/cw/portaltobitcoin/invite/lagg9ZO0mEonQ_hRsVIHI',
         'https://zealy.io/cw/portaltobitcoin/invite/E5x-4NXNDKavwFvL5XoNl',
-        'https://zealy.io/cw/portaltobitcoin/invite/aDN4zuhkodcoi9oMWAPEL',
-        'https://zealy.io/cw/portaltobitcoin/invite/juHIa43dGkF1_stISTGpt'
+        'https://zealy.io/cw/portaltobitcoin/invite/rmjBwiGSFRx50spA-lTDA',
+        'https://zealy.io/cw/portaltobitcoin/invite/Sr-qCTv0XjZEKA7jgtGv-',
+        'https://zealy.io/cw/portaltobitcoin/invite/Z9X3Be0s7u9uwOxvLgM-v',
+        'https://zealy.io/cw/portaltobitcoin/invite/h0XCiMMMEvWjJTrAcm89A',
+        'https://zealy.io/cw/portaltobitcoin/invite/6GEyku52rUFyNyU9pphtL',
+        'https://zealy.io/cw/portaltobitcoin/invite/7-JPoYbw7-WtjEI9iYQNq',
+        'https://zealy.io/cw/portaltobitcoin/invite/6MtWuarcjE0Q_OGwA-Xv9',
+        'https://zealy.io/cw/portaltobitcoin/invite/XnnLqG0UAnQLV9I5f80Ih',
+        'https://zealy.io/cw/portaltobitcoin/invite/h4QWy7Q0NeBuCcWwSrhWj',
+        'https://zealy.io/cw/portaltobitcoin/invite/vnReLbAZtqHk66ZSpp-x4',
+        'https://zealy.io/cw/portaltobitcoin/invite/Xjxdg4jtJ9zZmojpXXRxr',
+        'https://zealy.io/cw/portaltobitcoin/invite/SuILo3bStLYzYgHHw9SNb',
+        'https://zealy.io/cw/portaltobitcoin/invite/x29_8koxJED5Ke2WATAvd',
+        'https://zealy.io/cw/portaltobitcoin/invite/A5rxMfMySJV3G0EA7W0oC',
+        'https://zealy.io/cw/portaltobitcoin/invite/aDN4zuhkodcoi9oMWAPEL'
     ]
     random_item = random.choice(items)
     return random_item
@@ -234,6 +245,12 @@ def getStarted(chrome,env):
     try:
         tab = chrome.new_tab(
             url='https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/02a57e83-c01d-4c07-a859-b344ee0b7a32')
+        try:
+            chrome.wait(2, 5)
+            if tab.s_ele('@class=intercom-1uah1ou e11klbxp0'):
+                tab.ele('@class=intercom-1uah1ou e11klbxp0').click()
+        except Exception as e:
+            logger.info(e)
         if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
             logger.info(f'{env.name}:任务已经完成')
             chrome.close_tabs()
@@ -292,81 +309,115 @@ def getStarted(chrome,env):
     except Exception as e:
        logger.error(e)
 
-    # time.sleep(10)
-    # try:
-    #     tab.ele('@class=shrink-0 w-button-icon-lg h-button-icon-lg').click()
-    #     time.sleep(6)
-    #     # print('跳转到twitter关注')
-    #     # logger.info('开始点')
-    #     chrome.get_tab(url='https://x.com/').ele('Follow @PortaltoBitcoin').click()
-    #     # logger.info('结束')
-    #     chrome.close_tabs()
-    #     time.sleep(2)
-    #     tab.ele('t:button@tx():Claim').click()
-    #     time.sleep(6)
-    #     chrome.close_tabs()
-    #     logger.info(f'{env.name}:twitter任务完成$$$$$$$$$$$$$$$$')
-    # except Exception as e:
-    #     logger.info(e)
 
-#     try:
-#         tab = chrome.new_tab('https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/9b0d1ff3-847e-4a69-abe4-eef9e2475555')
-#         if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
-#             logger.info(f'{env.name}:任务已经完成')
-#             chrome.close_tabs()
-#         else:
-#             print('开始做discord任务')
-#             tab.ele('@class=text-ellipsis line-clamp-1 justify-start').click()
-#             time.sleep(6)
-#             print('点击确认')
-#             time.sleep(10)
-#             getDiscord(chrome,env)
-#             time.sleep(15)
-#             try:
-#                 print('点击关注')
-#                 print('title', chrome.get_tab(url='https://discord.com/').title)
-#                 title_url = chrome.get_tab(url='https://discord.com/').title
-#                 chrome.get_tab(title=title_url).ele('@class=contents_dd4f85 innerButton_faf5ab').click()
-#                 time.sleep(2)
-#                 print('点击对号')
-#                 chrome.get_tab(title=title_url).ele(
-#                     '@class=checkboxWrapper_f6cde8 alignCenter_f6cde8 checkbox_bd5b94').click()
-#                 time.sleep(2)
-#                 print('点击同意')
-#                 chrome.get_tab(title=title_url).ele(
-#                     '@class=submitButton_a74b6f button_dd4f85 lookFilled_dd4f85 colorGreen_dd4f85 sizeMedium_dd4f85 grow_dd4f85').click()
-#                 time.sleep(2)
-#                 chrome.close_tabs()
-#             except Exception as e:
-#                 logger.info(e)
-#                 chrome.close_tabs()
-#             time.sleep(2)
-#             tab.ele('t:button@tx():Claim').click()
-#             time.sleep(6)
-#             chrome.close_tabs()
-#     except Exception as e:
-#         logger.info('discord有问题需要人工')
+
+    time.sleep(10)
+#---------------Follow us on Twitter
+    try:
+        tab = chrome.get_tab(
+            url='https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/02a57e83-c01d-4c07-a859-b344ee0b7a32')
+        tab.ele('@class=shrink-0 w-button-icon-lg h-button-icon-lg').click()
+        time.sleep(6)
+        # print('跳转到twitter关注')
+        # logger.info('开始点')
+        chrome.get_tab(url='https://x.com/').ele('Follow @PortaltoBitcoin').click()
+        # logger.info('结束')
+        chrome.close_tabs()
+        time.sleep(5)
+        print('开始Claim')
+        num = 0
+        while num < 3:
+            if tab.s_ele('t:button@tx():Claim'):
+                tab.ele('t:button@tx():Claim').click()
+                num += 1
+            else:
+                break
+        print('结束Claim')
+        # tab.run_js(claim_js)
+        time.sleep(6)
+        chrome.close_tabs()
+        logger.info(f'{env.name}:twitter任务完成$$$$$$$$$$$$$$$$')
+    except Exception as e:
+        logger.info(e)
+
+    chrome.wait(2, 5)
+
+#---------------------------------------------------------------------------------------------------------------
+
+    try:
+        tab = chrome.new_tab('https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/9b0d1ff3-847e-4a69-abe4-eef9e2475555')
+        if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
+            logger.info(f'{env.name}:任务已经完成')
+            chrome.close_tabs()
+        else:
+            print('开始做discord任务')
+            tab.ele('@class=text-ellipsis line-clamp-1 justify-start').click()
+            time.sleep(6)
+            print('点击确认')
+            time.sleep(10)
+            getDiscord(chrome,env)
+            time.sleep(15)
+            try:
+                print('点击关注')
+                print('title', chrome.get_tab(url='https://discord.com/').title)
+                title_url = chrome.get_tab(url='https://discord.com/').title
+                chrome.get_tab(title=title_url).ele('@class=contents_dd4f85 innerButton_faf5ab').click()
+                time.sleep(2)
+                print('点击对号')
+                chrome.get_tab(title=title_url).ele(
+                    '@class=checkboxWrapper_f6cde8 alignCenter_f6cde8 checkbox_bd5b94').click()
+                time.sleep(2)
+                print('点击同意')
+                chrome.get_tab(title=title_url).ele(
+                    '@class=submitButton_a74b6f button_dd4f85 lookFilled_dd4f85 colorGreen_dd4f85 sizeMedium_dd4f85 grow_dd4f85').click()
+                time.sleep(2)
+                chrome.close_tabs()
+            except Exception as e:
+                logger.info(e)
+                chrome.close_tabs()
+            time.sleep(2)
+            print('开始Claim')
+            num = 0
+            while num < 3:
+                if tab.s_ele('t:button@tx():Claim'):
+                    tab.ele('t:button@tx():Claim').click()
+                    num += 1
+                else:
+                    break
+            print('结束Claim')
+            time.sleep(6)
+            chrome.close_tabs()
+    except Exception as e:
+        logger.info('discord有问题需要人工')
 #
 # #     # print('Follow our Medium')
 # #     # --------------Follow our Medium------------
-#     try:
-#         tab = chrome.new_tab(
-#             url='https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/b5817b0f-4b29-4478-a961-c8f3024ead2e')
-#         if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
-#             logger.info(f'{env.name}:任务已经完成')
-#             chrome.close_tabs()
-#         else:
-#             tab.ele('@class=flex flex-col gap-embed-url-texts flex-1 w-full p-embed-url-container').click()
-#             time.sleep(1)
-#             chrome.close_tabs()
-#             time.sleep(2)
-#             tab.ele('t:button@tx():Claim').click()
-#             time.sleep(6)
-#             chrome.close_tabs()
-#     except Exception as e:
-#         logger.info(e)
-# #     # print('Subscribe to our YouTube Channel and watch a video!')
-# #     # ---------------Subscribe to our YouTube Channel and watch a video!---------------------------------
+    try:
+        tab = chrome.new_tab(
+            url='https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/b5817b0f-4b29-4478-a961-c8f3024ead2e')
+        if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
+            logger.info(f'{env.name}:任务已经完成')
+            chrome.close_tabs()
+        else:
+            tab.ele('@class=flex flex-col gap-embed-url-texts flex-1 w-full p-embed-url-container').click()
+            time.sleep(1)
+            chrome.close_tabs()
+            time.sleep(2)
+            print('开始Claim')
+            num = 0
+            while num < 3:
+                if tab.s_ele('t:button@tx():Claim'):
+                    tab.ele('t:button@tx():Claim').click()
+                    num += 1
+                else:
+                    break
+            print('结束Claim')
+            time.sleep(6)
+            chrome.close_tabs()
+    except Exception as e:
+        logger.info(e)
+#     # print('Subscribe to our YouTube Channel and watch a video!')
+#     # ---------------Subscribe to our YouTube Channel and watch a video!---------------------------------
 #     try:
 #         tab = chrome.new_tab(
 #             url='https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/55b14c1a-3c8e-4a4e-9239-81d263268360')
@@ -385,32 +436,97 @@ def getStarted(chrome,env):
 #         logger.info(e)
 # #  #-----------------Join us on Telegram and like/react to a few posts!-------------------
 # #     #-----------------------------------------------------------------------------------------------------------------------------------
-#     try:
-#         tab = chrome.new_tab('https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/e30d9ed1-b71f-43f4-bbd8-8c7677e6acae')
-#         if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
-#             logger.info(f'{env.name}:任务已经完成')
-#             chrome.close_tabs()
-#         else:
-#             time.sleep(2)
-#             tab.ele('t:button@tx():Claim').click()
-#             time.sleep(6)
-#             chrome.close_tabs()
-#     except Exception as e:
-#         logger.info(e)
+    try:
+        tab = chrome.new_tab('https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/e30d9ed1-b71f-43f4-bbd8-8c7677e6acae')
+        if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
+            logger.info(f'{env.name}:任务已经完成')
+            chrome.close_tabs()
+        else:
+            time.sleep(2)
+            print('开始Claim')
+            num = 0
+            while num < 3:
+                if tab.s_ele('t:button@tx():Claim'):
+                    tab.ele('t:button@tx():Claim').click()
+                    num += 1
+                else:
+                    break
+            print('结束Claim')
+            time.sleep(6)
+            chrome.close_tabs()
+    except Exception as e:
+        logger.info(e)
 # # #---------------------Follow us on Telegram and React!---------------------
-#     try:
-#         tab = chrome.new_tab('https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/ead3833b-7a28-4b85-90d4-55f5270156de')
-#         if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
-#             logger.info(f'{env.name}:任务已经完成')
-#             chrome.close_tabs()
-#         else:
-#             time.sleep(2)
-#             tab.ele('t:button@tx():Claim').click()
-#             time.sleep(6)
-#             chrome.close_tabs()
-#     except Exception as e:
-#         logger.info(e)
-#
+    try:
+        tab = chrome.new_tab('https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/ead3833b-7a28-4b85-90d4-55f5270156de')
+        if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
+            logger.info(f'{env.name}:任务已经完成')
+            chrome.close_tabs()
+        else:
+            time.sleep(2)
+            print('开始Claim')
+            num = 0
+            while num < 3:
+                if tab.s_ele('t:button@tx():Claim'):
+                    tab.ele('t:button@tx():Claim').click()
+                    num += 1
+                else:
+                    break
+            print('结束Claim')
+            time.sleep(6)
+            chrome.close_tabs()
+    except Exception as e:
+        logger.info(e)
+
+#------------------------Get the Zealy Jelly role!------------
+    try:
+        tab = chrome.new_tab(
+            'https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/0f0a4221-df49-478a-8c85-26e17f0280cc')
+        if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
+            logger.info(f'{env.name}:任务已经完成')
+            chrome.close_tabs()
+        else:
+            time.sleep(2)
+            print('开始Claim')
+            num = 0
+            while num < 3:
+                if tab.s_ele('t:button@tx():Claim'):
+                    tab.ele('t:button@tx():Claim').click()
+                    num += 1
+                else:
+                    break
+            print('结束Claim')
+            time.sleep(6)
+            tab.ele('t:button@tx():Claim reward').click()
+            time.sleep(6)
+            chrome.close_tabs()
+    except Exception as e:
+        logger.info(e)
+
+#---------Unlock the Crusader Jelly role
+    try:
+        tab = chrome.new_tab('https://zealy.io/cw/portaltobitcoin/questboard/d1a85be3-67ab-4eac-a997-aab4db2f5631/c5b6b5bf-1c66-4233-b30d-5d635ab98d7b')
+        if tab.s_ele('@class=whitespace-nowrap min-w-0 truncate badge-xs text-badge-positive-primary'):
+            logger.info(f'{env.name}:任务已经完成')
+            chrome.close_tabs()
+        else:
+            time.sleep(2)
+            print('开始Claim')
+            num = 0
+            while num < 3:
+                if tab.s_ele('t:button@tx():Claim'):
+                    tab.ele('t:button@tx():Claim').click()
+                    num += 1
+                else:
+                    break
+            print('结束Claim')
+            time.sleep(6)
+            chrome.close_tabs()
+
+    except Exception as e:
+        logger.info(e)
+
+
 # #----------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #BitScalerLaunch
@@ -761,6 +877,46 @@ def getCount(chrome, env):
         taskData.XP = portal_xp
         updateTaskRecord(env.name, name, taskData, 1)
         time.sleep(10)
+
+
+        current_time = time.strftime("%m-%d")
+        file_path = r'D:\桌面\每日报表\portal_{}.xlsx'.format(current_time)
+
+        # 打开已存在的 Excel 文件（arch.xlsx）
+        try:
+            wb = openpyxl.load_workbook(file_path)
+            ws = wb.active
+            # 设置表头
+            ws['A1'] = '环境编号'
+            ws['B1'] = 'portal_xp'
+
+        except FileNotFoundError:
+            # 如果文件不存在，创建一个新的工作簿
+            wb = openpyxl.Workbook()
+            ws = wb.active
+            # 设置表头
+            ws['A1'] = '环境编号'
+            ws['B1'] = 'portal_xp'
+
+            wb.save(file_path)
+        # 找到下一行位置（避免覆盖）
+        next_row = ws.max_row + 1
+
+        env_name_exists = False
+        env_name = env.name
+        for row in range(2, ws.max_row + 1):  # 从第二行开始遍历（跳过表头）
+            if ws[f'A{row}'].value == env_name:
+                # 如果找到相同的 env_name，更新该行的 xp 和 level
+                ws[f'B{row}'] = portal_xp
+                env_name_exists = True
+                break
+        if not env_name_exists:
+            # 如果没有找到相同的 env_name，追加新行
+            next_row = ws.max_row + 1
+            ws[f'A{next_row}'] = env_name
+            ws[f'B{next_row}'] = portal_xp
+        # 保存文件（不会覆盖，直接追加）
+        wb.save(file_path)
     except Exception as e:
         logger.info(e)
 
@@ -768,19 +924,18 @@ def portal(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
-            # getZearly(chrome, env)
-            # time.sleep(5)
-            # chrome.close_tabs()
-            # time.sleep(5)
+            getZearly(chrome, env)
+            time.sleep(5)
+            chrome.close_tabs()
+            time.sleep(5)
             getPortal(chrome, env)
-            # getCount(chrome, env)
-            # time.sleep(10)
+            getCount(chrome, env)
+            time.sleep(10)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
             return ("失败", e)
-        # finally:
-        #     quitChrome(env, chrome)
-
+        finally:
+            quitChrome(env, chrome)
 
 
