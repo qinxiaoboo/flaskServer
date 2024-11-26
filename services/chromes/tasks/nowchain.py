@@ -18,59 +18,64 @@ switch_Network = '''let button  =
 document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-unsupported-chain-view").shadowRoot.querySelector("wui-flex > wui-flex:nth-child(2) > wui-list-network:nth-child(2)");
 button.click();
 '''
-
 okx_url = '''let button  =
 document.querySelector("body > w3m-modal").shadowRoot.querySelector("wui-flex > wui-card > w3m-router").shadowRoot.querySelector("div > w3m-connect-view").shadowRoot.querySelector("wui-flex > w3m-wallet-login-list").shadowRoot.querySelector("wui-flex > w3m-connect-announced-widget").shadowRoot.querySelector("wui-flex > wui-list-wallet:nth-child(1)");
 button.click();'''
 
 def exe_okx(chrome,env):
     try:
-        chrome.wait(3, 4)
         if chrome.get_tab(title="OKX Wallet").ele('@data-testid=okd-button', index=2):
+            chrome.wait(3, 4)
             chrome.get_tab(title="OKX Wallet").ele('@data-testid=okd-button', index=2).click()
-
+            chrome.wait(3, 4)
+            try:
+                chrome.get_tab(title="OKX Wallet").ele('@data-testid=okd-button', index=2).click()
+            except Exception as e:
+                pass
     except Exception as e:
-        print(f'{env.name}取的ele不对')
-    return
+        pass
 
 #主页面登录
 def getTab(chrome,env):
     tab = chrome.new_tab(now_chain_url)
-    time.sleep(5)
     # 设置全屏
     tab.set.window.max()
-    #登录钱包
+    tab.wait.load_start(timeout=6)
     try:
-        if tab.s_ele('Connect Wallet'):
-            print('开始链接钱包')
-            tab.ele('Connect Wallet').click()
-            time.sleep(5)
-            try:
-                tab.run_js(okx_url)
-                time.sleep(5)
-                exe_okx(chrome, env)
-                time.sleep(5)
-            except Exception as e:
-                print('不需要钱包验证')
-            try:
-                tab.run_js(switch_Network)
-                print('选择测试网完成')
-                time.sleep(5)
-                exe_okx(chrome,env)
-                time.sleep(5)
-            except Exception as e:
-                print('不需要选择测试网了')
-        try:
-            tab.run_js(switch_Network)
-            print('选择测试网完成')
-            time.sleep(5)
-            exe_okx(chrome,env)
-            time.sleep(5)
-        except Exception as e:
-            print('不需要选择测试网了')
+        tab.run_js(switch_Network)
+        print('选择测试网完成')
+        tab.wait.load_start(timeout=3)
+        exe_okx(chrome, env)
     except Exception as e:
-        logger.error(e)
-
+        pass
+    try:
+        # print('开始选择钱包并且授权')
+        tab.wait(5).run_async_js(okx_url)
+        tab.wait.load_start(timeout=3)
+        exe_okx(chrome, env)
+    except Exception as e:
+        pass
+    #登录钱包
+    if tab.wait.ele_displayed('Connect Wallet', timeout=5, raise_err=False):
+        print('开始链接钱包')
+        tab.wait.load_start(timeout=6)
+        tab.ele('Connect Wallet').click()
+    else:
+        print('不需要Connect Wallet按钮')
+    try:
+        print('开始选择钱包并且授权')
+        tab.wait(5).run_async_js(okx_url)
+        tab.wait.load_start(timeout=3)
+        exe_okx(chrome, env)
+    except Exception as e:
+        pass
+    try:
+        tab.run_js(switch_Network)
+        print('选择测试网完成')
+        tab.wait.load_start(timeout=3)
+        exe_okx(chrome, env)
+    except Exception as e:
+        pass
 #领水
 def getFaucet(chrome, env):
     getTab(chrome, env)
@@ -78,23 +83,21 @@ def getFaucet(chrome, env):
     print('开始领水')
     tab = chrome.new_tab(url='https://testnet.nowchain.co/testnet/faucet/')
     try:
-        time.sleep(30)
-        if tab.s_ele('Time remaining: '):
+        if tab.wait.eles_loaded('Time remaining: ', timeout=10, raise_err=False):
             print('领水时间还没到：', tab.ele('Time remaining: ').text)
             return False
+        tab.wait.load_start(timeout=6)
         num = 0
         while num < 5:
-            if tab.s_ele('t:button@tx():Request Assets'):
+            if tab.wait.eles_loaded('Request Assets', timeout=10, raise_err=False):
                 print('此时为Request Assets，开始点击领水')
-                time.sleep(30)
                 tab.ele('t:button@tx():Request Assets').click()
                 print('点击完成')
                 num += 1
-                time.sleep(15)
+                tab.wait.load_start(timeout=6)
             else:
                 print('领水完成')
                 return True
-
     except Exception as e:
         logger.error(e)
         return False
@@ -397,8 +400,9 @@ def NowChain(env):
         try:
             chrome: ChromiumPage = OKXChrome(env)
             getTab(chrome,env)
-            chrome.close_tabs()
-            getCount(chrome, env)
+            # # chrome.close_tabs()
+            # # getCount(chrome, env)
+
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
