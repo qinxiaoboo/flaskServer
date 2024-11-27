@@ -349,6 +349,7 @@ def missions(chrome, env):
 
     tab = chrome.new_tab(url="https://www.youtube.com/channel/UCSsjwRKAUnCb6sj38wk0YvQ")
     chrome.wait(3, 6)
+    tab.close()
     tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
 
     if tab.ele('t:span@text():CONTINUE'):
@@ -357,11 +358,14 @@ def missions(chrome, env):
         tab.ele('t:span@text():START MISSIONS').click()
     if tab.ele('t:span@text():CONTINUE'):
         tab.ele('t:span@text():CONTINUE').click()
-    chrome.wait(2, 3)
-    tab.ele('t:div@text():NOTIFICATIONS').click()
-    chrome.wait(2, 3)
-    tab.ele('t:div@text():Next').click()
-    chrome.wait(2, 3)
+    try:
+        chrome.wait(2, 3)
+        tab.ele('t:div@text():NOTIFICATIONS').click()
+        chrome.wait(2, 3)
+        tab.ele('t:div@text():Next').click()
+        chrome.wait(2, 3)
+    except Exception as e:
+        pass
     if chrome.get_tab(title="OKX Wallet"):
         logger.info(f"{env.name}   OKX钱包授权")
         chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
