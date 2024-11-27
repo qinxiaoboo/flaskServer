@@ -400,8 +400,8 @@ def NowChain(env):
         try:
             chrome: ChromiumPage = OKXChrome(env)
             getTab(chrome,env)
-            # # chrome.close_tabs()
-            # # getCount(chrome, env)
+            chrome.close_tabs()
+            getCount(chrome, env)
 
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
