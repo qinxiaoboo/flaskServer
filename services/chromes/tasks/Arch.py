@@ -50,40 +50,26 @@ def getTab(chrome, env):
             chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
             chrome.wait(10, 15)
 
-    for _ in range(3):
+    for _ in range(2):
         if tab.ele('t:button@text():Sign'):
             logger.info(f"{env.name}   登录")
             tab.ele('t:button@text():Sign').click()
-            chrome.wait(10, 15)
+            chrome.wait(5, 10)
             chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
-            chrome.wait(15, 20)
-
-    if tab.ele('t:span@text():START MISSIONS'):
-        logger.info(f"{env.name}   主页登录成功")
-    else:
-        logger.info(f"{env.name}   主页登录失败")
-        quitChrome(env, chrome)
-        return
+            chrome.wait(10, 15)
 
     logger.info(f"{env.name}   进入任务页面")
     if tab.ele('t:span@text():CONTINUE'):
         tab.ele('t:span@text():CONTINUE').click()
-    chrome.wait(2, 3)
+
     tab.ele('t:span@text():START MISSIONS').click()
     chrome.wait(2, 3)
     tab.ele('t:div@text():WEEKLY MISSIONS').click()
-    chrome.wait(6, 9)
+    chrome.wait(2, 3)
 
     if tab.ele('t:button@text():Start'):
         logger.info(f"{env.name}   推特授权成功")
     else:
-        if tab.ele('t:span@text():CONTINUE'):
-            tab.ele('t:span@text():CONTINUE').click()
-        if tab.ele('t:span@text():START MISSIONS'):
-            tab.ele('t:span@text():START MISSIONS').click()
-        if tab.ele('t:span@text():CONTINUE'):
-            tab.ele('t:span@text():CONTINUE').click()
-        chrome.wait(2, 3)
         logger.info(f"{env.name}   推特授权")
         try:
             tab.ele('t:button@text():Authorize').click()
@@ -166,7 +152,7 @@ def getTab(chrome, env):
                     logger.info(f"{env.name}   推特授权成功")
                     chrome.wait(15, 20)
         except Exception as e:
-                tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
+                # tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
                 tab.ele('t:div@text():WEEKLY MISSIONS').click()
                 chrome.wait(2, 4)
 
@@ -175,7 +161,7 @@ def getTab(chrome, env):
                 else:
                     try:
                         tab.ele('t:button@text():Authorize').click()
-                        chrome.wait(20, 25)
+                        chrome.wait(15, 20)
                         chrome.get_tab(url='https://twitter.com/').ele("@data-testid=OAuth_Consent_Button").click()
                         logger.info(f"{env.name}   推特授权成功")
                     except Exception as e:
@@ -280,11 +266,10 @@ def missions(chrome, env):
                         raise Exception(f"{env.name}: 没有导入TW的账号信息")
 
     tab.close()
-    chrome.wait(15, 20)
     tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
-    chrome.wait(3, 6)
+    chrome.wait(2, 3)
     tab.ele('t:div@text():ONBOARDING MISSIONS').click()
-    chrome.wait(3, 6)
+    chrome.wait(2, 3)
     tab.ele('t:button@text():Start').click()
     chrome.wait(3, 6)
 
@@ -327,23 +312,26 @@ def missions(chrome, env):
         pass
     tab.close()
 
-    tab = chrome.new_tab(url="https://x.com/compose/post")
-    chrome.wait(5, 10)
-    if tab.ele('t:span@text():Log in'):
-        logger.info(f"{env.name}    推特登录失败")
-        quitChrome(env, chrome)
-
-    tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input('Want to earn points and help build bridgeless Bitcoin DeFi?\n\nJoin me: https://dashboard.arch.network?referralCode=254c68f9-1b28-4e66-bdf1-4e42c48085f9 #JoinArch ')
-    chrome.wait(3, 6)
-    tab.ele("t:span@text():Post").click(by_js=True)
-    chrome.wait(3, 6)
-    tab.close()
-
-    tab = chrome.new_tab(url="https://x.com/ArchNtwrk")
     try:
-        chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
+        tab = chrome.new_tab(url="https://x.com/compose/post")
+        chrome.wait(5, 10)
+        if tab.ele('t:span@text():Log in'):
+            logger.info(f"{env.name}    推特登录失败")
+            quitChrome(env, chrome)
+
+        tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input('Want to earn points and help build bridgeless Bitcoin DeFi?\n\nJoin me: https://dashboard.arch.network?referralCode=254c68f9-1b28-4e66-bdf1-4e42c48085f9 #JoinArch ')
         chrome.wait(3, 6)
-        chrome.get_tab(url='https://x.com/').close()
+        tab.ele("t:span@text():Post").click(by_js=True)
+        chrome.wait(3, 6)
+        tab.close()
+
+        tab = chrome.new_tab(url="https://x.com/ArchNtwrk")
+        try:
+            chrome.get_tab(url='https://x.com/').ele("t:span@text():Follow").click()
+            chrome.wait(3, 6)
+            chrome.get_tab(url='https://x.com/').close()
+        except Exception as e:
+            pass
     except Exception as e:
         pass
 
@@ -359,7 +347,6 @@ def missions(chrome, env):
     if tab.ele('t:span@text():CONTINUE'):
         tab.ele('t:span@text():CONTINUE').click()
     try:
-        chrome.wait(2, 3)
         tab.ele('t:div@text():NOTIFICATIONS').click()
         chrome.wait(2, 3)
         tab.ele('t:div@text():Next').click()
