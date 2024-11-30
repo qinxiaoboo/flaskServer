@@ -121,41 +121,9 @@ def getDiscord(chrome,env):
                 print('Onboarding | Humanity Protocol进入')
                 tab.ele("@type=button", index=2).wait(10).click()  # 等待按钮可点击
                 logger.info(f"{env.name}: 登录discord完成----------------------------------")
-        # if chrome.get_tab(title='Discord | Authorize access to your account'):
-        #     print('Discord | Authorize access to your account进入')
-        #     chrome.get_tab(title='Discord | Authorize access to your account').ele("@type=button", index=2).click()
-        #     logger.info(f"{env.name}: 登录discord完成----------------------------------")
-        #     time.sleep(10)
-        # elif chrome.get_tab(title='Discord | 授权访问您的账号'):
-        #     print('Discord | 授权访问您的账号进入')
-        #     chrome.get_tab(title='Discord | 授权访问您的账号').ele("@type=button", index=2).click()
-        #     logger.info(f"{env.name}: 登录discord完成----------------------------------")
-        #     time.sleep(10)
-        # elif chrome.get_tab(title='Discord'):
-        #     print('Discord 进入')
-        #     if chrome.get_tab(title='Discord').ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85'):
-        #         logger.info(f'{env.name}的discord需要重新登录')
-        #         chrome.get_tab(title='Discord').ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85').click()
-        #         time.sleep(6)
-        #         LoginDiscord(chrome, env)
-        #         time.sleep(6)
-        #         chrome.close_tabs()
-        #     elif chrome.get_tab(title='Discord').ele('Welcome back!'):
-        #         logger.info(f"{env.name}的Discord未登录，尝试重新登录")
-        #         time.sleep(6)
-        #         LoginDiscord(chrome, env)
-        #         time.sleep(6)
-        #         chrome.close_tabs()
-        #     if chrome.get_tab(title='Discord').ele("@type=button", index=2):
-        #         chrome.get_tab(title='Discord').ele("@type=button", index=2).click()
-        #         logger.info(f"{env.name}: 登录discord完成----------------------------------")
-        #         chrome.wait.load_start(timeout=5,raise_err=False)
-        # elif chrome.get_tab('Onboarding | Humanity Protocol'):
-        #     print('Onboarding | Humanity Protocol进去的')
-        #     chrome.get_tab(title='Onboarding | Humanity Protocol').ele("@type=button", index=2).click()
-        #     logger.info(f"{env.name}: 登录discord完成----------------------------------")
         else:
             logger.info(f'{env.name}:还有其他的语言需要加判断')
+            quitChrome(env, chrome)
     except Exception as e:
         logger.error(e)
 
@@ -333,7 +301,6 @@ def Humanity(env):
         try:
             chrome: ChromiumPage = OKXChrome(env)
             gethumanity(chrome, env)
-            # getCount(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
