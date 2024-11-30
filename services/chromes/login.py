@@ -116,11 +116,18 @@ def LoginOKXWallet(chrome,env):
                 for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
                     eles[index].input(word)
                 tab.ele("@@type=submit@!btn-disabled").click()
-                passwords = tab.eles("@type=password")
+                if tab.s_ele("@data-testid=okd-button"):#  3.31.16版
+                    tab.ele("@data-testid=okd-button").click()
+                if tab.s_ele("@type=submit"): # 3.30.之前版本的okx
+                    tab.ele("@type=submit").click()
+                tab.wait.eles_loaded("@type=password", timeout=8, raise_err=False)
+                passwords = tab.eles("@type=password") # 密码
                 for pwd in passwords:
                     pwd.input(WALLET_PASSWORD)
-                tab.ele("@type=submit").click()
-                tab.ele("@type=button").click()
+                if tab.s_ele("@data-testid=okd-button"): #  3.31.16版
+                    tab.ele("@data-testid=okd-button").click()
+                if tab.s_ele("@type=button"): # 3.30.之前版本的okx
+                    tab.ele("@type=button").click()
                 tab.ele("MATIC")
                 logger.info(f"{env.name}: OKX 登录成功")
             else:
@@ -474,13 +481,13 @@ def DebugChrome(env):
     with app.app_context():
         proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
         chrome = getChrome(proxy,env)
-        LoginINITWallet(chrome, env)
+        # LoginINITWallet(chrome, env)
         LoginOKXWallet(chrome, env)
         # LoginPhantomWallet(chrome, env)
-        LoginOutlook(chrome, env)
-        LoginTW(chrome, env)
+        # LoginOutlook(chrome, env)
+        # LoginTW(chrome, env)
         LoginDiscord(chrome, env)
-        LoginBitlight(chrome, env)
+        # LoginBitlight(chrome, env)
         logger.info(ChromiumOptions().address)
         updateEnvStatus(env.name, 2)
         return chrome
