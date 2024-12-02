@@ -118,7 +118,15 @@ def getSigninTW(chrome, env):
         logger.error(f"处理过程中出现错误: {e}")
         return
 
-
+# def exe_okx(chrome,env):
+#     try:
+#         tab = chrome.get_tab(title="OKX Wallet").ele('@data-testid=okd-button', index=2)
+#         if tab:
+#             tab.wait(3).click()
+#             if tab:
+#                 tab.wait(3).click()
+#     except Exception as e:
+#         print(f'{env.name}取的ele不对或者不需要连接')
 def exe_okx(chrome,env):
     try:
         if chrome.get_tab(title="OKX Wallet").ele('@data-testid=okd-button', index=2):
@@ -304,7 +312,7 @@ def getAgenttasks(chrome, env):
         chrome.wait(2, 3)
         tab.ele('@data-testid=suggested-question', index=1).click()
         chrome.wait(2, 3)
-        tab.ele('@class=flex h-11 w-12 items-center justify-center rounded-full transition-colors duration-300 bg-green-500 hover:bg-green-300 ').click()
+        tab.ele('@data-testid=send-message', index=1).click()
     except Exception as e:
         logger.info(e)
 
@@ -322,7 +330,7 @@ def getAgenttasks(chrome, env):
         chrome.wait(2, 3)
         tab.ele('@data-testid=suggested-question', index=1).click()
         chrome.wait(2, 3)
-        tab.ele('@class=flex h-11 w-12 items-center justify-center rounded-full transition-colors duration-300 bg-green-500 hover:bg-green-300 ').click()
+        tab.ele('@data-testid=send-message', index=1).click()
     except Exception as e:
         logger.info(e)
 
@@ -338,9 +346,9 @@ def getAgenttasks(chrome, env):
         chrome.wait(2, 3)
         tab.ele('Create Session').click()
         chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=2).click()
+        tab.ele('@data-testid=suggested-question', index=1).click()
         chrome.wait(2, 3)
-        tab.ele('@class=flex h-11 w-12 items-center justify-center rounded-full transition-colors duration-300 bg-green-500 hover:bg-green-300 ').click()
+        tab.ele('@data-testid=send-message', index=1).click()
     except Exception as e:
         logger.info(e)
 
@@ -356,9 +364,9 @@ def getAgenttasks(chrome, env):
         chrome.wait(2, 3)
         tab.ele('Create Session').click()
         chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=2).click()
+        tab.ele('@data-testid=suggested-question', index=1).click()
         chrome.wait(2, 3)
-        tab.ele('@class=flex h-11 w-12 items-center justify-center rounded-full transition-colors duration-300 bg-green-500 hover:bg-green-300 ').click()
+        tab.ele('@data-testid=send-message', index=1).click()
     except Exception as e:
         logger.info(e)
 
@@ -375,7 +383,7 @@ def getAgenttasks(chrome, env):
         chrome.wait(2, 3)
         tab.ele('@data-testid=suggested-question', index=1).click()
         chrome.wait(2, 3)
-        tab.ele('@class=flex h-11 w-12 items-center justify-center rounded-full transition-colors duration-300 bg-green-500 hover:bg-green-300 ').click()
+        tab.ele('@data-testid=send-message', index=1).click()
     except Exception as e:
         logger.info(e)
 
@@ -390,9 +398,9 @@ def getAgenttasks(chrome, env):
         chrome.wait(2, 3)
         tab.ele('Create Session').click()
         chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=2).click()
+        tab.ele('@data-testid=suggested-question', index=1).click()
         chrome.wait(2, 3)
-        tab.ele('@class=flex h-11 w-12 items-center justify-center rounded-full transition-colors duration-300 bg-green-500 hover:bg-green-300 ').click()
+        tab.ele('@data-testid=send-message', index=1).click()
     except Exception as e:
         logger.info(e)
     chrome.wait(5, 8)
@@ -408,9 +416,9 @@ def getAgenttasks(chrome, env):
         chrome.wait(2, 3)
         tab.ele('Create Session').click()
         chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=2).click()
+        tab.ele('@data-testid=suggested-question', index=1).click()
         chrome.wait(2, 3)
-        tab.ele('@class=flex h-11 w-12 items-center justify-center rounded-full transition-colors duration-300 bg-green-500 hover:bg-green-300 ').click()
+        tab.ele('@data-testid=send-message', index=1).click()
     except Exception as e:
         logger.info(e)
     chrome.wait(5, 8)
@@ -425,9 +433,9 @@ def getAgenttasks(chrome, env):
         chrome.wait(2, 3)
         tab.ele('Create Session').click()
         chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=2).click()
+        tab.ele('@data-testid=suggested-question', index=1).click()
         chrome.wait(2, 3)
-        tab.ele('@class=flex h-11 w-12 items-center justify-center rounded-full transition-colors duration-300 bg-green-500 hover:bg-green-300 ').click()
+        tab.ele('@data-testid=send-message', index=1).click()
     except Exception as e:
         logger.info(e)
     chrome.wait(5, 8)
@@ -441,9 +449,9 @@ def getAgenttasks(chrome, env):
         chrome.wait(2, 3)
         tab.ele('Create Session').click()
         chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=2).click()
+        tab.ele('@data-testid=suggested-question', index=1).click()
         chrome.wait(2, 3)
-        tab.ele('@class=flex h-11 w-12 items-center justify-center rounded-full transition-colors duration-300 bg-green-500 hover:bg-green-300 ').click()
+        tab.ele('@data-testid=send-message', index=1).click()
     except Exception as e:
         logger.info(e)
 
@@ -458,9 +466,9 @@ def getAgenttasks(chrome, env):
         chrome.wait(2, 3)
         tab.ele('Create Session').click()
         chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=2).click()
+        tab.ele('@data-testid=suggested-question', index=1).click()
         chrome.wait(2, 3)
-        tab.ele('@class=flex h-11 w-12 items-center justify-center rounded-full transition-colors duration-300 bg-green-500 hover:bg-green-300 ').click()
+        tab.ele('@data-testid=send-message', index=1).click()
     except Exception as e:
         logger.info(e)
 
