@@ -18,6 +18,7 @@ from threading import Thread
 from flaskServer.routes import env,task,galxe,user
 from flask_cors import CORS
 from flaskServer.services.chromes.tasks.plume import toDoPlumeTaskAll
+from flaskServer.services.system.auto.updateEtd import updateExten
 app.register_blueprint(env.bp)
 app.register_blueprint(task.bp)
 app.register_blueprint(galxe.bp)
@@ -91,6 +92,8 @@ if __name__ == '__main__':
     # # Create the database and table
     # with app.app_context():
     #     db.create_all()
+    # 更新插件
+    # updateExten()
     addJobByDB()
     scheduler.init_app(app)
     scheduler.start()
