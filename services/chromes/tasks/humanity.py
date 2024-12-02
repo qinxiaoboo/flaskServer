@@ -1,5 +1,5 @@
 import string
-
+import multiprocessing
 import openpyxl
 import requests
 from DrissionPage import ChromiumPage,ChromiumOptions
@@ -84,7 +84,7 @@ def getDiscord(chrome,env):
               chrome.get_tab(title='Discord | 授权访问您的账号') or \
               chrome.get_tab(title='Discord') or \
               chrome.get_tab('Onboarding | Humanity Protocol')
-
+        print('开始')
         if tab:
             if tab.title == 'Discord | Authorize access to your account' or 'Discord | 授权访问您的账号':
                 print(f'{tab.title}进入')
@@ -130,11 +130,6 @@ def getDiscord(chrome,env):
 def gethumanity(chrome,env):
     tab = chrome.new_tab(url=humanity_url)
     tab.set.window.max()
-    try:
-        if tab.s_ele('Almost there!'):
-            print('出现了Almost there!')
-    except Exception as e:
-        logger.info(e)
     if tab.s_ele('Almost there!'):
         print('进入 Almost there! 等待状态')
         num = 0
@@ -143,7 +138,7 @@ def gethumanity(chrome,env):
                 # 刷新页面
                 chrome.refresh()
                 # 等待页面加载
-                if tab.wait.load_start(timeout=10 ,raise_err=False):
+                if tab.wait.load_start(timeout=10, raise_err=False):
                     print("页面加载完成")
                 # 等待 'Get Started' 元素出现
                 if tab.s_ele('Get Started', timeout=10):
@@ -173,7 +168,24 @@ def gethumanity(chrome,env):
         if tab.wait.eles_loaded('Get Started', timeout=5, raise_err=False):
             tab.run_js(dis_js)
             tab.wait.url_change("https://discord.com/", timeout=5, raise_err=False)
-            getDiscord(chrome, env)
+            process = multiprocessing.Process(target=getDiscord(chrome, env))
+            process.start()
+            process.join(timeout=20)
+            # 检查进程是否仍在运行
+            if process.is_alive():
+                print(f"任务超时，强制结束进程！")
+                process.terminate()  # 强制终止进程
+                process.join()  # 确保进程已被终止
+                quitChrome(env, chrome)
+            else:
+                print("任务在规定时间内完成。")
+
+            if tab.s_ele('Get a new place in line'):
+                print('Get a new place in line 等待状态')
+                chrome.refresh()
+                # if tab.wait.ele_displayed('Get a new place in line', timeout=10, raise_err=False):
+                #     tab.ele('Get a new place in line').click()
+
             # try:
             #     if tab.s_ele('Choose a name for your Human ID'):
             #         tab.ele('@class=MuiInputBase-input mui-1qvwndf').input(generate_random_word())
