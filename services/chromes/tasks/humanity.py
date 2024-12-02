@@ -156,7 +156,12 @@ def gethumanity(chrome,env):
                 return
     else:
         print('不需要等待')
-
+    tab.wait.load_start(timeout=6)
+    if tab.wait.ele_displayed('@class=skip', timeout=5, raise_err=False):
+        print('点击skip弹幕')
+        tab.ele('@class=skip').click()
+    else:
+        print('没有出现skip')
     if tab.wait.ele_displayed('@class=bottom', timeout=5, raise_err=False):
         print('点击签到')
         tab.ele('@class=bottom').click()
@@ -213,6 +218,7 @@ def gethumanity(chrome,env):
             #         tab.ele('@class=MuiBox-root mui-171onha', index=2).click()
             # except Exception as e:
             #     logger.info(e)
+        tab.wait.load_start(timeout=6)
         if tab.wait.ele_displayed('@class=skip', timeout=5, raise_err=False):
             print('点击skip弹幕')
             tab.ele('@class=skip').click()
