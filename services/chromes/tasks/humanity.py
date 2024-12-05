@@ -84,8 +84,10 @@ def getDiscord(chrome,env):
               chrome.get_tab(title='Discord | 授权访问您的账号') or \
               chrome.get_tab(title='Discord') or \
               chrome.get_tab('Onboarding | Humanity Protocol')
-        print('开始')
-        if tab:
+        if tab == None:
+            logger.info(f'{env.name}:还有其他的语言需要加判断')
+            quitChrome(env, chrome)
+        elif tab:
             if tab.title == 'Discord | Authorize access to your account' or 'Discord | 授权访问您的账号':
                 print(f'{tab.title}进入')
                 tab.wait.load_start(timeout=6)
@@ -173,18 +175,8 @@ def gethumanity(chrome,env):
         if tab.wait.eles_loaded('Get Started', timeout=5, raise_err=False):
             tab.run_js(dis_js)
             tab.wait.url_change("https://discord.com/", timeout=5, raise_err=False)
-            process = multiprocessing.Process(target=getDiscord(chrome, env))
-            process.start()
-            process.join(timeout=20)
-            # 检查进程是否仍在运行
-            if process.is_alive():
-                print(f"任务超时，强制结束进程！")
-                process.terminate()  # 强制终止进程
-                process.join()  # 确保进程已被终止
-                quitChrome(env, chrome)
-            else:
-                print("任务在规定时间内完成。")
-
+            getDiscord(chrome,env)
+            tab.wait.load_start(timeout=6)
             if tab.s_ele('Get a new place in line'):
                 print('Get a new place in line 等待状态')
                 chrome.refresh()
