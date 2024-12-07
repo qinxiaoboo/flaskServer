@@ -170,6 +170,81 @@ def getTab(chrome, env):
     return
 
 def missions(chrome, env):
+    tab = chrome.new_tab(url="https://dashboard.arch.network?referralCode=f9c6ab90-03a4-4724-9cbd-080a192f74d2")
+    rw = RandomWords()
+    tab.set.window.max()
+    chrome.wait(2, 3)
+
+    if tab.ele('t:button@text():Connect Wallet'):
+        logger.info(f"{env.name}   链接钱包选择OKX")
+        tab.ele('t:button@text():Connect Wallet').click()
+        chrome.wait(3, 6)
+        tab.ele('OKX').click()
+        chrome.wait(10, 15)
+
+        if chrome.get_tab(title="OKX Wallet"):
+            logger.info(f"{env.name}   OKX钱包授权")
+            chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+            chrome.wait(10, 15)
+
+    for _ in range(2):
+        if tab.ele('t:button@text():Sign'):
+            logger.info(f"{env.name}   登录")
+            tab.ele('t:button@text():Sign').click()
+            chrome.wait(5, 10)
+            chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+            chrome.wait(3, 6)
+
+    logger.info(f"{env.name}   进入任务页面")
+    if tab.ele('t:span@text():CONTINUE'):
+        tab.ele('t:span@text():CONTINUE').click()
+
+    tab.ele('t:span@text():START MISSIONS').click()
+    chrome.wait(2, 3)
+
+    try:
+
+        if tab.ele('t:button@text():Authorize'):
+            tab.ele('t:button@text():Authorize').click()
+            chrome.wait(15, 25)
+            chrome.get_tab(url='https://discord.com').ele("@type=button", index=2).click()
+            chrome.wait(5, 10)
+            logger.info(f"{env.name}    开始验证")
+
+        count = 0
+        while count < 2:
+                element = tab.ele('t:button@text():Start')
+                if not element:
+                    break
+                else:
+                    element.click()
+                count += 1
+
+        try:
+            tab.ele('t:button@text():Verify').click()
+        except Exception as e:
+            pass
+
+        count = 0
+        while count < 4:
+                element = tab.ele('t:button@text():Start')
+                if not element:
+                    break
+                else:
+                    element.click()
+                count += 1
+
+    except Exception as e:
+        pass
+
+    tab = chrome.new_tab(url="https://dashboard.arch.network/missions")
+    if tab.ele('t:button@text():Authorize') or tab.ele('t:button@text():Start') or tab.ele('t:button@text():Verify'):
+        logger.info(f"{env.name}   有未完成任务！！！")
+
+    return
+
+def missions1(chrome, env):
+
     tab = chrome.new_tab(url="https://x.com/ArchNtwrk")
     rw = RandomWords()
     outlook: Account = Account.query.filter_by(id=env.outlook_id).first()
@@ -783,12 +858,12 @@ def arch(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
-            getTab(chrome, env)
+            # getTab(chrome, env)
             missions(chrome, env)
             # weekly(chrome, env)
             # daily(chrome, env)
-            community(chrome, env)
-            count(chrome, env)
+            # community(chrome, env)
+            # count(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
