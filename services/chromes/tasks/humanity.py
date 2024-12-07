@@ -78,56 +78,59 @@ def generate_random_word(length=7):
     return ''.join(random.choice(letters) for _ in range(length))
 
 def getDiscord(chrome,env):
-    try:
-        print('开始discord认证')
-        tab = chrome.get_tab(title='Discord | Authorize access to your account') or \
-              chrome.get_tab(title='Discord | 授权访问您的账号') or \
-              chrome.get_tab(title='Discord') or \
-              chrome.get_tab('Onboarding | Humanity Protocol')
-        if tab == None:
-            logger.info(f'{env.name}:还有其他的语言需要加判断')
-            quitChrome(env, chrome)
-        elif tab:
-            if tab.title == 'Discord | Authorize access to your account' or 'Discord | 授权访问您的账号':
-                print(f'{tab.title}进入')
-                tab.wait.load_start(timeout=6)
-                tab.ele("@type=button", index=2).wait(10).click()  # 等待按钮可点击
-            elif tab.title == 'Discord':
-                print('Discord 进入')
-                login_button = tab.ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85')
-                welcome_message = tab.ele('Welcome back!')
-                # 如果需要重新登录
-                if login_button:
-                    logger.info(f'{env.name}的discord需要重新登录')
-                    login_button.wait(6).click()  # 等待登录按钮可点击
-                    tab.wait.load_start(timeout=6)  # 等待页面加载完成
-                    LoginDiscord(chrome, env)
-                    tab.wait.load_start(timeout=6)  # 等待重新加载的页面完成
-                    chrome.close_tabs()
-
-                # 如果显示 "Welcome back!" 信息
-                elif welcome_message:
-                    logger.info(f"{env.name}的Discord未登录，尝试重新登录")
-                    LoginDiscord(chrome, env)
-                    tab.wait.load_start(timeout=6)  # 等待页面加载完成
-                    chrome.close_tabs()
-                # 点击授权登录按钮
-                print('4')
-                if tab.ele("@type=button", index=2):
-                    print('开始授权')
-                    tab.ele("@type=button", index=2).wait(10).click()  # 等待按钮可点击
-                    logger.info(f"{env.name}: 登录discord完成----------------------------------")
-                    tab.wait.load_start(timeout=5)  # 等待页面加载完成
-            # 处理 Onboarding 页面
-            elif tab.title == 'Onboarding | Humanity Protocol':
-                print('Onboarding | Humanity Protocol进入')
-                tab.ele("@type=button", index=2).wait(10).click()  # 等待按钮可点击
-                logger.info(f"{env.name}: 登录discord完成----------------------------------")
-        else:
-            logger.info(f'{env.name}:还有其他的语言需要加判断')
-            quitChrome(env, chrome)
-    except Exception as e:
-        logger.error(e)
+    print('开始discord认证')
+    chrome.get_tab(url='https://discord.com').ele("@type=button", index=2).click()
+    chrome.wait(5, 10)
+    # try:
+    #     print('开始discord认证')
+    #     tab = chrome.get_tab(title='Discord | Authorize access to your account') or \
+    #           chrome.get_tab(title='Discord | 授权访问您的账号') or \
+    #           chrome.get_tab(title='Discord') or \
+    #           chrome.get_tab('Onboarding | Humanity Protocol')
+    #     if tab == None:
+    #         logger.info(f'{env.name}:还有其他的语言需要加判断')
+    #         quitChrome(env, chrome)
+    #     elif tab:
+    #         if tab.title == 'Discord | Authorize access to your account' or 'Discord | 授权访问您的账号':
+    #             print(f'{tab.title}进入')
+    #             tab.wait.load_start(timeout=6)
+    #             tab.ele("@type=button", index=2).wait(10).click()  # 等待按钮可点击
+    #         elif tab.title == 'Discord':
+    #             print('Discord 进入')
+    #             login_button = tab.ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85')
+    #             welcome_message = tab.ele('Welcome back!')
+    #             # 如果需要重新登录
+    #             if login_button:
+    #                 logger.info(f'{env.name}的discord需要重新登录')
+    #                 login_button.wait(6).click()  # 等待登录按钮可点击
+    #                 tab.wait.load_start(timeout=6)  # 等待页面加载完成
+    #                 LoginDiscord(chrome, env)
+    #                 tab.wait.load_start(timeout=6)  # 等待重新加载的页面完成
+    #                 chrome.close_tabs()
+    #
+    #             # 如果显示 "Welcome back!" 信息
+    #             elif welcome_message:
+    #                 logger.info(f"{env.name}的Discord未登录，尝试重新登录")
+    #                 LoginDiscord(chrome, env)
+    #                 tab.wait.load_start(timeout=6)  # 等待页面加载完成
+    #                 chrome.close_tabs()
+    #             # 点击授权登录按钮
+    #             print('4')
+    #             if tab.ele("@type=button", index=2):
+    #                 print('开始授权')
+    #                 tab.ele("@type=button", index=2).wait(10).click()  # 等待按钮可点击
+    #                 logger.info(f"{env.name}: 登录discord完成----------------------------------")
+    #                 tab.wait.load_start(timeout=5)  # 等待页面加载完成
+    #         # 处理 Onboarding 页面
+    #         elif tab.title == 'Onboarding | Humanity Protocol':
+    #             print('Onboarding | Humanity Protocol进入')
+    #             tab.ele("@type=button", index=2).wait(10).click()  # 等待按钮可点击
+    #             logger.info(f"{env.name}: 登录discord完成----------------------------------")
+    #     else:
+    #         logger.info(f'{env.name}:还有其他的语言需要加判断')
+    #         quitChrome(env, chrome)
+    # except Exception as e:
+    #     logger.error(e)
 
 def gethumanity(chrome,env):
     tab = chrome.new_tab(url=humanity_url)
