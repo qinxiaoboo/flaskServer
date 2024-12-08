@@ -374,6 +374,7 @@ def LoginOutlook(chrome:ChromiumPage,env):
                     logger.info(f"{env.name}: 开始登陆 outlook邮箱")
                     if "login.srf" not in tab.url:
                         tab = tab.eles("@aria-label=Sign in to Outlook")[4].click.for_new_tab()
+                    tab.wait.eles_loaded('@data-testid=i0116', timeout=3, raise_err=False)
                     if tab.s_ele("@data-testid=i0116"):
                         tab.ele("@data-testid=i0116").input(outlook.name, clear=True)
                     if tab.s_ele("@type=submit"):
