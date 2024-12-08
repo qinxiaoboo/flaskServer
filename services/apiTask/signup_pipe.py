@@ -1,14 +1,12 @@
+import asyncio
+import random
 from urllib.parse import urlparse, parse_qs
 
-import asyncio
-import json
-import random
-import time
-from flaskServer.services.apiTask.clientApi import TLSClient,userAgent
-import requests
+from flaskServer.config.connect import app
 from flaskServer.mode.account import Account
 from flaskServer.mode.proxy import Proxy
-from flaskServer.config.connect import app,db
+from flaskServer.services.apiTask.clientApi import TLSClient, userAgent
+
 # 代理列表
 proxyList = []
 # 邮箱列表
@@ -72,7 +70,7 @@ async def main():
     datas = []
     for i in range(10):
         if i == 0:
-            task = asyncio.create_task(signup(i, accountList[i], datas, {}))
+            task = asyncio.create_task(signup(i, accountList[i], datas, ''))
             tasks.append(task)
         if i < len(proxyList):
             task = asyncio.create_task(signup(i+1, accountList[i+1], datas, proxyList[i]))

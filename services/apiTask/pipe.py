@@ -1,8 +1,8 @@
 import asyncio
-import json
 import time
-from flaskServer.services.apiTask.clientApi import TLSClient,userAgent
 import requests
+from flaskServer.services.apiTask.clientApi import TLSClient, userAgent
+
 HEARTBEAT_INTERVAL = 6 * 60 * 60 * 1000   # 6小时
 backendUrl = 'https://api.pipecdn.app/api/heartbeat'
 # 报告ip 检测结果
@@ -35,9 +35,9 @@ async def toKeep(token,proxy,env_name,username):
                     response = await client.post("https://api.pipecdn.app/api/test", json=data)
 
                     if "points" in response and response["points"]:
-                        print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),f"环境名称：{env_name} -- 代理IP：{proxy}  -- 上报成功：{response} -- 上报结果：{latency} True")
+                        print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),f"环境名称：{env_name} -- 代理IP：{proxy} -- 上报成功：{response} -- 上报结果：{latency} True")
                     else:
-                        print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),f"环境名称：{env_name} -- 代理IP：{proxy}  -- 上报失败：{response} -- 上报结果：{latency} False")
+                        print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),f"环境名称：{env_name} -- 代理IP：{proxy} -- 上报失败：{response} -- 上报结果：{latency} False")
 
             elapsed_time = time.time() - start_time
             sleep_time = max(0, 1800 - elapsed_time)
