@@ -5,15 +5,13 @@ import time
 from flaskServer.services.apiTask.clientApi import TLSClient,userAgent
 import requests
 
-custom_headers = {
-    "Content-Type": "application/json",
-    "origin": "chrome-extension://gelgmmdfajpefjbiaedgjkpekijhkgbe"
 
-}
-client = TLSClient(None, userAgent, custom_headers)
 
 async def signup(env_name, email, datas,proxy):
-
+    custom_headers = {
+        "Content-Type": "application/json",
+    }
+    client = TLSClient(proxy, userAgent, custom_headers)
     data = {
         "email": email,
         "password" : "123qweasd",
@@ -21,10 +19,10 @@ async def signup(env_name, email, datas,proxy):
     }
     response = await client.post("https://api.pipecdn.app/api/signup", json=data, with_text=True)
     print(f"{env_name}:{email} {response}")
-    await login(env_name, email,datas,proxy)
+    await login(client, env_name, email, datas, proxy)
 
 
-async def login(env_name, email,datas,proxy):
+async def login(client, env_name, email,datas,proxy):
     data = {
         "email": email,
         "password": "123qweasd",
