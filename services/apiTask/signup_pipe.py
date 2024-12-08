@@ -6,7 +6,7 @@ from flaskServer.services.apiTask.clientApi import TLSClient,userAgent
 import requests
 
 
-
+#注册
 async def signup(env_name, email, datas,proxy):
     custom_headers = {
         "Content-Type": "application/json",
@@ -17,11 +17,11 @@ async def signup(env_name, email, datas,proxy):
         "password" : "123qweasd",
         "referralCode": "",
     }
-    response = await client.post("https://api.pipecdn.app/api/signup", json=data, with_text=True)
-    print(f"{env_name}:{email} {response}")
+    # response = await client.post("https://api.pipecdn.app/api/signup", json=data, with_text=True)
+    # print(f"{env_name}:{email} {response}")
     await login(client, env_name, email, datas, proxy)
 
-
+#登录
 async def login(client, env_name, email,datas,proxy):
     data = {
         "email": email,
@@ -29,8 +29,16 @@ async def login(client, env_name, email,datas,proxy):
     }
     response = await client.post("https://api.pipecdn.app/api/login", json=data)
     token = response["token"]
+    # await reward(client, email)
     print(f"环境：{env_name} 登录成功 ，token：{token}")
     datas.append(f"{env_name}|{email}|{token}|{proxy}\n")
+# 获取邀请连接
+async def reward(client, email):
+    data = {
+        "email": email
+    }
+    response = await client.get("https://api.pipecdn.app/api/generate-referral", json=data)
+    return response["response"]
 
 async def main():
     datas = []

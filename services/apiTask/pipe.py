@@ -5,7 +5,7 @@ from flaskServer.services.apiTask.clientApi import TLSClient,userAgent
 import requests
 HEARTBEAT_INTERVAL = 6 * 60 * 60 * 1000   # 6小时
 backendUrl = 'https://api.pipecdn.app/api/heartbeat'
-
+# 报告ip 检测结果
 async def toKeep(token,proxy,env_name,username):
     count = 0
     while True:
@@ -50,7 +50,7 @@ async def toKeep(token,proxy,env_name,username):
             if count >= 12:
                 await sendHeartBeat(client, env_name, proxy)
                 count = 0
-
+# 心跳检测
 async def sendHeartBeat(client,env_name, proxy):
     try:
         geoInfo = await getGeoLocation()
@@ -69,12 +69,12 @@ async def sendHeartBeat(client,env_name, proxy):
     except Exception as e:
         print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),
               f"环境名称：{env_name} -- 代理IP：{proxy}  -- 心跳发送失败：{e}  False")
-
+# 获取分数
 async def getPoints(client):
     response = await client.get("https://api.pipecdn.app/api/points" )
     return response["points"]
 
-
+# 获取本地ip信息
 async def getGeoLocation():
     response = requests.get('https://ipapi.co/json/').json()
     return {"ip":response["ip"],"location":f"{response['city']}, {response['region']}, {response['country_name']}"}
