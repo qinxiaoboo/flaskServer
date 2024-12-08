@@ -34,7 +34,7 @@ class Outlook(BaseClient):
                 if self.tab.s_ele("@@type=submit@@id=iNext"):
                     self.tab.ele("@@type=submit@@id=iNext").click()
                 logger.info(f"{self.envName}: 登录OUTLOOK成功")
-        self.tab.wait(3)
+        self.tab.wait.eles_loaded('#meInitialsButton', timeout=5 , raise_err=False)
         self.tab.ele("#meInitialsButton").click()
         user = self.tab.ele("#mectrl_currentAccount_secondary")
         if user == None:
@@ -68,7 +68,9 @@ class Outlook(BaseClient):
         header = self.tab.ele(".EeHm8",index=2)
         TtcXM = header.ele(".TtcXM")
         if text in TtcXM.text:
-            self.tab.ele(".EeHm8", index=2).click(by_js=True)
+            self.tab.wait.eles_loaded(".EeHm8", timeout=3, raise_err=False)
+            self.tab.ele(".EeHm8", index=2).click()
+            self.tab.wait.eles_loaded("@role=document", timeout=3, raise_err=False)
             document = self.tab.ele("@role=document").text
             search = re.search("(\d{6})", document)
             if search:
