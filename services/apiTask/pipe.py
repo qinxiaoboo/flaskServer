@@ -16,40 +16,40 @@ async def toKeep(token,proxy,env_name,username):
                 "origin": "chrome-extension://gelgmmdfajpefjbiaedgjkpekijhkgbe"
             }
         client = TLSClient(proxy, userAgent, custom_headers)
-        # try:
-        nodes = await client.get("https://api.pipecdn.app/api/nodes")
-        points = await getPoints(client)
-        for node in nodes:
-            if node:
-                print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),f"环境名称：{env_name} -- 代理IP：{proxy} --节点ip：{node['ip']} --当前分数：{points} -- 存活检测：True")
-                start = time.time() * 1000
-                await client.get(f"http://{node['ip']}?mode=no-cors", with_text=True)
-                end = time.time() * 1000
-                latency = end - start
-                data = {
-                    "node_id": node['node_id'],
-                    "ip": node['ip'],
-                    "latency": int(latency),
-                    "status": "online" if latency > 0 else "offline"
-                }
-                response = await client.post("https://api.pipecdn.app/api/test", json=data)
+        try:
+            nodes = await client.get("https://api.pipecdn.app/api/nodes")
+            points = await getPoints(client)
+            for node in nodes:
+                if node:
+                    print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),f"环境名称：{env_name} -- 代理IP：{proxy} --节点ip：{node['ip']} --当前分数：{points} -- 存活检测：True")
+                    start = time.time() * 1000
+                    await client.get(f"http://{node['ip']}?mode=no-cors", with_text=True)
+                    end = time.time() * 1000
+                    latency = end - start
+                    data = {
+                        "node_id": node['node_id'],
+                        "ip": node['ip'],
+                        "latency": int(latency),
+                        "status": "online" if latency > 0 else "offline"
+                    }
+                    response = await client.post("https://api.pipecdn.app/api/test", json=data)
 
-                if "points" in response and response["points"]:
-                    print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),f"环境名称：{env_name} -- 代理IP：{proxy}  -- 上报成功：{response} -- 上报结果：{latency} True")
-                else:
-                    print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),f"环境名称：{env_name} -- 代理IP：{proxy}  -- 上报失败：{response} -- 上报结果：{latency} False")
+                    if "points" in response and response["points"]:
+                        print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),f"环境名称：{env_name} -- 代理IP：{proxy}  -- 上报成功：{response} -- 上报结果：{latency} True")
+                    else:
+                        print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),f"环境名称：{env_name} -- 代理IP：{proxy}  -- 上报失败：{response} -- 上报结果：{latency} False")
 
-        elapsed_time = time.time() - start_time
-        sleep_time = max(0, 1800 - elapsed_time)
-        await asyncio.sleep(sleep_time)
-        # except Exception as e:
-        #     print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),f"环境名称：{env_name} -- 代理IP：{proxy} --异常：{e} -- 存活检测：False", flush=True)
-        #     await asyncio.sleep(3600)
-        # finally:
-        #     count += 1
-        #     if count >= 12:
-        #         await sendHeartBeat(client, env_name, proxy)
-        #         count = 0
+            elapsed_time = time.time() - start_time
+            sleep_time = max(0, 1800 - elapsed_time)
+            await asyncio.sleep(sleep_time)
+        except Exception as e:
+            print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),f"环境名称：{env_name} -- 代理IP：{proxy} --异常：{e} -- 存活检测：False", flush=True)
+            await asyncio.sleep(3600)
+        finally:
+            count += 1
+            if count >= 12:
+                await sendHeartBeat(client, env_name, proxy)
+                count = 0
 
 async def sendHeartBeat(client,env_name, proxy):
     try:
