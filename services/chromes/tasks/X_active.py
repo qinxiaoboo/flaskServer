@@ -74,6 +74,15 @@ def getTab(chrome, env):
         logger.info(f"{env.name}   推特被封或者需要重新登录")
         return
 
+    if tab.ele('t:span@text():Got it'):
+        tab.ele('t:span@text():Got it').click()
+
+    if tab.ele('t:span@text():Turn on personalized ads'):
+        tab.ele('t:span@text():Turn on personalized ads').click()
+
+    if tab.ele('t:span@text():Got it'):
+        tab.ele('t:span@text():Got it').click()
+
     for _ in range(20):
         tab.scroll.up(2)
         time.sleep(1)
