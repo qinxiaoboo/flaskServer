@@ -6,7 +6,7 @@ from flaskServer.config.connect import app
 from flaskServer.mode.account import Account
 from flaskServer.mode.proxy import Proxy
 from flaskServer.services.apiTask.clientApi import TLSClient, userAgent
-
+from flaskServer.config.config import WALLET_PASSWORD
 # 代理列表
 proxyList = []
 # 邮箱列表
@@ -25,9 +25,9 @@ async def signup(env_name, email, datas,proxy):
     }
     client = TLSClient(proxy, userAgent, custom_headers)
     if email =="yun16603860403@outlook.com":
-        password = "5201314xiao"
+        password = "xxx"
     else:
-        password = "123qweasd"
+        password = WALLET_PASSWORD
     data = {
         "email": email,
         "password" : password,
