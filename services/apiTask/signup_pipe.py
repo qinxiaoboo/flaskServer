@@ -13,7 +13,8 @@ proxyList = []
 accountList=[]
 # 邀请列表
 #第一次执行会生成这个列表
-reffers = ['eXVuMTY2MD', 'Y29jb3NieW', 'a3JvZ2NvdH', 'Y2xhcmtlLm', 'aGVsZW5jbm', 'QW50aG9ueV', 'bWluZGVybW', 'bW9ucm9lZG', 'aGVybmFuZG', 'eXVuMTY2MD']
+reffers = ['eXVuMTY2MD', 'Y29jb3NieW', 'a3JvZ2NvdH', 'Y2xhcmtlLm', 'aGVsZW5jbm', 'QW50aG9ueV', 'bWluZGVybW', 'bW9ucm9lZG', 'aGVybmFuZG', 'eXVuMTY2MD', 'bWluZGVybW', 'b3dvY21lZH', 'a3JvZ2NvdH', 'QW50aG9ueV', 'c2hla2V5a3', 'eXVuMTY2MD', 'bW9ucm9lZG', 'Y2xhcmtlLm', 'aGVybmFuZG', 'Y29jb3NieW', 'aGVsZW5jbm']
+
 # 是否是第一次执行,如果不是第一次执行，则使用上面reffers中的邀请码，并随机选中一个使用
 FIRST=True
 
@@ -68,7 +69,7 @@ async def reward(client, email):
 async def main():
     tasks = []
     datas = []
-    for i in range(10):
+    for i in range(100):
         if i == 0:
             task = asyncio.create_task(signup(i, accountList[i], datas, ''))
             tasks.append(task)
@@ -107,14 +108,21 @@ def getTWEmailName():
 
 def getOutlookEmailName():
     #按需添加
-    pass
+    with app.app_context():
+        accounts = Account.query.filter(Account.type == "OUTLOOK").all()
+        for account in accounts:
+            if account.name:
+                accountList.append(account.name)
 
 if __name__ == '__main__':
 
     getProxys()
     getDiscordEmailName()
+    getOutlookEmailName()
     # getFileEmailName()
     print(proxyList)
     print(accountList)
+    list(set(accountList))
+    list(set(proxyList))
     asyncio.run(main())
     print(reffers)
