@@ -4,6 +4,7 @@ from flaskServer.services.chromes.login import OKXChrome, tw2faV
 from DrissionPage import ChromiumPage
 from loguru import logger
 # 连接数据库
+import random
 from flaskServer.config.connect import app
 #登录环境账号
 from flaskServer.services.chromes.login import OKXChrome
@@ -298,179 +299,56 @@ def getAgenttasks(chrome, env):
         print('点击完成')
     except Exception as e:
         logger.info(e)
-
     chrome.wait(5, 10)
-    try:
-        print('Bondex Agent')
-        tab.ele('@class=size-6 text-green-500').click()
-        chrome.wait(2, 3)
-        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Bondex Agent')
-        chrome.wait(2, 3)
-        tab.ele('@class=h-full px-1 lg:px-5').click()
-        chrome.wait(2, 3)
-        tab.ele('Create Session').click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=1).click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=send-message', index=1).click()
-    except Exception as e:
-        logger.info(e)
 
-    chrome.wait(2, 5)
+    afent_list = {
+        'Investment Collective',
+        'Eigenlayer Collective',
+        'Bondex Collective',
+        'Prediction Collective',
+        'Eigenlayer Discord Agent',
+        'Crypto Game',
+        'DAO Agent',
+        'Forecasting Agent',
+        'Edbot',
+        'Eigenlayer Documentation Agent',
+        'Filecoin Documentation Agent',
+        'Investment Planner Agent',
+        'DAO Voting Agent',
+        'Polymarket Info Agent',
+        'Investment Twitter Agent',
+        'Eigenlayer Twitter Agent',
+        'Prediction Market Planner Agent',
+        'Bondex Agent'
+    }
 
-    try:
-        print('Filecoin Documentation Agent')
-        tab.ele('@class=size-6 text-green-500').click()
-        chrome.wait(2, 3)
-        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Filecoin Documentation Agent')
-        chrome.wait(2, 3)
-        tab.ele('@class=h-full px-1 lg:px-5').click()
-        chrome.wait(2, 3)
-        tab.ele('Create Session').click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=1).click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=send-message', index=1).click()
-    except Exception as e:
-        logger.info(e)
+    for select_aget in afent_list:
+        try:
 
-    chrome.wait(5, 8)
-
-    try:
-        print('Eigenlayer Discord Agent')
-        tab.ele('@class=size-6 text-green-500').click()
-        chrome.wait(2, 3)
-        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Eigenlayer Discord Agent')
-        chrome.wait(2, 3)
-        tab.ele('@class=h-full px-1 lg:px-5').click()
-        chrome.wait(2, 3)
-        tab.ele('Create Session').click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=1).click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=send-message', index=1).click()
-    except Exception as e:
-        logger.info(e)
-
-    chrome.wait(5, 8)
-
-    try:
-        print('Eigenlayer Twitter Agent')
-        tab.ele('@class=size-6 text-green-500').click()
-        chrome.wait(2, 3)
-        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Eigenlayer Twitter Agent')
-        chrome.wait(2, 3)
-        tab.ele('@class=h-full px-1 lg:px-5').click()
-        chrome.wait(2, 3)
-        tab.ele('Create Session').click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=1).click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=send-message', index=1).click()
-    except Exception as e:
-        logger.info(e)
-
-    chrome.wait(5, 8)
-    try:
-        print('Eigenlayer Documentation Agent')
-        tab.ele('@class=size-6 text-green-500').click()
-        chrome.wait(2, 3)
-        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Eigenlayer Documentation Agent')
-        chrome.wait(2, 3)
-        tab.ele('@class=h-full px-1 lg:px-5').click()
-        chrome.wait(2, 3)
-        tab.ele('Create Session').click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=1).click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=send-message', index=1).click()
-    except Exception as e:
-        logger.info(e)
-
-    chrome.wait(5, 8)
-    try:
-        print('Eigenlayer Collective')
-        tab.ele('@class=size-6 text-green-500').click()
-        chrome.wait(2, 3)
-        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Eigenlayer Collective')
-        chrome.wait(2, 3)
-        tab.ele('@class=h-full px-1 lg:px-5').click()
-        chrome.wait(2, 3)
-        tab.ele('Create Session').click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=1).click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=send-message', index=1).click()
-    except Exception as e:
-        logger.info(e)
-    chrome.wait(5, 8)
-
-    chrome.wait(5, 8)
-    try:
-        print('Bondex Collective')
-        tab.ele('@class=size-6 text-green-500').click()
-        chrome.wait(2, 3)
-        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Bondex Collective')
-        chrome.wait(2, 3)
-        tab.ele('@class=h-full px-1 lg:px-5').click()
-        chrome.wait(2, 3)
-        tab.ele('Create Session').click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=1).click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=send-message', index=1).click()
-    except Exception as e:
-        logger.info(e)
-    chrome.wait(5, 8)
-
-    try:
-        print('Bondex Collective')
-        tab.ele('@class=size-6 text-green-500').click()
-        chrome.wait(2, 3)
-        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Bondex Collective')
-        chrome.wait(2, 3)
-        tab.ele('@class=h-full px-1 lg:px-5').click()
-        chrome.wait(2, 3)
-        tab.ele('Create Session').click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=1).click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=send-message', index=1).click()
-    except Exception as e:
-        logger.info(e)
-    chrome.wait(5, 8)
-    try:
-        print('Crypto Game')
-        tab.ele('@class=size-6 text-green-500').click()
-        chrome.wait(2, 3)
-        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('Crypto Game')
-        chrome.wait(2, 3)
-        tab.ele('@class=h-full px-1 lg:px-5').click()
-        chrome.wait(2, 3)
-        tab.ele('Create Session').click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=1).click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=send-message', index=1).click()
-    except Exception as e:
-        logger.info(e)
-
-    chrome.wait(5, 8)
-    try:
-        print('DAO Agent')
-        tab.ele('@class=size-6 text-green-500').click()
-        chrome.wait(2, 3)
-        tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input('DAO Agent')
-        chrome.wait(2, 3)
-        tab.ele('@class=h-full px-1 lg:px-5').click()
-        chrome.wait(2, 3)
-        tab.ele('Create Session').click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=suggested-question', index=1).click()
-        chrome.wait(2, 3)
-        tab.ele('@data-testid=send-message', index=1).click()
-    except Exception as e:
-        logger.info(e)
+            print(select_aget)
+            tab.ele('@class=size-6 text-green-500').click()
+            chrome.wait(2, 3)
+            tab.ele(
+                '@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input(
+                select_aget)
+            chrome.wait(2, 3)
+            tab.ele('@class=h-full px-1 lg:px-5').click()
+            chrome.wait(2, 3)
+            tab.ele('Create Session').click()
+            chrome.wait(2, 3)
+            items = [
+                '1',
+                '2',
+                '3',
+                '4'
+            ]
+            random_item = int(random.choice(items))
+            tab.ele('@data-testid=suggested-question', index=random_item).click()
+            chrome.wait(2, 3)
+            tab.ele('@data-testid=send-message', index=1).click()
+        except Exception as e:
+            logger.info(e)
+        chrome.wait(5, 8)
 
     return
 
