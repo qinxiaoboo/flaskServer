@@ -96,8 +96,15 @@ def getDiscordEmailName():
 
 def getFileEmailName():
     with open("input.txt") as f:
-        # 按需添加
-        pass
+        lines = f.readlines()
+        for line in lines:
+            accountList.append(line)
+
+def getFileProxys():
+    with open("proxys.txt") as f:
+        lines = f.readlines()
+        for line in lines:
+            proxyList.append(line)
 
 def getTWEmailName():
     with app.app_context():
@@ -115,14 +122,15 @@ def getOutlookEmailName():
                 accountList.append(account.name)
 
 if __name__ == '__main__':
-
     getProxys()
     getDiscordEmailName()
     getOutlookEmailName()
-    # getFileEmailName()
-    print(proxyList)
-    print(accountList)
+    getTWEmailName()
+    getFileProxys()
+    getFileEmailName()
     list(set(accountList))
     list(set(proxyList))
+    print(proxyList)
+    print(accountList)
     asyncio.run(main())
     print(reffers)
