@@ -98,13 +98,13 @@ def getFileEmailName():
     with open("input.txt") as f:
         lines = f.readlines()
         for line in lines:
-            accountList.append(line)
+            accountList.append(line.strip())
 
 def getFileProxys():
     with open("proxys.txt") as f:
         lines = f.readlines()
         for line in lines:
-            proxyList.append(line)
+            proxyList.append(line.strip())
 
 def getTWEmailName():
     with app.app_context():
@@ -122,10 +122,10 @@ def getOutlookEmailName():
                 accountList.append(account.name)
 
 if __name__ == '__main__':
-    getProxys()
-    getDiscordEmailName()
-    getOutlookEmailName()
-    getTWEmailName()
+    # getProxys()
+    # getDiscordEmailName()
+    # getOutlookEmailName()
+    # getTWEmailName()
     getFileProxys()
     getFileEmailName()
     list(set(accountList))
