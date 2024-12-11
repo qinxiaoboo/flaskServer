@@ -308,14 +308,10 @@ def getAgenttasks(chrome, env):
         'Prediction Collective',
         'Eigenlayer Discord Agent',
         'Crypto Game',
-        'DAO Agent',
-        'Forecasting Agent',
         'Edbot',
         'Eigenlayer Documentation Agent',
         'Filecoin Documentation Agent',
         'Investment Planner Agent',
-        'DAO Voting Agent',
-        'Polymarket Info Agent',
         'Investment Twitter Agent',
         'Eigenlayer Twitter Agent',
         'Prediction Market Planner Agent',
@@ -324,13 +320,12 @@ def getAgenttasks(chrome, env):
 
     for select_aget in afent_list:
         try:
-
             print(select_aget)
             tab.ele('@class=size-6 text-green-500').click()
             chrome.wait(2, 3)
             tab.ele(
                 '@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input(
-                select_aget)
+                select_aget, clear=True)
             chrome.wait(2, 3)
             tab.ele('@class=h-full px-1 lg:px-5').click()
             chrome.wait(2, 3)
