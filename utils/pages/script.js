@@ -1,6 +1,5 @@
 window.addEventListener('DOMContentLoaded', (event) => {
-    // IPINFO密码统一为：123qweasd ，，一个token一个月5万次请求，不够请注册账号增加token，注册地址：https://ipinfo.io/signup
-    // Q-4-1
+    // 一个token一个月5万次请求，不够请注册账号增加token，注册地址：https://ipinfo.io/signup
     const tokens = ['474b21d224a0f6', '49c2ab4ff7a1cf', 'a206ea7361154a', '3c7e33c84deaef', '5751b568430384'
     , '92190d75d1c110', 'bacf74eb433ba7', '207da94d85058c']; // 替换为你的 token 列表
     // 随机选择一个 token

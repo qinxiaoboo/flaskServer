@@ -24,6 +24,7 @@ from flaskServer.services.chromes.tasks.humanity import Humanity
 from flaskServer.services.chromes.tasks.humanityWallet import humanityWallet
 from flaskServer.services.chromes.tasks.Arch import arch
 from flaskServer.services.chromes.tasks.Theoriq import theoriq
+from flaskServer.services.chromes.tasks.X_active import x_active
 
 bp = Blueprint('tasks', __name__)
 
@@ -217,4 +218,15 @@ def Theoriq (groups):
     with app.app_context():
         envs = getEnvsByIds(ids)
         Thread(target=submit, args=(theoriq, envs,)).start()
+    return result
+
+@app.route("/<groups>/todo/x_active", methods=["POST"])
+def X_active (groups):
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    with app.app_context():
+        envs = getEnvsByIds(ids)
+        Thread(target=submit, args=(x_active, envs,)).start()
     return result

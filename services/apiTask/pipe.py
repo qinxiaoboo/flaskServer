@@ -53,7 +53,7 @@ async def toKeep(token,proxy,env_name,username):
 # 心跳检测
 async def sendHeartBeat(client,env_name, proxy):
     try:
-        geoInfo = await getGeoLocation()
+        geoInfo = await getGeoLocation(proxy)
         data = {
             "ip": geoInfo["ip"],
             "location": geoInfo["location"],
@@ -62,7 +62,7 @@ async def sendHeartBeat(client,env_name, proxy):
         response = await client.post("https://api.pipecdn.app/api/heartbeat", json=data)
         if "message" in response and "successfully" in response["message"]:
             print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),
-                  f"环境名称：{env_name} -- 代理IP：{proxy}  -- 心跳发送成功：{response}  True")
+                  f"环境名称：{env_name} -- 代理IP：{proxy} -- 位置：{geoInfo['location']}  -- 心跳发送成功：{response}  True")
         else:
             print(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(time.time())),
                   f"环境名称：{env_name} -- 代理IP：{proxy}  -- 心跳发送失败：{response}  False")
@@ -75,8 +75,9 @@ async def getPoints(client):
     return response["points"]
 
 # 获取本地ip信息
-async def getGeoLocation():
-    response = requests.get('https://ipapi.co/json/').json()
+async def getGeoLocation(proxy):
+    proxies = {'http': f"http://{proxy}", 'https': f"http://{proxy}"} if proxy else {}
+    response = requests.get('https://ipapi.co/json/',proxies=proxies).json()
     return {"ip":response["ip"],"location":f"{response['city']}, {response['region']}, {response['country_name']}"}
 
 async def main():
@@ -85,7 +86,6 @@ async def main():
         tasks = []
         for line in data:
             env_name, email, token, proxy = line.strip().split("|")
-            await asyncio.sleep(5)
             task = asyncio.create_task(toKeep(token, proxy, env_name, email))
             tasks.append(task)
         await asyncio.gather(*tasks)

@@ -11,6 +11,7 @@ from flaskServer.services.dto.dataDictionary import getDataDictionaryByValue
 from flaskServer.utils.envutil import getUserAgent,to_be_list,can_convert_to_number,can_be_list
 from flaskServer.entity.envAccount import EnvAccountInfo
 from flaskServer.services.dto.account import Account
+from flaskServer.services.dto.proxy import deleteProxyById
 from sqlalchemy import and_
 
 def getAllEnvs():
@@ -65,9 +66,9 @@ def getEnvsInfo(page,page_size,search, label, sortBy="env", sortOrder="asc",grou
             discord = Account.query.filter_by(id=env.discord_id).first()
             outlook = Account.query.filter_by(id=env.outlook_id).first()
             ip = Proxy.query.filter_by(id=env.t_proxy_id).first()
-            env_json = EnvAccountInfo(id=env.id,group=env.group,env=env.name,tw=tw.name,tw_status=tw.status,tw_error=tw.error,discord=discord.name,
-                                      discord_status=discord.status,discord_error=discord.error,outlook_status=outlook.status,outlook_error=outlook.error,
-                                      outlook=outlook.name, ip=ip.ip if ip else "", ip_status=ip.status if ip else 0, status=status_descriptions.get(env.status, "未知状态"),
+            env_json = EnvAccountInfo(id=env.id,group=env.group,env=env.name,tw=tw.name if tw else "",tw_status=tw.status if tw else "",tw_error=tw.error if tw else "",
+                                      discord=discord.name if discord else "",discord_status=discord.status if discord else "",discord_error=discord.error if discord else ""
+                                      ,outlook_status=outlook.status if outlook else "",outlook_error=outlook.error if outlook else "",outlook=outlook.name if outlook else "", ip=ip.ip if ip else "", ip_status=ip.status if ip else 0, status=status_descriptions.get(env.status, "未知状态"),
                                       label=env.label,isOpen=env.isOpen).to_dict()
             envs_json.append(env_json)
     return envs_json,paginated_envs.total - count
@@ -111,6 +112,10 @@ def getEnvByName(name):
     with app.app_context():
         env = Env.query.filter_by(name=name).first()
         return env
+def getEnvByProxyId(proxy_id):
+    with app.app_context():
+        envs = Env.query.filter_by(proxy_id=proxy_id)
+        return envs
 
 def updateEnvStatus(name,status):
     ENV = getEnvByName(name)
@@ -159,6 +164,9 @@ def updateEnv(env,group,port,cookies,proxy,tw,discord,outlook,okx,init,bitlight,
             if ENV.group != group and group:
                 ENV.group = group
             if proxy and ENV.t_proxy_id != proxy.id:
+                # 如果代理IP发生改变并且该代理IP已无环境引用，则删除原来的代理IP
+                if not getEnvByProxyId(ENV.t_proxy_id):
+                    deleteProxyById(ENV.t_proxy_id)
                 ENV.t_proxy_id = proxy.id
             if tw and ENV.tw_id != tw.id:
                 ENV.tw_id = tw.id

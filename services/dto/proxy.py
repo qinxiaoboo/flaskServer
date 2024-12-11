@@ -11,6 +11,14 @@ def getProxyByID(_id):
     with app.app_context():
         proxy = Proxy.query.filter_by(id=_id).first()
         return proxy
+
+def deleteProxyById(_id):
+    with app.app_context():
+        proxy = getProxyByID(_id)
+        if proxy:
+            db.session.delete(proxy)
+            db.session.commit()
+
 # 更新代理信息
 def update(ip,port,user,pwd):
     proxy = getProxyByIp(ip)
@@ -23,7 +31,7 @@ def update(ip,port,user,pwd):
             if proxy.pwd != pwd:
                 proxy.pwd = pwd
         else:
-            proxy = Proxy(ip=ip,port=port,user=user,pwd=pwd)
+            proxy = Proxy(ip=ip,port=port,user=user,pwd=pwd,status=2)
         db.session.add(proxy)
         db.session.commit()
         print("新增一条代理信息，id：",proxy.id)

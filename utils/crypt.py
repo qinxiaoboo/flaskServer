@@ -105,7 +105,6 @@ def decrypt_data(encrypted_base64):
     )
 
     return decrypted_data.decode('utf-8')
-# print(aesCbcPbkdf2EncryptToBase64("123qweasd"))
 # if __name__ == '__main__':
 #
 #     print("SO AES CBC 256 encryption with PBKDF2 key derivation")
