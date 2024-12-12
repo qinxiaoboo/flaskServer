@@ -181,7 +181,8 @@ def getTab(chrome, env):
                 tab.ele('CONNECT WALLET').click()
                 # print("CONNECT WALLET 点击完成")
                 chrome.wait(2, 3)
-                tab.ele('CONNECT METAMASK').click()
+                if tab.ele('CONNECT METAMASK'):
+                    tab.ele('CONNECT METAMASK').click()
                 # print('CONNECT METAMASK点击完成')
                 chrome.wait(2, 3)
                 exe_okx(chrome, env)
