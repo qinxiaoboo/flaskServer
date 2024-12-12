@@ -401,9 +401,7 @@ def getAgenttasks(chrome, env):
             chrome.wait(2, 3)
             items = [
                 '1',
-                '2',
-                '3',
-                '4'
+                '2'
             ]
             random_item = int(random.choice(items))
             tab.ele('@data-testid=suggested-question', index=random_item).click()
