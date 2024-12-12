@@ -223,6 +223,16 @@ def getTab(chrome, env):
 
     print('登录完成开始做任务')
 
+    completed = tab.eles('t:span@text():COMPLETED')
+    if len(completed) != 4:
+        logger.info(f"{env.name}: 开始完成入职任务")
+        if tab.ele('t:button@text():FOLLOW'):
+            tab.ele('t:button@text():FOLLOW').click()
+            chrome.wait(2, 3)
+    if len(completed) != 4:
+        logger.info(f"{env.name}: 入职任务推特无法授权，需要人工介入········· ")
+
+
 def getSocialTasks(chrome,env):
     try:
         tw = getSigninTW(chrome, env)
