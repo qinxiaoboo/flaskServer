@@ -119,15 +119,6 @@ def getSigninTW(chrome, env):
         logger.error(f"处理过程中出现错误: {e}")
         return
 
-# def exe_okx(chrome,env):
-#     try:
-#         tab = chrome.get_tab(title="OKX Wallet").ele('@data-testid=okd-button', index=2)
-#         if tab:
-#             tab.wait(3).click()
-#             if tab:
-#                 tab.wait(3).click()
-#     except Exception as e:
-#         print(f'{env.name}取的ele不对或者不需要连接')
 def exe_okx(chrome,env):
     try:
         if chrome.get_tab(title="OKX Wallet").ele('@data-testid=okd-button', index=2):
@@ -178,30 +169,30 @@ def getDiscord(chrome,env):
         logger.error(e)
 
 
-def getTab(chrome,env):
+def getTab(chrome, env):
     tab = chrome.new_tab(url=Theoriq_url)
     tab.set.window.max()
-    chrome.wait(5,10)
+    chrome.wait(5, 10)
     try:
         num = 1
         while num < 5:
             if tab.s_ele('CONNECT WALLET'):
-                print('点击次数：', num)
+                # print('点击次数：', num)
                 tab.ele('CONNECT WALLET').click()
-                print("CONNECT WALLET 点击完成")
+                # print("CONNECT WALLET 点击完成")
                 chrome.wait(2, 3)
                 tab.ele('CONNECT METAMASK').click()
-                print('CONNECT METAMASK点击完成')
+                # print('CONNECT METAMASK点击完成')
                 chrome.wait(2, 3)
                 exe_okx(chrome, env)
                 chrome.wait(5, 10)
                 num += 1
             else:
-                print('钱包请确认完成可以进入内场')
+                # print('钱包请确认完成可以进入内场')
                 break
     except Exception as e:
         logger.info(e)
-    chrome.wait(2, 5)
+    # chrome.wait(2, 5)
     try:
         if tab.s_ele('@class=px-6 flex justify-between items-center gap-4 p-2 bg-[#181818] text-white rounded', index=2):
             print('判断成功开始点击')
@@ -212,7 +203,7 @@ def getTab(chrome,env):
     except Exception as e:
         logger.error(e)
 
-    chrome.wait(5, 10)
+    # chrome.wait(5, 10)
     try:
         print('开始discord确认')
         if tab.s_ele('Connect Discord'):
@@ -249,7 +240,7 @@ def getSocialTasks(chrome,env):
             tab.ele('@class=px-3 pt-1 text-sm/[22px] font-medium text-black cursor-pointer text-center',index=1).click()
             chrome.wait(5, 10)
             chrome.get_tab(url='https://api.x.com/').ele('@value=Authorize app').click()
-            chrome.wait(5,13)
+            chrome.wait(5, 13)
     except Exception as e:
         logger.error(e)
     try:
@@ -269,21 +260,90 @@ def getAgenttasks(chrome, env):
     try:
         if tab.s_ele('Continue with X / Twitter'):
             tab.ele('Continue with X / Twitter').click()
-            chrome.wait(5, 13)
+            chrome.wait(10, 15)
             try:
-                if not chrome.get_tab(url='https://x.com/').ele('Authorize app'):
-                    getSigninTW(chrome, env)
-                    chrome.wait(2, 3)
-                    tab = chrome.new_tab(url='https://infinity.theoriq.ai/login')
-                    if tab.s_ele('Continue with X / Twitter'):
-                        tab.ele('Continue with X / Twitter').click()
-
-                else:
-                    print('没有问题，继续')
+                chrome.get_tab(url='https://x.com/').ele('Authorize app').click()
             except Exception as e:
-                logger.error(e)
-            chrome.get_tab(url='https://x.com/').ele('Authorize app').click()
-            chrome.wait(5, 13)
+                pass
+            try:
+                tw_tab = chrome.get_tab(url="x.com")
+                if tw_tab:
+                    if "login" in tw_tab.url:
+                        logger.info(f"{env.name}: 推特未登录,尝试重新登录")
+                        with app.app_context():
+                            tw: Account = Account.query.filter_by(id=env.tw_id).first()
+                            if tw:
+                                tw_tab.ele("@autocomplete=username").input(tw.name, clear=True)
+                                tw_tab.ele("@@type=button@@text()=Next").click()
+                                tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd),
+                                                                        clear=True)
+                                tw_tab.ele("@@type=button@@text()=Log in").click()
+                                fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                                if "login" in tab.url and len(fa2) > 10:
+                                    tw2faV(tab, fa2)
+                                chrome.wait(25, 30)
+                            else:
+                                raise Exception(f"{env.name}: 没有导入TW的账号信息")
+
+                if chrome.get_tab(url='https://x.com/').ele("t:span@text():Log in"):
+                    chrome.get_tab(url='https://x.com/').ele("t:span@text():Log in").click()
+                    logger.info(f"{env.name}: 推特未登录,尝试重新登录")
+                    with app.app_context():
+                        tw: Account = Account.query.filter_by(id=env.tw_id).first()
+                        if tw:
+                            tw_tab.ele("@autocomplete=username").input(tw.name, clear=True)
+                            tw_tab.ele("@@type=button@@text()=Next").click()
+                            tab.ele("t:span@text():Password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
+                            tw_tab.ele("@@type=button@@text()=Log in").click()
+                            fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                            if "login" in tab.url and len(fa2) > 10:
+                                tw2faV(tab, fa2)
+                            chrome.wait(25, 30)
+                        else:
+                            raise Exception(f"{env.name}: 没有导入TW的账号信息")
+            except Exception as e:
+                pass
+
+            try:
+                if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Send email"):
+                    logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
+                    quitChrome(env, chrome)
+            except Exception as e:
+                pass
+
+            try:
+                if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Start"):
+                    chrome.get_tab(url='https://x.com/').ele("@@type=submit@@value=Start").click()
+                    chrome.wait(10, 15)
+                    if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Send email"):
+                        logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
+                        quitChrome(env, chrome)
+                    chrome.wait(25, 30)
+            except Exception as e:
+                pass
+
+            try:
+                if chrome.get_tab(url='https://x.com/').ele("@@type=submit@@value=Continue to X"):
+                    chrome.get_tab(url='https://x.com/').ele("@@type=submit@@value=Continue to X").click()
+                    chrome.wait(20, 25)
+                if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Start"):
+                    chrome.get_tab(url='https://x.com/').ele("@@type=submit@@value=Start").click()
+                    chrome.wait(10, 15)
+                if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Send email"):
+                    logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
+                    quitChrome(env, chrome)
+            except Exception as e:
+                pass
+
+            tab = chrome.new_tab(url='https://infinity.theoriq.ai/login')
+            if tab.s_ele('Continue with X / Twitter'):
+                tab.ele('Continue with X / Twitter').click()
+                chrome.wait(10, 15)
+                chrome.get_tab(url='https://x.com/').ele('Authorize app').click()
+                chrome.wait(1, 2)
+            if tab.ele('t:div@text():Upstream provider rate limit - twitter'):
+                logger.info(f"{env.name}  Upstream provider rate limit - twitter")
+            chrome.wait(8, 12)
             tab.ele('Connect Wallet').click()
             chrome.wait(2, 3)
             tab.run_js(okx_js)
@@ -320,12 +380,10 @@ def getAgenttasks(chrome, env):
 
     for select_aget in afent_list:
         try:
-            print(select_aget)
+            # print(select_aget)
             tab.ele('@class=size-6 text-green-500').click()
             chrome.wait(2, 3)
-            tab.ele(
-                '@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input(
-                select_aget, clear=True)
+            tab.ele('@class=appearance-none w-full h-full bg-[transparent] border-none p-0 m-0 outline-none focus:outline-none').input(select_aget, clear=True)
             chrome.wait(2, 3)
             tab.ele('@class=h-full px-1 lg:px-5').click()
             chrome.wait(2, 3)
@@ -343,7 +401,7 @@ def getAgenttasks(chrome, env):
             tab.ele('@data-testid=send-message', index=1).click()
         except Exception as e:
             logger.info(e)
-        chrome.wait(5, 8)
+        # chrome.wait(5, 8)
 
     return
 
