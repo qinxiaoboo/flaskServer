@@ -664,6 +664,42 @@ def community(chrome, env):
     tab.close()
     return
 
+def faucet(chrome, env):
+    tab = chrome.new_tab(url="https://faucet.bound.money/")
+
+    # 打开文件进行读取和写入
+    while True:
+        if tab.ele('Try again later'):
+            logger.info(f"{env.name}   该环境已达上限，暂时关闭")
+            quitChrome(env, chrome)
+
+        # 以读取模式打开文件并读取一行
+        with open(r'C:\Users\Toka\Desktop\shell\wallet.txt', 'r', encoding='utf-8') as file:
+            lines = file.readlines()
+
+        # 如果文件为空，跳出循环
+        if not lines:
+            break
+
+        # 获取文件的第一行
+        line = lines[0].strip()  # 读取并去掉行尾的换行符
+
+        # 执行操作
+        tab.wait.ele_displayed('t:div@text():Automatic recognition completed', timeout=60)
+        tab.ele('@type=text').input(line, clear=True)
+        chrome.wait(1)
+        tab.ele('@type=submit').click()
+        chrome.wait(1)
+
+        # 每处理完一行后，删除这一行
+        lines.pop(0)
+
+        # 将剩余内容重新写回文件
+        with open(r'C:\Users\Toka\Desktop\shell\wallet.txt', 'w', encoding='utf-8') as file:
+            file.writelines(lines)
+
+    return
+
 import openpyxl
 import time
 def count(chrome, env):
@@ -740,10 +776,11 @@ def arch(env):
             chrome: ChromiumPage = OKXChrome(env)
             # getTab(chrome, env)
             # missions(chrome, env)
-            weekly(chrome, env)
+            # weekly(chrome, env)
             # daily(chrome, env)
             # community(chrome, env)
             # count(chrome, env)
+            faucet(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
