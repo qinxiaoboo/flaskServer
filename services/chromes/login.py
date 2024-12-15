@@ -1,5 +1,5 @@
 import time
-
+import asyncio
 import requests
 from DrissionPage import ChromiumOptions
 from DrissionPage import ChromiumPage
@@ -7,6 +7,7 @@ from loguru import logger
 from flaskServer.services.chromes.mail.factory import Email
 from flaskServer.config.config import WALLET_PASSWORD
 from flaskServer.config.connect import app
+from flaskServer.entity.galxeAccount import AccountInfo
 from flaskServer.mode.account import Account
 from flaskServer.mode.env import Env
 from flaskServer.mode.proxy import Proxy
@@ -15,7 +16,9 @@ from flaskServer.services.dto.env import updateEnvStatus
 from flaskServer.utils.chrome import getChrome,get_Custome_Tab, quitChrome
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 from flaskServer.services.content import Content
-from flaskServer.services.dto.account import updateAccountStatus
+from flaskServer.services.dto.proxy import getProxyByID
+from flaskServer.services.dto.account import updateAccountStatus,updateAccountToken
+from flaskServer.services.internal.twitter.twitter import Twitter
 
 def LoginINITWallet(chrome,env):
     tab = chrome.get_tab(title="Initia Wallet")
@@ -291,37 +294,73 @@ def endCheckTW(tab,env):
         else:
             logger.warning(f"{env.name}: 弹窗不包含Yes，没有点击")
             return
+    for cookie in tab.cookies():
+        if cookie["name"]=="auth_token":
+            updateAccountToken(env.tw_id, cookie["value"])
     updateAccountStatus(env.tw_id, 2)
 
+async def checkTwToken(env):
+    account_info = AccountInfo()
+    proxy = getProxyByID(env.t_proxy_id)
+    account_info.user_agent = env.user_agent
+    if proxy:
+        account_info.proxy = f"{proxy.user}:{proxy.pwd}@{proxy.ip}:{proxy.port}"
+    else:
+        account_info.proxy = ""
+    tw:Account = Account.query.filter_by(id=env.tw_id).first()
+    if tw:
+        account_info.twitter_auth_token = tw.token
+        if not tw.token:
+            return False
+        account_info.twitter_username = tw.name
+        twitter = Twitter(account_info)
+        await twitter.start()
+        await twitter.follow('elonmusk')
+    return True
+
+
+
 def preCheckTW(chrome,env):
-    tab = chrome.get_tab(url=".com/i/flow/login")
-    if tab is None:
-        tab = chrome.get_tab(url=".com/login")
+    logger.info(f"{env.name} 开始检查tw token")
+    result = asyncio.run(checkTwToken(env))
+    logger.info(f"{env.name} tw检查结果：{result}")
+    # 如果token有效则不用登录tw
+    if not result:
+        tab = chrome.get_tab(url=".com/i/flow/login")
         if tab is None:
-            tab = chrome.new_tab(url="https://x.com/home")
-    chrome.wait(1, 2)
-    return tab
+            tab = chrome.get_tab(url=".com/login")
+            if tab is None:
+                tab = chrome.new_tab(url="https://x.com/home")
+        chrome.wait(1, 2)
+    else:
+        return None,result
+    return tab,result
 
 def LoginTW(chrome:ChromiumPage,env):
     updateAccountStatus(env.tw_id, 0, "重置了TW登录状态")
-    tab = preCheckTW(chrome,env)
-    if "logout" in tab.url or "login" in tab.url:
+    tab,status = preCheckTW(chrome,env)
+    if "logout" in tab.url or "login" in tab.url or not status:
         logger.info(f"{env.name}: 开始登录 TW 账号")
         tab.get(url="https://x.com/i/flow/login")
         with app.app_context():
             tw:Account = Account.query.filter_by(id=env.tw_id).first()
             if tw:
-                tab.wait.eles_loaded('@autocomplete=username', timeout=8, raise_err=False)
-                tab.ele("@autocomplete=username").input(tw.name, clear=True)
-                tab.ele("@@type=button@@text()=Next").click()
-                tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
-                tab.ele("@@type=button@@text()=Log in").click()
-                fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                tab.wait.eles_loaded('@autocomplete=username', timeout=3, raise_err=False)
+                if "login" in tab.url:
+                    tab.ele("@autocomplete=username").input(tw.name, clear=True)
+                    tab.ele("@@type=button@@text()=Next").click()
+                    tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
+                    tab.ele("@@type=button@@text()=Log in").click()
+                    fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
                 if "login" in tab.url and len(fa2) > 10:
                     tw2faV(tab, fa2)
             else:
                 updateAccountStatus(env.tw_id, 1, "没有导入TW的账号信息")
                 raise Exception(f"{env.name}: 没有导入TW的账号信息")
+    else:
+        # 如果token有效则会返回None
+        if status:
+            return tab
     return checkTw(chrome, get_Custome_Tab(tab), env)
 
 
@@ -483,11 +522,12 @@ def DebugChrome(env):
         proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
         chrome = getChrome(proxy,env)
         # LoginINITWallet(chrome, env)
-        # LoginOKXWallet(chrome, env)
+        LoginOKXWallet(chrome, env)
         # LoginPhantomWallet(chrome, env)
         # LoginOutlook(chrome, env)
-        # LoginTW(chrome, env)
-        # LoginDiscord(chrome, env)
+        LoginTW(chrome, env)
+        LoginDiscord(chrome, env)
+        # chrome.new_tab("https://discord.com/invite/wwY5KvYFPC")
         # LoginBitlight(chrome, env)
         logger.info(ChromiumOptions().address)
         updateEnvStatus(env.name, 2)

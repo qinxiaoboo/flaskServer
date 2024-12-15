@@ -29,10 +29,10 @@ def getSEC_CH_UA_PLATFORM(userAgent):
     if "WOW64" in userAgent:
         return "Windows"
     else:
-        return "Windows"
+        return "Android"
 
 def getSEC_CH_UA():
-    return f'"Not)A;Brand";v="99", "Google Chrome";v="{CHROME_VERSION}", "Chromium";v="{CHROME_VERSION}"'
+    return f'""Google Chrome";v="{CHROME_VERSION}", "Chromium";v="{CHROME_VERSION}", "Not_A Brand";v="24"'
 # 检查字符串是否能转换为python对象中的列表
 def can_be_list(string):
     try:

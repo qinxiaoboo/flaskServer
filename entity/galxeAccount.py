@@ -22,6 +22,7 @@ class AccountInfo:
     proxy: str = ''
     twitter_auth_token: str = ''
     twitter_ct0: str = ''
+    twitter_username:str = ''
     email_username: str = ''
     email_password: str = ''
     discord_token: str = ''
