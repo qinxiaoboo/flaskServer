@@ -299,7 +299,7 @@ def endCheckTW(tab,env):
             updateAccountToken(env.tw_id, cookie["value"])
     updateAccountStatus(env.tw_id, 2)
 
-async def checkTwToken(env):
+async def followTw(env, name):
     account_info = AccountInfo()
     proxy = getProxyByID(env.t_proxy_id)
     account_info.user_agent = env.user_agent
@@ -315,14 +315,14 @@ async def checkTwToken(env):
         account_info.twitter_username = tw.name
         twitter = Twitter(account_info)
         await twitter.start()
-        await twitter.follow('elonmusk')
+        await twitter.follow(name)
     return True
 
 
 
 def preCheckTW(chrome,env):
     logger.info(f"{env.name} 开始检查tw token")
-    result = asyncio.run(checkTwToken(env))
+    result = asyncio.run(followTw(env, 'elonmusk'))
     logger.info(f"{env.name} tw检查结果：{result}")
     # 如果token有效则不用登录tw
     if not result:
