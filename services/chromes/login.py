@@ -192,8 +192,9 @@ def tw2faV(tab,fa2):
     if res.ok:
         code = res.json().get("data").get("otp")
         print(tab.url)
-        tab.ele("@data-testid=ocfEnterTextTextInput").input(code,clear=True)
-        tab.ele("@@type=button@@text()=Next").click()
+        if tab.s_ele("@data-testid=ocfEnterTextTextInput"):
+            tab.ele("@data-testid=ocfEnterTextTextInput").input(code,clear=True)
+            tab.ele("@@type=button@@text()=Next").click()
 
 def checkTw(chrome, tab, env):
     tab.wait(2, 3)
@@ -314,8 +315,12 @@ async def followTw(env, name):
             return False
         account_info.twitter_username = tw.name
         twitter = Twitter(account_info)
-        await twitter.start()
-        await twitter.follow(name)
+        try:
+            await twitter.start()
+            await twitter.follow(name)
+        except Exception as e:
+            logger.error(f"{env.name}检查tw的token失败：{e}")
+            return False
     return True
 
 
@@ -339,13 +344,13 @@ def preCheckTW(chrome,env):
 def LoginTW(chrome:ChromiumPage,env):
     updateAccountStatus(env.tw_id, 0, "重置了TW登录状态")
     tab,status = preCheckTW(chrome,env)
-    if "logout" in tab.url or "login" in tab.url or not status:
+    if "logout" in tab.url or "login" in tab.url:
         logger.info(f"{env.name}: 开始登录 TW 账号")
         tab.get(url="https://x.com/i/flow/login")
         with app.app_context():
             tw:Account = Account.query.filter_by(id=env.tw_id).first()
             if tw:
-                tab.wait.eles_loaded('@autocomplete=username', timeout=3, raise_err=False)
+                tab.wait.eles_loaded('@autocomplete=username', timeout=5, raise_err=False)
                 if "login" in tab.url:
                     tab.ele("@autocomplete=username").input(tw.name, clear=True)
                     tab.ele("@@type=button@@text()=Next").click()
@@ -527,7 +532,7 @@ def DebugChrome(env):
         # LoginOutlook(chrome, env)
         LoginTW(chrome, env)
         LoginDiscord(chrome, env)
-        # chrome.new_tab("https://discord.com/invite/wwY5KvYFPC")
+        chrome.new_tab("https://discord.com/invite/wwY5KvYFPC")
         # LoginBitlight(chrome, env)
         logger.info(ChromiumOptions().address)
         updateEnvStatus(env.name, 2)
