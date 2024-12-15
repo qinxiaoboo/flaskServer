@@ -295,9 +295,14 @@ def endCheckTW(tab,env):
         else:
             logger.warning(f"{env.name}: 弹窗不包含Yes，没有点击")
             return
+    token = ""
     for cookie in tab.cookies():
         if cookie["name"]=="auth_token":
-            updateAccountToken(env.tw_id, cookie["value"])
+            token = cookie["value"] + token
+        if cookie["name"] == "ct0":
+            token+= ","
+            token+=cookie["value"]
+    updateAccountToken(env.tw_id, token)
     updateAccountStatus(env.tw_id, 2)
 
 async def followTw(env, name):
@@ -309,18 +314,20 @@ async def followTw(env, name):
     else:
         account_info.proxy = ""
     tw:Account = Account.query.filter_by(id=env.tw_id).first()
-    if tw:
-        account_info.twitter_auth_token = tw.token
-        if not tw.token:
-            return False
-        account_info.twitter_username = tw.name
-        twitter = Twitter(account_info)
-        try:
+    try:
+        if tw:
+            tokens = tw.token.split(",")
+            account_info.twitter_auth_token = tokens[0]
+            account_info.twitter_ct0 = tokens[1]
+            if not tw.token:
+                return False
+            account_info.twitter_username = tw.name
+            twitter = Twitter(account_info)
             await twitter.start()
             await twitter.follow(name)
-        except Exception as e:
-            logger.error(f"{env.name}检查tw的token失败：{e}")
-            return False
+    except Exception as e:
+        logger.error(f"{env.name}检查tw的token失败：{e}")
+        return False
     return True
 
 
@@ -329,7 +336,8 @@ def preCheckTW(chrome,env):
     logger.info(f"{env.name} 开始检查tw token")
     result = asyncio.run(followTw(env, 'elonmusk'))
     logger.info(f"{env.name} tw检查结果：{result}")
-    # 如果token有效则不用登录tw
+    # result =False
+    # # 如果token有效则不用登录tw
     if not result:
         tab = chrome.get_tab(url=".com/i/flow/login")
         if tab is None:
@@ -344,6 +352,9 @@ def preCheckTW(chrome,env):
 def LoginTW(chrome:ChromiumPage,env):
     updateAccountStatus(env.tw_id, 0, "重置了TW登录状态")
     tab,status = preCheckTW(chrome,env)
+    # 如果token有效则会返回None
+    if status:
+        return tab
     if "logout" in tab.url or "login" in tab.url:
         logger.info(f"{env.name}: 开始登录 TW 账号")
         tab.get(url="https://x.com/i/flow/login")
@@ -362,10 +373,6 @@ def LoginTW(chrome:ChromiumPage,env):
             else:
                 updateAccountStatus(env.tw_id, 1, "没有导入TW的账号信息")
                 raise Exception(f"{env.name}: 没有导入TW的账号信息")
-    else:
-        # 如果token有效则会返回None
-        if status:
-            return tab
     return checkTw(chrome, get_Custome_Tab(tab), env)
 
 
