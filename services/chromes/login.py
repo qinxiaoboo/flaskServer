@@ -333,10 +333,10 @@ async def followTw(env, name):
 
 
 def preCheckTW(chrome,env):
-    logger.info(f"{env.name} 开始检查tw token")
-    result = asyncio.run(followTw(env, 'elonmusk'))
-    logger.info(f"{env.name} tw检查结果：{result}")
-    # result =False
+    # logger.info(f"{env.name} 开始检查tw token")
+    # result = asyncio.run(followTw(env, 'elonmusk'))
+    # logger.info(f"{env.name} tw检查结果：{result}")
+    result =False
     # # 如果token有效则不用登录tw
     if not result:
         tab = chrome.get_tab(url=".com/i/flow/login")
