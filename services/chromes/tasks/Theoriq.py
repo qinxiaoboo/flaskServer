@@ -175,19 +175,28 @@ def getTab(chrome, env):
     chrome.wait(5, 10)
     try:
         num = 1
-        while num < 5:
+        while num < 3:
             if tab.s_ele('CONNECT WALLET'):
                 # print('点击次数：', num)
                 tab.ele('CONNECT WALLET').click()
                 # print("CONNECT WALLET 点击完成")
                 chrome.wait(2, 3)
-                if tab.ele('CONNECT METAMASK'):
-                    tab.ele('CONNECT METAMASK').click()
-                # print('CONNECT METAMASK点击完成')
+
+            if tab.ele('@class=px-6 flex justify-between items-center gap-4 p-2 bg-[#181818] text-white rounded', index=2):
+                tab.ele('@class=px-6 flex justify-between items-center gap-4 p-2 bg-[#181818] text-white rounded', index=2).click()
                 chrome.wait(2, 3)
                 exe_okx(chrome, env)
                 chrome.wait(5, 10)
                 num += 1
+
+            # if tab.ele('CONNECT METAMASK'):
+            #     tab.ele('CONNECT METAMASK').click()
+            #     # print('CONNECT METAMASK点击完成')
+            #     chrome.wait(2, 3)
+            #     exe_okx(chrome, env)
+            #     chrome.wait(5, 10)
+            #     num += 1
+
             else:
                 # print('钱包请确认完成可以进入内场')
                 break
@@ -233,7 +242,6 @@ def getTab(chrome, env):
     if len(completed) != 4:
         logger.info(f"{env.name}: 入职任务推特无法授权，需要人工介入········· ")
 
-
 def getSocialTasks(chrome,env):
     try:
         tw = getSigninTW(chrome, env)
@@ -268,10 +276,12 @@ def getSocialTasks(chrome,env):
 def getAgenttasks(chrome, env):
     tab = chrome.new_tab(url='https://infinity.theoriq.ai/login')
     chrome.wait(5, 10)
+
     try:
         if tab.s_ele('Continue with X / Twitter'):
             tab.ele('Continue with X / Twitter').click()
-            chrome.wait(10, 15)
+            chrome.wait(15, 20)
+
             try:
                 chrome.get_tab(url='https://x.com/').ele('Authorize app').click()
             except Exception as e:
