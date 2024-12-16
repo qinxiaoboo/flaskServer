@@ -406,9 +406,9 @@ def LoginDiscord(chrome:ChromiumPage,env):
         res = tab.listen.wait(timeout=30,raise_err=False)
         if res:
             updateAccountToken(env.discord_id, res.request.headers["Authorization"])
+            updateAccountStatus(env.discord_id, 2, "登录成功，并获取到Authorization")
         else:
             updateAccountStatus(env.discord_id, 2, "登录成功，但是没有获取到Authorization")
-        updateAccountStatus(env.discord_id, 2)
         logger.info(f"{env.name}登录Discord成功！")
     else:
         updateAccountStatus(env.discord_id, 1, "等待登录超时，可能登录失败！")
