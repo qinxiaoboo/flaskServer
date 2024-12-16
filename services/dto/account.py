@@ -50,6 +50,15 @@ def updateAccountStatus(account_id, status, error=""):
         db.session.add(account)
         db.session.commit()
 
+def updateAccountToken(account_id, token):
+    account = getAccountById(account_id)
+    with app.app_context():
+        if account:
+            if account.token != token:
+                account.token = token
+        db.session.add(account)
+        db.session.commit()
+
 
 if __name__ == '__main__':
     name,pwd,fa2 = "brown_laur21244:VwiuMLt8lPqirZ4:".split(":")
