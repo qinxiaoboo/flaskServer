@@ -401,8 +401,9 @@ def LoginDiscord(chrome:ChromiumPage,env):
                 updateAccountStatus(env.discord_id, 1, "没有导入DISCORD 的账号信息")
                 raise Exception(f"{env.name}: 没有导入DISCORD 账号信息")
     tab.listen.start("https://discord.com/api/v9/science")
-    tab.wait.url_change("channels",timeout=10, raise_err=False)
+    tab.wait.url_change("channels",timeout=15, raise_err=False)
     if "channels" in tab.url or ".com/app" in tab.url:
+        tab.refresh()
         res = tab.listen.wait(timeout=30,raise_err=False)
         if res:
             updateAccountToken(env.discord_id, res.request.headers["Authorization"])
