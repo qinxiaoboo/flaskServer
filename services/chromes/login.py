@@ -121,6 +121,7 @@ def LoginOKXWallet(chrome,env):
                 tab.ele("@@type=submit@!btn-disabled").click()
                 if tab.s_ele("@data-testid=okd-button"):#  3.31.16版
                     tab.ele("@data-testid=okd-button").click()
+                tab.wait.eles_loaded("@type=submit", timeout=1, raise_err=False)
                 if tab.s_ele("@type=submit"): # 3.30.之前版本的okx
                     tab.ele("@type=submit").click()
                 tab.wait.eles_loaded("@type=password", timeout=8, raise_err=False)
@@ -381,8 +382,6 @@ def LoginDiscord(chrome:ChromiumPage,env):
     tab = chrome.new_tab(url="https://discord.com/app")
     if tab.s_ele("Please log in again"):
         tab.ele("@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85").click()
-
-
     if "login" in tab.url:
         logger.info(f"{env.name} 开始登录 Discord 账号")
         with app.app_context():
@@ -401,9 +400,19 @@ def LoginDiscord(chrome:ChromiumPage,env):
             else:
                 updateAccountStatus(env.discord_id, 1, "没有导入DISCORD 的账号信息")
                 raise Exception(f"{env.name}: 没有导入DISCORD 账号信息")
+    tab.listen.start("https://discord.com/api/v9/science")
+    tab.wait.url_change("channels",timeout=10, raise_err=False)
     if "channels" in tab.url or ".com/app" in tab.url:
+        res = tab.listen.wait(timeout=30,raise_err=False)
+        if res:
+            updateAccountToken(env.discord_id, res.request.headers["Authorization"])
+        else:
+            updateAccountStatus(env.discord_id, 2, "登录成功，但是没有获取到Authorization")
         updateAccountStatus(env.discord_id, 2)
         logger.info(f"{env.name}登录Discord成功！")
+    else:
+        updateAccountStatus(env.discord_id, 1, "等待登录超时，可能登录失败！")
+    tab.listen.stop()
     return get_Custome_Tab(tab)
 
 def preCheckOutlook(chrome):
@@ -537,9 +546,9 @@ def DebugChrome(env):
         LoginOKXWallet(chrome, env)
         # LoginPhantomWallet(chrome, env)
         # LoginOutlook(chrome, env)
-        LoginTW(chrome, env)
+        # LoginTW(chrome, env)
         LoginDiscord(chrome, env)
-        chrome.new_tab("https://discord.com/invite/wwY5KvYFPC")
+        # chrome.new_tab("https://discord.com/invite/wwY5KvYFPC")
         # LoginBitlight(chrome, env)
         logger.info(ChromiumOptions().address)
         updateEnvStatus(env.name, 2)
