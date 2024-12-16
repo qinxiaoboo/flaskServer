@@ -182,6 +182,10 @@ def gethumanity(chrome,env):
     else:
         print('不需要等待')
     # tab.wait.load_start(timeout=6)
+    if tab.s_ele('t:p@text():Loading your profile...'):
+        chrome.wait(15, 30)
+    else:
+        tab.refresh()
 
     if tab.wait.ele_displayed('@class=skip', timeout=15, raise_err=False):
         print('点击skip弹幕')
