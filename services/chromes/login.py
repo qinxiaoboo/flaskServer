@@ -114,7 +114,7 @@ def LoginOKXWallet(chrome,env):
             wallet = Wallet.query.filter_by(id=env.okx_id).first()
             if wallet:
                 tab.ele("Import wallet").click()
-                # tab.ele("@@text()=Seed phrase or private key@@style=font-weight: 500; flex: 1 0 0%;").click()
+                tab.ele("@@text()=Seed phrase or private key@@style=font-weight: 500; flex: 1 0 0%;").click()
                 eles = tab.eles("@type=text")
                 for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
                     eles[index].input(word)
@@ -547,7 +547,7 @@ def DebugChrome(env):
         LoginOKXWallet(chrome, env)
         # LoginPhantomWallet(chrome, env)
         # LoginOutlook(chrome, env)
-        # LoginTW(chrome, env)
+        LoginTW(chrome, env)
         LoginDiscord(chrome, env)
         # chrome.new_tab("https://discord.com/invite/wwY5KvYFPC")
         # LoginBitlight(chrome, env)
@@ -573,11 +573,11 @@ def toLoginAll(env):
 
 if __name__ == '__main__':
     with app.app_context():
-        env = Env.query.filter_by(name="Q-2-1").first()
-        chrome = DebugChrome(env)
-        logger.info("环境初始化成功")
-        from flaskServer.services.chromes.mail.factory import Email
-        outlook: Account = Account.query.filter_by(id=env.outlook_id).first()
-        client = Email.from_account("0", chrome, "Q-2-1", outlook.name, aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
-        code = client.getCode("Lauren Brown, confirm your email address to access all", 3, 3)
-        print(code)
+        envs = Env.query.filter_by(group="qinxiaobo").all()
+        for env in envs:
+            tw = Account.query.filter_by(id=env.tw_id).first()
+            discord = Account.query.filter_by(id=env.discord_id).first()
+            if tw:
+                print(tw.name)
+            if discord:
+                print(discord.token)
