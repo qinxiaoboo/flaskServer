@@ -30,31 +30,18 @@ if __name__ == '__main__':
     #     for env in envs:
     #         tw = Account.query.filter_by(id=env.tw_id).first()
     #         discord = Account.query.filter_by(id=env.discord_id).first()
-    #         if tw:
-    #             print(tw.name)
-    #         if discord:
-    #             print(discord.token)
+    #         print(f"{env.name}|@{tw.name}|{discord.token}")
 
     # with app.app_context():
     #     envs = Env.query.all()
     #     for env in envs:
     #         tw = Account.query.filter_by(id=env.tw_id).first()
     #         discord = Account.query.filter_by(id=env.discord_id).first()
-    #         if tw:
-    #             print(tw.name)
-    #         if discord:
-    #             print(discord.token)
+    #         print(f"{env.name}|@{tw.name}|{discord.token}")
 
     with app.app_context():
         envs = Env.query.filter_by(name="test-2").all()
         for env in envs:
             tw = Account.query.filter_by(id=env.tw_id).first()
             discord = Account.query.filter_by(id=env.discord_id).first()
-
-            print(f"环境编号：{env.name} | Tw_Name: @{tw.name} | Discord_Token: {discord.token}")
             print(f"{env.name}|@{tw.name}|{discord.token}")
-
-            # if tw:
-            #     print(f"Tw_Name: @{tw.name}")
-            # if discord:
-            #     print(f"Discord_Token: {discord.token}")
