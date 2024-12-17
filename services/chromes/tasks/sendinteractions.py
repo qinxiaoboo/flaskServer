@@ -83,7 +83,7 @@ def setTw(twName,header,name):
            "nonce": "131784151{}659474432".format(random.randrange(0, 1000)), "analytics_location": "slash_ui"}
     res = requests.post(url=url, headers=header, data=json.dumps(msg))
     if res.status_code == 204:
-        print_green(f"{name} - 绑定推特执行成功")
+        print_green(f"{name} - {header['Authorization']} - 绑定推特执行成功")
 
 # 每日签到
 def signIn(header,name):
@@ -104,7 +104,7 @@ def signIn(header,name):
            "nonce": "13178423{}7827920896".format(random.randrange(0, 1000)), "analytics_location": "slash_ui"}
     res = requests.post(url=url, headers=header, data=json.dumps(msg))
     if res.status_code == 204:
-        print_green(f"{name} - 每日签到执行成功")
+        print_green(f"{name} - {header['Authorization']} - 每日签到执行成功")
 
 def main():
 
