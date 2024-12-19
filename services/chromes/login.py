@@ -296,9 +296,6 @@ def endCheckTW(tab,env):
         else:
             logger.warning(f"{env.name}: 弹窗不包含Yes，没有点击")
             return
-    if tab.s_ele("data-testid=inlinePrompt"):
-        if tab.ele("data-testid=inlinePrompt").s_ele("Your account is suspended"):
-            updateAccountStatus(env.tw_id, 1, "TW账号疑似被封，请确认账号状态~")
     token = ""
     for cookie in tab.cookies():
         if cookie["name"]=="auth_token":
@@ -308,6 +305,9 @@ def endCheckTW(tab,env):
             token+=cookie["value"]
     updateAccountToken(env.tw_id, token)
     updateAccountStatus(env.tw_id, 2)
+    if tab.s_ele("data-testid=inlinePrompt"):
+        if tab.ele("data-testid=inlinePrompt").s_ele("Your account is suspended"):
+            updateAccountStatus(env.tw_id, 1, "TW账号疑似被封，请确认账号状态~")
 
 async def followTw(env, name):
     account_info = AccountInfo()
