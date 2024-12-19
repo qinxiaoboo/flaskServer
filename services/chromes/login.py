@@ -254,8 +254,9 @@ def checkTw(chrome, tab, env):
             logger.info(f"{env.name}: 登录推特成功")
             endCheckTW(tab, env)
         else:
-            updateAccountStatus(env.tw_id, 1, "没有检测到登录页面的url为.com/home")
-            raise Exception(f"{env.name}: TW 登录失败")
+            tab.refresh()
+            logger.warning(f"{env.name}: 刷新tw页面，重新登录tw")
+            LoginTW(chrome, env)
     return tab
 
 def verifyTw(chrome, tab, env):
