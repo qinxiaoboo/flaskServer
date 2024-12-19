@@ -262,7 +262,7 @@ def liketw(chrome, env):
     chrome.wait(3, 6)
     tab.close()
 
-    tab = chrome.new_tab(url="https://x.com/SaharaLabsAI/status/1868923223494344796")
+    tab = chrome.new_tab(url="https://x.com/SaharaLabsAI/status/1869411896069333380")
     # 点赞
     tab.ele('@data-testid=like').click()
     chrome.wait(1)
