@@ -195,11 +195,111 @@ def getTab(chrome, env):
         logger.info(f'{env.name}:  discord或推特授权失败，人工授权')
 
 
+def liketw(chrome, env):
+    list = [
+        'great',
+        'LFG',
+        'LFG🚀',
+        'nice',
+        'so nice',
+        'lfg',
+        'Lfg',
+        'Great',
+        'amazing',
+        'awesome',
+        'excellent',
+        'outstanding',
+        'impressive',
+        'incredible',
+        'fantastic',
+        'wonderful',
+        'remarkable',
+        'phenomenal',
+        'brilliant',
+        'exceptional',
+        'stunning',
+        'terrific',
+        'fabulous',
+        'splendid',
+        'breathtaking',
+        'genius',
+        'masterpiece',
+        'champion',
+        'hero',
+        'pro',
+        'star',
+        'virtuoso',
+        'expert',
+        'trailblazer',
+        'maven',
+        'You nailed it!',
+        'You did an outstanding job!',
+        'You\'re amazing!',
+        'That\'s impressive!',
+        'You\'re a genius!',
+        'I\'m so proud of you!',
+        'You\'re on fire!',
+        'You\'re a rock star!',
+        'That was top-notch!',
+        'You’ve outdone yourself!',
+        'You look stunning!',
+        'You look fantastic!',
+        'You\'re looking sharp!',
+        'You\'re glowing!'
+    ]
+
+    random_choice = random.choice(list)
+    tab = chrome.new_tab(url="https://x.com/SaharaLabsAI/status/1868923223494344796")
+    # 点赞
+    tab.ele('@data-testid=like').click()
+    chrome.wait(1)
+    # 评论
+    tab.ele('@data-testid=reply').click()
+    chrome.wait(1, 2)
+    tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input(random_choice)
+    chrome.wait(1, 2)
+    tab.ele('@data-testid=tweetButton').click()
+    chrome.wait(3, 6)
+    tab.close()
+
+    tab = chrome.new_tab(url="https://x.com/SaharaLabsAI/status/1868923223494344796")
+    # 点赞
+    tab.ele('@data-testid=like').click()
+    chrome.wait(1)
+    # 评论
+    tab.ele('@data-testid=reply').click()
+    chrome.wait(1, 2)
+    tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input(random_choice)
+    chrome.wait(1, 2)
+    tab.ele('@data-testid=tweetButton').click()
+    chrome.wait(3, 6)
+    tab.close()
+
+    tab = chrome.new_tab(url="https://x.com/SaharaLabsAI/status/1869428301435204003")
+    # 点赞
+    tab.ele('@data-testid=like').click()
+    chrome.wait(1)
+    # 评论
+    tab.ele('@data-testid=reply').click()
+    chrome.wait(1, 2)
+    tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input(random_choice)
+    chrome.wait(1, 2)
+    tab.ele('@data-testid=tweetButton').click()
+    chrome.wait(3, 6)
+    tab.close()
+
+    return
+
+
+
+
+
 def engages(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
-            getTab(chrome, env)
+            # getTab(chrome, env)
+            liketw(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
