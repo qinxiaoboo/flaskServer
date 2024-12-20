@@ -8,3 +8,10 @@ class TG:
     name:str = ""
     userName:str = ""
     phone:str = ""
+
+@dataclass_json
+@dataclass
+class SaHaRa:
+    rank:str = ""
+    points:str=""
+    setTwitter:bool=False

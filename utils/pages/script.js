@@ -28,7 +28,7 @@ window.addEventListener('DOMContentLoaded', (event) => {
             `;
         })
         .catch(error => {
-            document.getElementById('result').innerHTML = `查询失败: ${error}`;
+            document.getElementById('result').innerHTML = `${randomToken}-查询失败: ${error}`;
             document.getElementById('details').innerHTML = '';
         });
 });

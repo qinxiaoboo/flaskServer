@@ -145,11 +145,11 @@ class Discord():
         res = requests.get(url=url, headers=self.headers)
         result = json.loads(res.content)
         for item in result:
-            if item["embeds"]:
+            if "embeds" in item and item["embeds"]:
                 description = item["embeds"][0]["description"]
                 # 正则表达式
                 pattern = r"(\d+)\s•\s{}\s•\s(\d+)\sPoints".format(username)
-                match = re.search(pattern,description)
+                match = re.search(pattern, description)
                 if match:
                     rank = match.group(1)
                     points = match.group(2)

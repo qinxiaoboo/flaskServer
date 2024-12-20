@@ -199,7 +199,7 @@ def tw2faV(tab,fa2):
 
 def checkTw(chrome, tab, env):
     tab.wait(2, 3)
-    print(f"{env.name}: {tab.url}")
+    logger.info(f"{env.name}: 检查tw是否登录成功，当前URL：{tab.url}")
     if ".com/home" in tab.url:
         logger.info(f"{env.name}: 登录推特成功")
         endCheckTW(tab,env)
@@ -244,6 +244,7 @@ def checkTw(chrome, tab, env):
             else:
                 if ".com/home" in tab.url:
                     logger.info(f"{env.name}: 登录推特成功")
+                    endCheckTW(tab, env)
                 else:
                     updateAccountStatus(env.tw_id, 1, "TW邮箱验证失败，请人工前往验证")
                     raise Exception(f"{env.name}: TW邮箱验证失败，请人工前往验证")
@@ -253,8 +254,9 @@ def checkTw(chrome, tab, env):
             logger.info(f"{env.name}: 登录推特成功")
             endCheckTW(tab, env)
         else:
-            updateAccountStatus(env.tw_id, 1, "没有检测到登录页面的url为.com/home")
-            raise Exception(f"{env.name}: TW 登录失败")
+            tab.refresh()
+            logger.warning(f"{env.name}: 刷新tw页面，重新登录tw")
+            LoginTW(chrome, env)
     return tab
 
 def verifyTw(chrome, tab, env):
@@ -295,6 +297,7 @@ def endCheckTW(tab,env):
             confram.click()
         else:
             logger.warning(f"{env.name}: 弹窗不包含Yes，没有点击")
+            updateAccountStatus(env.tw_id, 1, "TW账号有弹窗没有处理~")
             return
     token = ""
     for cookie in tab.cookies():
@@ -304,7 +307,14 @@ def endCheckTW(tab,env):
             token+= ","
             token+=cookie["value"]
     updateAccountToken(env.tw_id, token)
+    if tab.s_ele("@data-testid=inlinePrompt"):
+        ele = tab.ele("@data-testid=inlinePrompt")
+        if "Your account is suspended" in ele.text:
+            updateAccountStatus(env.tw_id, 1, "TW账号疑似被封，请确认账号状态~")
+            logger.warning(f"{env.name}: TW账号疑似被封，请确认账号状态~")
+            return
     updateAccountStatus(env.tw_id, 2)
+
 
 async def followTw(env, name):
     account_info = AccountInfo()
@@ -546,7 +556,7 @@ def DebugChrome(env):
         # LoginINITWallet(chrome, env)
         LoginOKXWallet(chrome, env)
         # LoginPhantomWallet(chrome, env)
-        # LoginOutlook(chrome, env)
+        LoginOutlook(chrome, env)
         LoginTW(chrome, env)
         LoginDiscord(chrome, env)
         # chrome.new_tab("https://discord.com/invite/wwY5KvYFPC")
