@@ -249,32 +249,6 @@ def liketw(chrome, env):
     ]
 
     random_choice = random.choice(list)
-    tab = chrome.new_tab(url="https://x.com/SaharaLabsAI/status/1868923223494344796")
-    # 点赞
-    tab.ele('@data-testid=like').click()
-    chrome.wait(1)
-    # 评论
-    tab.ele('@data-testid=reply').click()
-    chrome.wait(1, 2)
-    tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input(random_choice)
-    chrome.wait(1, 2)
-    tab.ele('@data-testid=tweetButton').click()
-    chrome.wait(3, 6)
-    tab.close()
-
-    tab = chrome.new_tab(url="https://x.com/SaharaLabsAI/status/1869411896069333380")
-    # 点赞
-    tab.ele('@data-testid=like').click()
-    chrome.wait(1)
-    # 评论
-    tab.ele('@data-testid=reply').click()
-    chrome.wait(1, 2)
-    tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input(random_choice)
-    chrome.wait(1, 2)
-    tab.ele('@data-testid=tweetButton').click()
-    chrome.wait(3, 6)
-    tab.close()
-
     tab = chrome.new_tab(url="https://x.com/SaharaLabsAI/status/1869428301435204003")
     # 点赞
     tab.ele('@data-testid=like').click()
@@ -287,6 +261,32 @@ def liketw(chrome, env):
     tab.ele('@data-testid=tweetButton').click()
     chrome.wait(3, 6)
     tab.close()
+
+    # tab = chrome.new_tab(url="https://x.com/SaharaLabsAI/status/1869411896069333380")
+    # # 点赞
+    # tab.ele('@data-testid=like').click()
+    # chrome.wait(1)
+    # # 评论
+    # tab.ele('@data-testid=reply').click()
+    # chrome.wait(1, 2)
+    # tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input(random_choice)
+    # chrome.wait(1, 2)
+    # tab.ele('@data-testid=tweetButton').click()
+    # chrome.wait(3, 6)
+    # tab.close()
+    #
+    # tab = chrome.new_tab(url="https://x.com/SaharaLabsAI/status/1869428301435204003")
+    # # 点赞
+    # tab.ele('@data-testid=like').click()
+    # chrome.wait(1)
+    # # 评论
+    # tab.ele('@data-testid=reply').click()
+    # chrome.wait(1, 2)
+    # tab.ele("@class=css-175oi2r r-1iusvr4 r-16y2uox r-1777fci r-1h8ys4a r-1bylmt5 r-13tjlyg r-7qyjyx r-1ftll1t").input(random_choice)
+    # chrome.wait(1, 2)
+    # tab.ele('@data-testid=tweetButton').click()
+    # chrome.wait(3, 6)
+    # tab.close()
 
     return
 
