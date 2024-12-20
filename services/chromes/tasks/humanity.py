@@ -18,7 +18,7 @@ from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 
 #humanity protocol
 name = 'humanity'
-humanity_url = 'https://testnet.humanity.org/login?ref=sunyunlei'
+humanity_url = 'https://testnet.humanity.org/login?ref=269toka'
 
 wallet_js = '''
 let button  = 
