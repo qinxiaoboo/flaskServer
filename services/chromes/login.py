@@ -372,7 +372,9 @@ def LoginTW(chrome:ChromiumPage,env):
         with app.app_context():
             tw:Account = Account.query.filter_by(id=env.tw_id).first()
             if tw:
-                tab.wait.eles_loaded('@autocomplete=username', timeout=5, raise_err=False)
+                flag = tab.wait.eles_loaded('@autocomplete=username', timeout=5, raise_err=False)
+                if not flag:
+                    tab.refresh()
                 if "login" in tab.url:
                     tab.ele("@autocomplete=username").input(tw.name, clear=True)
                     tab.ele("@@type=button@@text()=Next").click()
