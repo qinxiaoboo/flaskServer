@@ -50,13 +50,7 @@ def login(name):
         env = Env.query.filter_by(name=name).first()
         Thread(target=DebugChrome,args=(env,)).start()
     return "success"
-# 0g官网任务
-@app.route("/todo/multifarm")
-def multifarm ():
-    with app.app_context():
-        envs = getAllEnvs()
-        Thread(target=submit, args=(toDoMultifarm, envs,)).start()
-    return "success"
+
 # 银河任务统计
 @app.route("/galxe/countpoints")
 def countpoints():

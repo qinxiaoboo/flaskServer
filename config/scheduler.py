@@ -16,8 +16,7 @@ app.config.from_object(Config())
 def get_function_by_name(name):
     functions = {
         'toDoFaucet0G': toDoFaucet0G,
-        'toDoFaucetPlumenetwork': toDoFaucetPlumenetwork,
-        'toDoMultifarm': toDoMultifarm,
+        'toDoFaucetPlumenetwork': toDoFaucetPlumenetwork
     }
     return functions.get(name)
 
