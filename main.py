@@ -9,7 +9,6 @@ from flaskServer.mode.env import Env
 from flaskServer.services.chromes.login import toLoginAll
 from flaskServer.services.chromes.login import DebugChrome
 from flaskServer.services.chromes.worker import submit, executor
-from flaskServer.services.chromes.tasks.multifarm import toDo as toDoMultifarm
 from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGroup
 from flaskServer.services.internal.tasks.spaces_stats import todo as countPoints
 from flaskServer.services.chromes.galxe.login import debugGalxeTask,toDoGalxeTaskAll

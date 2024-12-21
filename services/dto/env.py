@@ -115,7 +115,7 @@ def getEnvByName(name):
         return env
 def getEnvByProxyId(proxy_id):
     with app.app_context():
-        envs = Env.query.filter_by(proxy_id=proxy_id)
+        envs = Env.query.filter_by(t_proxy_id=proxy_id)
         return envs
 
 def updateEnvStatus(name,status):

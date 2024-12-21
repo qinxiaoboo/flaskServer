@@ -17,7 +17,7 @@ def getAccountById(id):
         return Account.query.filter_by(id=id).first()
 
 # 更新账号信息
-def updateAccount(name,pwd,fa2,type,email_name=None,email_pass=None):
+def updateAccount(name,pwd,fa2,type,email_name=None,email_pass=None, token=""):
     pwd = aesCbcPbkdf2EncryptToBase64(pwd)
     fa2 = aesCbcPbkdf2EncryptToBase64(fa2)
     account = getAccount(name,type)
@@ -32,6 +32,8 @@ def updateAccount(name,pwd,fa2,type,email_name=None,email_pass=None):
                 account.email_pass = email_pass
             if account.fa2 != fa2 and fa2:
                 account.fa2 = fa2
+            if token and account.token != token:
+                account.token = token
             account.deleted = 0
         else:
             account = Account(name=name,pwd=pwd,email_name=email_name,email_pass=email_pass,fa2=fa2,type=type, deleted=0)

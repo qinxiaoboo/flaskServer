@@ -1,7 +1,6 @@
 from flask_apscheduler import APScheduler
 from flaskServer.config.connect import app
 from flaskServer.services.chromes.faucet.G0 import toDo as toDoFaucet0G
-from flaskServer.services.chromes.tasks.multifarm import toDo as toDoMultifarm
 from flaskServer.services.chromes.tasks.plumenetwork import toDoFaucet as toDoFaucetPlumenetwork
 from flaskServer.services.chromes.worker import checkTasks
 from flaskServer.services.dto.taskLog import clearTaskLog

@@ -32,14 +32,22 @@ for index, row in df.iterrows():
         if tw:
             twList = tw.split(",")
             if len(twList) == 3:
-                name, pwd, fa2 = tw.split(",")
+                name, pwd, fa2 = twList
                 TW = updateAccount(name, pwd, fa2, "TW")
             elif len(twList) == 5:
-                name, pwd, fa2, emailUser, emailPassword = tw.split(",")
+                name, pwd, fa2, emailUser, emailPassword = twList
                 TW = updateAccount(name, pwd, fa2, "TW", emailUser, emailPassword)
+            elif len(twList) == 6:
+                name, pwd, fa2, emailUser, emailPassword,token = twList
+                TW = updateAccount(name, pwd, fa2, "TW", emailUser, emailPassword,token)
         if discord:
-            name, pwd, fa2 = discord.split(",")
-            DISCORD = updateAccount(name, pwd, fa2, "DISCORD")
+            discordList = discord.split(",")
+            if len(discordList) == 3:
+                name, pwd, fa2 = discordList
+                DISCORD = updateAccount(name, pwd, fa2, "DISCORD")
+            elif len(discordList) == 4:
+                name, pwd, fa2, token = discordList
+                DISCORD = updateAccount(name, pwd, fa2, "DISCORD", token=token)
         if outlook:
             name, pwd = outlook.split(",")
             OUTLOOK = updateAccount(name, pwd, "", "OUTLOOK")

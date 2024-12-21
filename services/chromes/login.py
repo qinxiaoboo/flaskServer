@@ -13,12 +13,15 @@ from flaskServer.mode.env import Env
 from flaskServer.mode.proxy import Proxy
 from flaskServer.mode.wallet import Wallet
 from flaskServer.services.dto.env import updateEnvStatus
+from flaskServer.services.dto.account import getAccountById
 from flaskServer.utils.chrome import getChrome,get_Custome_Tab, quitChrome
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 from flaskServer.services.content import Content
 from flaskServer.services.dto.proxy import getProxyByID
 from flaskServer.services.dto.account import updateAccountStatus,updateAccountToken
 from flaskServer.services.internal.twitter.twitter import Twitter
+from flaskServer.utils.decorator import chrome_retry
+
 
 def LoginINITWallet(chrome,env):
     tab = chrome.get_tab(title="Initia Wallet")
@@ -165,39 +168,16 @@ def LoginBitlight(chrome:ChromiumPage,env):
         tab.ele("@type=button").click()
         logger.info(f"{env.name}: 解锁Bitlight钱包成功！")
     tab.close()
-def AuthTW(chrome:ChromiumPage,env):
-    tab = chrome.get_tab(url=r"oauth2/authorize")
-    if tab :
-        tab.ele("@@role=button@@data-testid=OAuth_Consent_Button").click()
-        logger.info(f"{env.name}: 推特认证成功")
-    else:
-        tab = chrome.get_tab(url="twitter.com")
-        with app.app_context():
-            tw: Account = Account.query.filter_by(id=env.tw_id).first()
-            if tw:
-                tab.ele("@autocomplete=username").input(tw.name)
-                tab.ele("@@type=button@@text()=Next").click()
-                tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
-                tab.ele("@@type=button@@text()=Log in").click()
-                fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
-                if "login" in tab.url and len(fa2) > 10:
-                    tw2faV(tab,fa2)
-                tab.ele("@@role=button@@data-testid=OAuth_Consent_Button").click()
-                logger.info(f"{env.name}: 推特登录并认证成功")
-            else:
-                logger.warning(f"{env.name}: TW 账号为空，跳过无法完成")
-    return get_Custome_Tab(tab)
 
 def tw2faV(tab,fa2):
     res = requests.get(fa2)
     if res.ok:
         code = res.json().get("data").get("otp")
-        print(tab.url)
         if tab.s_ele("@data-testid=ocfEnterTextTextInput"):
             tab.ele("@data-testid=ocfEnterTextTextInput").input(code,clear=True)
             tab.ele("@@type=button@@text()=Next").click()
 
-def checkTw(chrome, tab, env):
+def checkTw(chrome, tab, env, count):
     tab.wait(2, 3)
     logger.info(f"{env.name}: 检查tw是否登录成功，当前URL：{tab.url}")
     if ".com/home" in tab.url:
@@ -254,9 +234,10 @@ def checkTw(chrome, tab, env):
             logger.info(f"{env.name}: 登录推特成功")
             endCheckTW(tab, env)
         else:
-            tab.refresh()
-            logger.warning(f"{env.name}: 刷新tw页面，重新登录tw")
-            LoginTW(chrome, env)
+            tab.refresh(ignore_cache=True)
+            count +=1
+            logger.warning(f"{env.name}: 刷新tw页面，重新登录tw, 第{count}次重试")
+            LoginTW(chrome, env, count)
     return tab
 
 def verifyTw(chrome, tab, env):
@@ -288,6 +269,7 @@ def endCheckTW(tab,env):
     if tab.s_ele("@@role=button@@text()=Retry"):
         logger.info(f"{env.name}点击Retry, tw页面刷新")
         tab.ele("@@role=button@@text()=Retry").click()
+        tab.refresh(ignore_cache=True)
     sheetDialog = tab.s_ele("@data-testid=sheetDialog")
     if sheetDialog:
         logger.info(f"{env.name}: 推特出现弹窗需要处理！")
@@ -299,6 +281,21 @@ def endCheckTW(tab,env):
             logger.warning(f"{env.name}: 弹窗不包含Yes，没有点击")
             updateAccountStatus(env.tw_id, 1, "TW账号有弹窗没有处理~")
             return
+    if tab.s_ele("@data-testid=SideNav_AccountSwitcher_Button"):
+        account = tab.ele("@data-testid=SideNav_AccountSwitcher_Button")
+        username = account.ele(".css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3", index=2).text
+        tw = getAccountById(env.tw_id)
+        logger.debug(f"{env.name} tw page name: {username}, db name: @{tw.name}")
+        if username and username != f"@{tw.name}":
+            account.click()
+            if tab.s_ele("@data-testid=AccountSwitcher_Logout_Button"):
+                tab.ele("@data-testid=AccountSwitcher_Logout_Button").click()
+                tab.ele("@data-testid=confirmationSheetConfirm").click()
+                logger.warning(f"{env.name} TW账号已经被替换，老账号退出登录")
+                tab.close()
+                raise ConnectionError("老账号退出登录")
+        elif not username:
+            raise Exception(f"{env.name} 没有获取到 TW 名称")
     token = ""
     for cookie in tab.cookies():
         if cookie["name"]=="auth_token":
@@ -316,62 +313,35 @@ def endCheckTW(tab,env):
     updateAccountStatus(env.tw_id, 2)
 
 
-async def followTw(env, name):
-    account_info = AccountInfo()
-    proxy = getProxyByID(env.t_proxy_id)
-    account_info.user_agent = env.user_agent
-    if proxy:
-        account_info.proxy = f"{proxy.user}:{proxy.pwd}@{proxy.ip}:{proxy.port}"
-    else:
-        account_info.proxy = ""
-    tw:Account = Account.query.filter_by(id=env.tw_id).first()
-    try:
-        if tw:
-            tokens = tw.token.split(",")
-            account_info.twitter_auth_token = tokens[0]
-            account_info.twitter_ct0 = tokens[1]
-            if not tw.token:
-                return False
-            account_info.twitter_username = tw.name
-            twitter = Twitter(account_info)
-            await twitter.start()
-            await twitter.follow(name)
-    except Exception as e:
-        logger.error(f"{env.name}检查tw的token失败：{e}")
-        return False
-    return True
-
-
-
-def preCheckTW(chrome,env):
-    # logger.info(f"{env.name} 开始检查tw token")
-    # result = asyncio.run(followTw(env, 'elonmusk'))
-    # logger.info(f"{env.name} tw检查结果：{result}")
-    result =False
-    # # 如果token有效则不用登录tw
-    if not result:
-        tab = chrome.get_tab(url=".com/i/flow/login")
+def LoginTwByToken(tw, chrome,env):
+    tab = chrome.get_tab(url=".com/i/flow/login")
+    if tab is None:
+        tab = chrome.get_tab(url=".com/login")
         if tab is None:
-            tab = chrome.get_tab(url=".com/login")
-            if tab is None:
-                tab = chrome.new_tab(url="https://x.com/home")
-        chrome.wait(1, 2)
+            tab = chrome.new_tab(url="https://x.com/home")
+    if "x.com/home" in tab.url:
+        pass
     else:
-        return None,result
-    return tab,result
+        if tw and tw.token:
+            tab.set.cookies(f'name=auth_token; value={tw.token.split(",")[0]};domain=.x.com;')
+            tab.get("https://x.com/home")
+    return tab
 
-def LoginTW(chrome:ChromiumPage,env):
+@chrome_retry(exceptions=(ConnectionError,), max_tries=2, initial_delay=2)
+def LoginTW(chrome:ChromiumPage,env, count=0):
+    if count > 3:
+        logger.error(f"{env.name} TW登录重试次数超过三次，停止重试！")
+        updateAccountStatus(env.tw_id, 1, "TW登录重试次数超过三次，停止重试！")
+        return
     updateAccountStatus(env.tw_id, 0, "重置了TW登录状态")
-    tab,status = preCheckTW(chrome,env)
-    # 如果token有效则会返回None
-    if status:
-        return tab
-    if "logout" in tab.url or "login" in tab.url:
-        logger.info(f"{env.name}: 开始登录 TW 账号")
-        tab.get(url="https://x.com/i/flow/login")
-        with app.app_context():
-            tw:Account = Account.query.filter_by(id=env.tw_id).first()
-            if tw:
+    with app.app_context():
+        tw: Account = Account.query.filter_by(id=env.tw_id).first()
+        if tw:
+            tab = LoginTwByToken(tw, chrome, env)
+            if "logout" in tab.url or "login" in tab.url:
+                tab.refresh(ignore_cache=True)
+                tab.get(url="https://x.com/i/flow/login")
+                logger.info(f"{env.name} 刷新页面并清空缓存 -> 开始登录 TW 账号")
                 flag = tab.wait.eles_loaded('@autocomplete=username', timeout=5, raise_err=False)
                 if not flag:
                     tab.refresh()
@@ -383,22 +353,33 @@ def LoginTW(chrome:ChromiumPage,env):
                     fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
                 if "login" in tab.url and len(fa2) > 10:
                     tw2faV(tab, fa2)
-            else:
-                updateAccountStatus(env.tw_id, 1, "没有导入TW的账号信息")
-                raise Exception(f"{env.name}: 没有导入TW的账号信息")
-    return checkTw(chrome, get_Custome_Tab(tab), env)
+        else:
+            return
+    return checkTw(chrome, get_Custome_Tab(tab), env, count)
+
+def LoginDiscordByToken(discord, chrome:ChromiumPage, env):
+    tab = chrome.new_tab("https://discord.com/channels/@me")
+    if "channels" in tab.url or ".com/app" in tab.url:
+        pass
+    else:
+        if discord and discord.token:
+            tab.set.local_storage("token", f'"{discord.token}"')
+            tab.get("https://discord.com/channels/@me")
+    return tab
 
 
 def LoginDiscord(chrome:ChromiumPage,env):
     updateAccountStatus(env.discord_id, 0, "重置了Discord登录状态")
-    tab = chrome.new_tab(url="https://discord.com/app")
-    if tab.s_ele("Please log in again"):
-        tab.ele("@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85").click()
-    if "login" in tab.url:
-        logger.info(f"{env.name} 开始登录 Discord 账号")
-        with app.app_context():
-            discord:Account = Account.query.filter_by(id=env.discord_id).first()
-            if discord:
+    with app.app_context():
+        discord: Account = Account.query.filter_by(id=env.discord_id).first()
+        if discord:
+            tab = LoginDiscordByToken(discord, chrome, env)
+            if tab.s_ele("Please log in again"):
+                tab.ele("@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85").click()
+            if "login" in tab.url:
+                tab.refresh(ignore_cache=True)
+                tab.get("https://discord.com/login")
+                logger.info(f"{env.name} 刷新页面并清空缓存 -> 开始登录 Discord 账号")
                 tab.ele("@name=email").input(discord.name)
                 tab.ele("@name=password").input(aesCbcPbkdf2DecryptFromBase64(discord.pwd))
                 tab.ele("@type=submit").click()
@@ -409,24 +390,27 @@ def LoginDiscord(chrome:ChromiumPage,env):
                         code = res.json().get("data").get("otp")
                         tab.ele("@autocomplete=one-time-code").input(code)
                         tab.ele("@type=submit").click()
+                tab.listen.start("https://discord.com/api/v9/science")
+                tab.wait.url_change("channels", timeout=15, raise_err=False)
+                if "channels" in tab.url or ".com/app" in tab.url:
+                    tab.refresh()
+                    res = tab.listen.wait(timeout=30, raise_err=False)
+                    if res:
+                        updateAccountToken(env.discord_id, res.request.headers["Authorization"])
+                        updateAccountStatus(env.discord_id, 2, "登录成功，并获取到Authorization")
+                        logger.info(f"{env.name} Discord -> 获取token并登录成功！")
+                    else:
+                        updateAccountStatus(env.discord_id, 2, "登录成功，但是没有获取到Authorization")
+                        logger.warning(f"{env.name} Discord -> 获取token失败，但是登录可能成功！")
+                else:
+                    logger.warning(f"{env.name} Discord登录异常，可能登录失败！")
+                    updateAccountStatus(env.discord_id, 1, "等待登录超时，可能登录失败！")
+                tab.listen.stop()
             else:
-                updateAccountStatus(env.discord_id, 1, "没有导入DISCORD 的账号信息")
-                raise Exception(f"{env.name}: 没有导入DISCORD 账号信息")
-    tab.listen.start("https://discord.com/api/v9/science")
-    tab.wait.url_change("channels",timeout=15, raise_err=False)
-    if "channels" in tab.url or ".com/app" in tab.url:
-        tab.refresh()
-        res = tab.listen.wait(timeout=30,raise_err=False)
-        if res:
-            updateAccountToken(env.discord_id, res.request.headers["Authorization"])
-            updateAccountStatus(env.discord_id, 2, "登录成功，并获取到Authorization")
-        else:
-            updateAccountStatus(env.discord_id, 2, "登录成功，但是没有获取到Authorization")
-        logger.info(f"{env.name}登录Discord成功！")
-    else:
-        updateAccountStatus(env.discord_id, 1, "等待登录超时，可能登录失败！")
-    tab.listen.stop()
-    return get_Custome_Tab(tab)
+                updateAccountStatus(env.discord_id, 2, "登录成功，并获取到Authorization")
+                logger.info(f"{env.name} 通过token -> 登录Discord成功")
+            return get_Custome_Tab(tab)
+
 
 def preCheckOutlook(chrome):
     tab = chrome.get_tab(url=".com/mail/0/")
@@ -436,14 +420,14 @@ def preCheckOutlook(chrome):
 
 def LoginOutlook(chrome:ChromiumPage,env):
     updateAccountStatus(env.outlook_id, 0, "重置了OutLook登录状态")
-    tab = preCheckOutlook(chrome)
-    tab.wait.url_change("microsoft", timeout=3, raise_err=False)
-    tab.wait.url_change("https://outlook.live.com/mail/0/", timeout=5, raise_err=False)
-    if "microsoft" in tab.url or "login.srf" in tab.url:
-        with app.app_context():
-            outlook:Account = Account.query.filter_by(id=env.outlook_id).first()
-            if outlook:
-                if "outlook" in outlook.name or "hotmail" in outlook.name:
+    with app.app_context():
+        outlook: Account = Account.query.filter_by(id=env.outlook_id).first()
+        if outlook:
+            if "outlook" in outlook.name or "hotmail" in outlook.name:
+                tab = preCheckOutlook(chrome)
+                tab.wait.url_change("microsoft", timeout=3, raise_err=False)
+                tab.wait.url_change("https://outlook.live.com/mail/0/", timeout=5, raise_err=False)
+                if "microsoft" in tab.url or "login.srf" in tab.url:
                     logger.info(f"{env.name}: 开始登陆 outlook邮箱")
                     if "login.srf" not in tab.url:
                         tab = tab.eles("@aria-label=Sign in to Outlook")[4].click.for_new_tab()
@@ -456,6 +440,10 @@ def LoginOutlook(chrome:ChromiumPage,env):
                         if tab.s_ele("@id=userDisplayName"):
                             text = tab.ele("@id=userDisplayName").text
                             if text == outlook.name:
+                                if tab.s_ele("@id=idA_PWD_SwitchToPassword"):
+                                    ele = tab.ele("@id=idA_PWD_SwitchToPassword")
+                                    if "password" in ele.text:
+                                        ele.click()
                                 tab.ele("@name=passwd").input(aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
                             else:
                                 if tab.s_ele("@data-testid=secondaryContent"):
@@ -477,11 +465,12 @@ def LoginOutlook(chrome:ChromiumPage,env):
                         tab.ele("@type=checkbox").click()
                     if tab.s_ele('t:button@tx():Yes'):
                         tab.ele('t:button@tx():Yes').click()
-                else:
-                    tab.close()
-                    logger.info(f"{env.name}: 邮箱格式不匹配，关闭邮箱标签,不登录邮箱")
             else:
-                logger.info(f"{env.name}: 邮箱 账号为空，跳过登录")
+                logger.info(f"{env.name}: 邮箱格式不匹配,不登录邮箱")
+                return
+        else:
+            logger.info(f"{env.name}: 邮箱 账号为空，跳过登录")
+            return
     if "https://outlook.live.com/mail/0" in tab.url:
         logger.info(f"{env.name}: 登录OUTLOOK成功")
         updateAccountStatus(env.outlook_id, 2)
