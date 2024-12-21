@@ -477,16 +477,18 @@ def LoginOutlook(chrome:ChromiumPage,env):
                         tab.ele("@type=checkbox").click()
                     if tab.s_ele('t:button@tx():Yes'):
                         tab.ele('t:button@tx():Yes').click()
-                    if "https://outlook.live.com/mail/0" in tab.url:
-                        logger.info(f"{env.name}: 登录OUTLOOK成功")
                 else:
                     tab.close()
                     logger.info(f"{env.name}: 邮箱格式不匹配，关闭邮箱标签,不登录邮箱")
-                    return
             else:
                 logger.info(f"{env.name}: 邮箱 账号为空，跳过登录")
+    if "https://outlook.live.com/mail/0" in tab.url:
+        logger.info(f"{env.name}: 登录OUTLOOK成功")
+        updateAccountStatus(env.outlook_id, 2)
+    else:
+        logger.warning(f"{env.name}: 登录OUTLOOK失败~")
+        updateAccountStatus(env.outlook_id, 1, "邮箱登录失败~")
 
-    updateAccountStatus(env.outlook_id, 2)
 
 
 def OKXChrome(env):

@@ -5,6 +5,7 @@ import socket
 from loguru import logger
 from flaskServer.config.config import CHROME_VERSION,RANDOM_ORDER
 from flaskServer.config.connect import db, app
+from sqlalchemy import func
 from flaskServer.mode.env import Env,status_descriptions
 from flaskServer.mode.proxy import Proxy
 from flaskServer.services.dto.dataDictionary import getDataDictionaryByValue
@@ -41,7 +42,7 @@ def getEnvsInfo(page,page_size,search, label, sortBy="env", sortOrder="asc",grou
         if groups :
             envs_query = envs_query.filter(Env.group==groups)
             # 动态设置排序
-        if sortBy not in ['group']:
+        if sortBy not in ['id', 'group']:
             sortBy = 'name'  # 默认排序字段
         if sortOrder == 'desc':
             sort_order = db.desc
@@ -50,7 +51,7 @@ def getEnvsInfo(page,page_size,search, label, sortBy="env", sortOrder="asc",grou
         if label:
             page_size = 100000
 
-        envs_query = envs_query.order_by(sort_order(getattr(Env, sortBy)))
+        envs_query = envs_query.order_by(sort_order(func.length(getattr(Env, sortBy))),sort_order(getattr(Env, sortBy)))
 
         # 分页
         paginated_envs = envs_query.paginate(page=page, per_page=page_size, error_out=False)
