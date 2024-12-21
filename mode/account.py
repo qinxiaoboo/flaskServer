@@ -1,4 +1,5 @@
 from flaskServer.config.connect import db
+import datetime
 
 class Account(db.Model):
     __tablename__ = "t_account"
@@ -15,7 +16,8 @@ class Account(db.Model):
     error = db.Column(db.String(120), unique=False, nullable=False)
     # 0: 未删除，1：已删除
     deleted = db.Column(db.Integer, unique=False, nullable=False)
-
+    createtime = db.Column(db.DateTime, default=datetime.datetime.now(), comment="创建时间")
+    updatetime = db.Column(db.DateTime, default=datetime.datetime.now(), comment="更新时间")
 
     def to_json(self):
         return {

@@ -171,15 +171,15 @@ def updateEnv(env,group,port,cookies,proxy,tw,discord,outlook,okx,init,bitlight,
                 ENV.t_proxy_id = proxy.id
             if tw and ENV.tw_id != tw.id:
                 # 如果tw账号发生改变，则逻辑删除原账号，并绑定新账号
-                deleteAccountById(tw.id, True)
+                deleteAccountById(ENV.tw_id, True)
                 ENV.tw_id = tw.id
             if discord and ENV.discord_id != discord.id:
                 # 如果discord账号发生改变，则逻辑删除原账号，并绑定新账号
-                deleteAccountById(discord.id, True)
+                deleteAccountById(ENV.discord_id, True)
                 ENV.discord_id = discord.id
             if outlook and ENV.outlook_id != outlook.id:
                 # 如果outlook账号发生改变，则逻辑删除原账号，并绑定新账号
-                deleteAccountById(outlook.id, True)
+                deleteAccountById(ENV.outlook_id, True)
                 ENV.outlook_id = outlook.id
             if okx and ENV.okx_id != okx.id:
                 ENV.okx = okx.id

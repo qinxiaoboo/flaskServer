@@ -1,3 +1,5 @@
+import datetime
+
 from flaskServer.mode.account import Account
 from flaskServer.config.connect import db,app
 from sqlalchemy import and_
@@ -23,6 +25,7 @@ def updateAccount(name,pwd,fa2,type,email_name=None,email_pass=None):
         if account:
             if account.pwd != pwd:
                 account.pwd = pwd
+                account.updatetime = datetime.datetime.now()
             if account.email_name != email_name and email_name:
                 account.email_name = email_name
             if account.email_pass != email_pass and email_pass:
@@ -44,6 +47,7 @@ def updateAccountStatus(account_id, status, error=""):
         if account:
             if account.status != status:
                 account.status = status
+                account.updatetime = datetime.datetime.now()
             if account.error != error:
                 account.error = error
         else:
@@ -57,6 +61,7 @@ def deleteAccountById(account_id, deleted):
         if account:
             if deleted:
                 account.deleted = 1
+                account.updatetime = datetime.datetime.now()
             else:
                 account.deleted = 0
         else:
@@ -70,6 +75,7 @@ def updateAccountToken(account_id, token):
         if account:
             if account.token != token:
                 account.token = token
+                account.updatetime = datetime.datetime.now()
         db.session.add(account)
         db.session.commit()
 
