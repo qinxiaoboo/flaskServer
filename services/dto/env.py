@@ -11,7 +11,7 @@ from flaskServer.mode.proxy import Proxy
 from flaskServer.services.dto.dataDictionary import getDataDictionaryByValue
 from flaskServer.utils.envutil import getUserAgent,to_be_list,can_convert_to_number,can_be_list
 from flaskServer.entity.envAccount import EnvAccountInfo
-from flaskServer.services.dto.account import Account
+from flaskServer.services.dto.account import Account, deleteAccountById
 from flaskServer.services.dto.proxy import deleteProxyById
 from sqlalchemy import and_
 
@@ -170,12 +170,18 @@ def updateEnv(env,group,port,cookies,proxy,tw,discord,outlook,okx,init,bitlight,
                     deleteProxyById(ENV.t_proxy_id)
                 ENV.t_proxy_id = proxy.id
             if tw and ENV.tw_id != tw.id:
+                # 如果tw账号发生改变，则逻辑删除原账号，并绑定新账号
+                deleteAccountById(tw.id, True)
                 ENV.tw_id = tw.id
             if discord and ENV.discord_id != discord.id:
+                # 如果discord账号发生改变，则逻辑删除原账号，并绑定新账号
+                deleteAccountById(discord.id, True)
                 ENV.discord_id = discord.id
             if outlook and ENV.outlook_id != outlook.id:
+                # 如果outlook账号发生改变，则逻辑删除原账号，并绑定新账号
+                deleteAccountById(outlook.id, True)
                 ENV.outlook_id = outlook.id
-            if okx and  ENV.okx_id != okx.id:
+            if okx and ENV.okx_id != okx.id:
                 ENV.okx = okx.id
             if init and ENV.init_id != init.id:
                 ENV.init_id = init.id

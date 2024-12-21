@@ -30,10 +30,10 @@ def updateAccount(name,pwd,fa2,type,email_name=None,email_pass=None):
             if account.fa2 != fa2 and fa2:
                 account.fa2 = fa2
         else:
-            account = Account(name=name,pwd=pwd,email_name=email_name,email_pass=email_pass,fa2=fa2,type=type)
+            account = Account(name=name,pwd=pwd,email_name=email_name,email_pass=email_pass,fa2=fa2,type=type, deleted=0)
+            print("新增一条账号信息，id: ", account.id)
         db.session.add(account)
         db.session.commit()
-        print("新增一条账号信息，id: ",account.id)
         return account
 
 # 更新账号信息
@@ -45,6 +45,19 @@ def updateAccountStatus(account_id, status, error=""):
                 account.status = status
             if account.error != error:
                 account.error = error
+        else:
+            print(f"{type}账号：{name}：没找到该账号")
+        db.session.add(account)
+        db.session.commit()
+
+def deleteAccountById(account_id, deleted):
+    account = getAccountById(account_id)
+    with app.app_context():
+        if account:
+            if deleted:
+                account.deleted = 1
+            else:
+                account.deleted = 0
         else:
             print(f"{type}账号：{name}：没找到该账号")
         db.session.add(account)
