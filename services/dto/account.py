@@ -29,11 +29,12 @@ def updateAccount(name,pwd,fa2,type,email_name=None,email_pass=None):
                 account.email_pass = email_pass
             if account.fa2 != fa2 and fa2:
                 account.fa2 = fa2
+            account.deleted = 0
         else:
             account = Account(name=name,pwd=pwd,email_name=email_name,email_pass=email_pass,fa2=fa2,type=type, deleted=0)
-            print("新增一条账号信息，id: ", account.id)
         db.session.add(account)
         db.session.commit()
+        print("新增一条账号信息，id: ", account.id)
         return account
 
 # 更新账号信息
