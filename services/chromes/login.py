@@ -1,6 +1,8 @@
 import json
+import threading
 import time
-import asyncio
+
+from flaskServer.services.chromes.worker import createThread
 import requests
 from DrissionPage import ChromiumOptions
 from DrissionPage import ChromiumPage
@@ -123,6 +125,8 @@ def LoginOKXWallet(chrome,env):
                 for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
                     eles[index].input(word)
                 tab.ele("@@type=submit@!btn-disabled").click()
+                if tab.s_ele("@data-testid=okd-checkbox-circle"):
+                    tab.ele("@data-testid=okd-checkbox-circle").click()
                 if tab.s_ele("@data-testid=okd-button"):#  3.31.16版
                     tab.ele("@data-testid=okd-button").click()
                 tab.wait.eles_loaded("@type=submit", timeout=1, raise_err=False)
@@ -182,7 +186,6 @@ def checkTw(chrome, tab, env, count):
     tab.wait(2, 3)
     logger.info(f"{env.name}: 检查tw是否登录成功，当前URL：{tab.url}")
     if ".com/home" in tab.url:
-        logger.info(f"{env.name}: 登录推特成功")
         endCheckTW(tab,env)
     elif "account/access" in tab.url:
         tab.wait(1, 2)
@@ -295,10 +298,18 @@ def endCheckTW(tab,env, count=1):
             return
     if tab.s_ele("@data-testid=SideNav_AccountSwitcher_Button"):
         account = tab.ele("@data-testid=SideNav_AccountSwitcher_Button")
-        username = account.ele("@class=css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3", index=2).text
+        try:
+            username = account.ele("@class=css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3", index=2, timeout=5).text
+        except Exception as e:
+            account.click()
+            if tab.s_ele("@data-testid=AccountSwitcher_Logout_Button"):
+                username = tab.ele("@data-testid=AccountSwitcher_Logout_Button").text
+            else: username=""
+            account.click()
         tw = getAccountById(env.tw_id)
         logger.debug(f"{env.name} tw page name: {username}, db name: @{tw.name}")
-        if username and username != f"@{tw.name}":
+        if username and f"@{tw.name}" not in username:
+            logger.debug(f"{env.name} TW账号发生改变，点击退出账号")
             account.click()
             if tab.s_ele("@data-testid=AccountSwitcher_Logout_Button"):
                 tab.ele("@data-testid=AccountSwitcher_Logout_Button").click()
@@ -322,6 +333,7 @@ def endCheckTW(tab,env, count=1):
             updateAccountStatus(env.tw_id, 1, "TW账号疑似被封，请确认账号状态~")
             logger.warning(f"{env.name}: TW账号疑似被封，请确认账号状态~")
             return
+    logger.info(f"{env.name}: 登录推特成功")
     updateAccountStatus(env.tw_id, 2)
 
 
@@ -331,6 +343,7 @@ def LoginTwByToken(tw, chrome,env):
         tab = chrome.get_tab(url=".com/login")
         if tab is None:
             tab = chrome.new_tab(url="https://x.com/home")
+    chrome.activate_tab(id_ind_tab=tab)
     if "x.com/home" in tab.url:
         pass
     else:
@@ -550,13 +563,14 @@ def LoginChrome(env):
         try:
             proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
             chrome = getChrome(proxy,env)
-            LoginINITWallet(chrome, env)
-            LoginOKXWallet(chrome, env)
-            # LoginPhantomWallet(chrome, env)
-            LoginOutlook(chrome, env)
-            LoginTW(chrome, env)
-            LoginDiscord(chrome, env)
-            LoginBitlight(chrome, env)
+            okxLoginThread = createThread(LoginOKXWallet, (chrome, env,))
+            discordLoginThread = createThread(LoginDiscord, (chrome, env,))
+            twLoginThread = createThread(LoginTW, (chrome, env,))
+            outlookLoginThread = createThread(LoginOutlook, (chrome, env,))
+            okxLoginThread.join()
+            discordLoginThread.join()
+            twLoginThread.join()
+            outlookLoginThread.join()
             logger.info(ChromiumOptions().address)
             updateEnvStatus(env.name, 2)
             return chrome
@@ -566,18 +580,30 @@ def LoginChrome(env):
 
 def DebugChrome(env):
     with app.app_context():
+        # 记录开始时间
+        start_time = time.perf_counter()
         proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
         chrome = getChrome(proxy,env)
         # LoginINITWallet(chrome, env)
-        LoginOKXWallet(chrome, env)
+        okxLoginThread = createThread(LoginOKXWallet, (chrome,env,))
         # LoginPhantomWallet(chrome, env)
-        LoginOutlook(chrome, env)
-        LoginTW(chrome, env)
-        LoginDiscord(chrome, env)
+        discordLoginThread = createThread(LoginDiscord, (chrome,env,))
+        twLoginThread = createThread(LoginTW, (chrome,env,))
+        outlookLoginThread = createThread(LoginOutlook, (chrome,env,))
+        okxLoginThread.join()
+        discordLoginThread.join()
+        twLoginThread.join()
+        outlookLoginThread.join()
         # chrome.new_tab("https://discord.com/invite/wwY5KvYFPC")
         # LoginBitlight(chrome, env)
         logger.info(ChromiumOptions().address)
         updateEnvStatus(env.name, 2)
+        # 记录结束时间
+        end_time = time.perf_counter()
+        # 计算执行时间
+        elapsed_time = end_time - start_time
+        logger.debug(f"{env.name} 登录用时：{elapsed_time}秒")
+
         return chrome
 
 def toLoginAll(env):

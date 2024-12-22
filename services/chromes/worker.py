@@ -7,6 +7,15 @@ from DrissionPage import ChromiumPage
 from flaskServer.config.config import THREAD_POOL_NUM
 from flaskServer.mode.env import Env
 from flaskServer.services.dto.taskLog import addTaskLog, updateTaskLogStatus, updateTaskLogResult
+from threading import Thread
+
+
+# func: 函数名
+# args: 函数需要的参数(chrome,env,)
+def createThread(func, args):
+    thread = Thread(target=func, args=args, name=f"{func}")
+    thread.start()
+    return thread
 
 tasks = {}
 # 创建线程池
