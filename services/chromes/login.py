@@ -1,3 +1,4 @@
+import json
 import time
 import asyncio
 import requests
@@ -265,11 +266,22 @@ def verifyTw(chrome, tab, env):
                 updateAccountStatus(env.tw_id, 1, "TW邮箱验证失败，请人工前往验证")
                 raise Exception(f"{env.name}: TW邮箱验证失败，请人工前往验证")
 
-def endCheckTW(tab,env):
+def endCheckTW(tab,env, count=1):
     if tab.s_ele("@@role=button@@text()=Retry"):
-        logger.info(f"{env.name}点击Retry, tw页面刷新")
         tab.ele("@@role=button@@text()=Retry").click()
-        tab.refresh(ignore_cache=True)
+        logger.debug(f"{env.name} TW Retry按钮出现, 第{count}次 点击Retry~")
+        tab.wait(0,2)
+        if count < 5:
+            count +=1
+            endCheckTW(tab, env, count)
+            return
+        logger.warning(f"{env.name} TW Retry按钮出现, 账号缓存异常，关闭页面重新登录~")
+        tab.set.cookies.remove(name="auth_token", domain=".x.com")
+        tab.refresh()
+        with app.app_context():
+            tw: Account = Account.query.filter_by(id=env.tw_id).first()
+            if tw:
+                LoginTwByUserPwd(tw, tab, env)
     sheetDialog = tab.s_ele("@data-testid=sheetDialog")
     if sheetDialog:
         logger.info(f"{env.name}: 推特出现弹窗需要处理！")
@@ -283,7 +295,7 @@ def endCheckTW(tab,env):
             return
     if tab.s_ele("@data-testid=SideNav_AccountSwitcher_Button"):
         account = tab.ele("@data-testid=SideNav_AccountSwitcher_Button")
-        username = account.ele(".css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3", index=2).text
+        username = account.ele("@class=css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3", index=2).text
         tw = getAccountById(env.tw_id)
         logger.debug(f"{env.name} tw page name: {username}, db name: @{tw.name}")
         if username and username != f"@{tw.name}":
@@ -327,6 +339,22 @@ def LoginTwByToken(tw, chrome,env):
             tab.get("https://x.com/home")
     return tab
 
+def LoginTwByUserPwd(tw, tab, env):
+    tab.refresh(ignore_cache=True)
+    tab.get(url="https://x.com/i/flow/login")
+    logger.info(f"{env.name} 刷新页面并清空缓存 -> 开始登录 TW 账号")
+    flag = tab.wait.eles_loaded('@autocomplete=username', timeout=5, raise_err=False)
+    if not flag:
+        tab.refresh()
+    if "login" in tab.url:
+        tab.ele("@autocomplete=username").input(tw.name, clear=True)
+        tab.ele("@@type=button@@text()=Next").click()
+        tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
+        tab.ele("@@type=button@@text()=Log in").click()
+        fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+        if "login" in tab.url and len(fa2) > 10:
+            tw2faV(tab, fa2)
+
 @chrome_retry(exceptions=(ConnectionError,), max_tries=2, initial_delay=2)
 def LoginTW(chrome:ChromiumPage,env, count=0):
     if count > 3:
@@ -339,20 +367,7 @@ def LoginTW(chrome:ChromiumPage,env, count=0):
         if tw:
             tab = LoginTwByToken(tw, chrome, env)
             if "logout" in tab.url or "login" in tab.url:
-                tab.refresh(ignore_cache=True)
-                tab.get(url="https://x.com/i/flow/login")
-                logger.info(f"{env.name} 刷新页面并清空缓存 -> 开始登录 TW 账号")
-                flag = tab.wait.eles_loaded('@autocomplete=username', timeout=5, raise_err=False)
-                if not flag:
-                    tab.refresh()
-                if "login" in tab.url:
-                    tab.ele("@autocomplete=username").input(tw.name, clear=True)
-                    tab.ele("@@type=button@@text()=Next").click()
-                    tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd), clear=True)
-                    tab.ele("@@type=button@@text()=Log in").click()
-                    fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
-                if "login" in tab.url and len(fa2) > 10:
-                    tw2faV(tab, fa2)
+                LoginTwByUserPwd(tw, tab, env)
         else:
             return
     return checkTw(chrome, get_Custome_Tab(tab), env, count)
@@ -412,10 +427,17 @@ def LoginDiscord(chrome:ChromiumPage,env):
             return get_Custome_Tab(tab)
 
 
-def preCheckOutlook(chrome):
+def LoginOutlookByCookies(chrome, outlook, env):
     tab = chrome.get_tab(url=".com/mail/0/")
     if tab is None:
         tab = chrome.new_tab(url="https://outlook.live.com/mail/0/")
+    # if "outlook" in outlook.name or "hotmail" in outlook.name:
+    #     tab.wait.url_change("microsoft", timeout=3, raise_err=False)
+    #     tab.wait.url_change("https://outlook.live.com/mail/0/", timeout=5, raise_err=False)
+    #     if "microsoft" in tab.url or "login.srf" in tab.url:
+    #         if outlook and outlook.token:
+    #             tab.set.cookies(json.loads(outlook.token))
+    #             chrome.get(url="https://outlook.live.com/mail/0/")
     return tab
 
 def LoginOutlook(chrome:ChromiumPage,env):
@@ -423,8 +445,8 @@ def LoginOutlook(chrome:ChromiumPage,env):
     with app.app_context():
         outlook: Account = Account.query.filter_by(id=env.outlook_id).first()
         if outlook:
+            tab = LoginOutlookByCookies(chrome, outlook, env)
             if "outlook" in outlook.name or "hotmail" in outlook.name:
-                tab = preCheckOutlook(chrome)
                 tab.wait.url_change("microsoft", timeout=3, raise_err=False)
                 tab.wait.url_change("https://outlook.live.com/mail/0/", timeout=5, raise_err=False)
                 if "microsoft" in tab.url or "login.srf" in tab.url:
