@@ -304,7 +304,7 @@ def endCheckTW(tab,env, count=1):
     if tab.s_ele("@data-testid=SideNav_AccountSwitcher_Button"):
         account = tab.ele("@data-testid=SideNav_AccountSwitcher_Button")
         try:
-            username = account.ele("@class=css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3", index=2, timeout=4).text
+            username = account.ele("@class=css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3", index=2, timeout=5).text
         except Exception as e:
             account.click()
             if tab.s_ele("@data-testid=AccountSwitcher_Logout_Button"):
@@ -482,6 +482,7 @@ def LoginOutlook(chrome:ChromiumPage,env):
                     if tab.s_ele("@name=passwd"):
                         if tab.s_ele("@id=userDisplayName"):
                             text = tab.ele("@id=userDisplayName").text
+                            logger.debug(f"{env.name}: 当前准备登录的邮箱 {outlook.name}, 正在登录的邮箱：{text}")
                             if text == outlook.name:
                                 if tab.s_ele("@id=idA_PWD_SwitchToPassword"):
                                     ele = tab.ele("@id=idA_PWD_SwitchToPassword")
@@ -490,10 +491,13 @@ def LoginOutlook(chrome:ChromiumPage,env):
                                 tab.ele("@name=passwd").input(aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
                             else:
                                 if tab.s_ele("@data-testid=secondaryContent"):
-                                    othertab_button = tab.ele("@data-testid=secondaryContent").children()[2]
-                                    othertab_button.click()
-                                    tab.wait.url_change("https://login.live.com/ppsecure/secure.srf?", timeout=8, raise_err=False)
-                                    tab.wait.eles_loaded('@data-testid=i0116', timeout=3, raise_err=False)
+                                    othertab_buttons = tab.ele("@data-testid=secondaryContent").children()
+                                    if len(othertab_buttons) >=3:
+                                        othertab_buttons[2].click()
+                                        tab.wait.url_change("https://login.live.com/ppsecure/secure.srf?", timeout=8, raise_err=False)
+                                    else:
+                                        tab.ele("@aria-label=Back").click()
+                                    tab.wait.eles_loaded('@data-testid=i0116', timeout=6, raise_err=False)
                                     if tab.s_ele("@data-testid=i0116"):
                                         tab.ele("@data-testid=i0116").input(outlook.name, clear=True)
                                     if tab.s_ele("@type=submit"):
@@ -517,7 +521,7 @@ def LoginOutlook(chrome:ChromiumPage,env):
         else:
             logger.info(f"{env.name}: 邮箱 账号为空，跳过登录")
             return
-    tab.wait.url_change("https://outlook.live.com/mail/0", timeout=3, raise_err=False)
+    tab.wait.url_change("https://outlook.live.com/mail/0", timeout=8, raise_err=False)
     if "https://outlook.live.com/mail/0" in tab.url:
         logger.info(f"{env.name}: 登录OUTLOOK成功")
         updateAccountStatus(env.outlook_id, 2)
