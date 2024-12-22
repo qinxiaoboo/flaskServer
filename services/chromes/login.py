@@ -299,7 +299,7 @@ def endCheckTW(tab,env, count=1):
     if tab.s_ele("@data-testid=SideNav_AccountSwitcher_Button"):
         account = tab.ele("@data-testid=SideNav_AccountSwitcher_Button")
         try:
-            username = account.ele("@class=css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3", index=2, timeout=5).text
+            username = account.ele("@class=css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3", index=2, timeout=4).text
         except Exception as e:
             account.click()
             if tab.s_ele("@data-testid=AccountSwitcher_Logout_Button"):
@@ -342,7 +342,9 @@ def LoginTwByToken(tw, chrome,env):
     if tab is None:
         tab = chrome.get_tab(url=".com/login")
         if tab is None:
-            tab = chrome.new_tab(url="https://x.com/home")
+            tab = chrome.get_tab(url="x.com")
+            if tab is None:
+                tab = chrome.new_tab(url="https://x.com/home")
     chrome.activate_tab(id_ind_tab=tab)
     if "x.com/home" in tab.url:
         pass
@@ -432,6 +434,7 @@ def LoginDiscord(chrome:ChromiumPage,env):
                         logger.warning(f"{env.name} Discord -> 获取token失败，但是登录可能成功！")
                 else:
                     logger.warning(f"{env.name} Discord登录异常，可能登录失败！")
+                    chrome.activate_tab(id_ind_tab=tab)
                     updateAccountStatus(env.discord_id, 1, "等待登录超时，可能登录失败！")
                 tab.listen.stop()
             else:
@@ -494,6 +497,9 @@ def LoginOutlook(chrome:ChromiumPage,env):
                     tab.wait.eles_loaded('t:button@tx():Sign in', timeout=2.1, raise_err=False)
                     if tab.s_ele("t:button@tx():Sign in"):
                         tab.ele("t:button@tx():Sign in").click()
+                    if tab.s_ele("@aria-label=Skip for now"):
+                        logger.debug(f"{env.name}: 邮箱 Skip for now")
+                        tab.ele("@aria-label=Skip for now").click()
                     if tab.s_ele("t:button@tx():Next"):
                         tab.ele("t:button@tx():Next").click()
                     if tab.s_ele("@type=checkbox"):
@@ -506,10 +512,12 @@ def LoginOutlook(chrome:ChromiumPage,env):
         else:
             logger.info(f"{env.name}: 邮箱 账号为空，跳过登录")
             return
+    tab.wait.url_change("https://outlook.live.com/mail/0", timeout=3, raise_err=False)
     if "https://outlook.live.com/mail/0" in tab.url:
         logger.info(f"{env.name}: 登录OUTLOOK成功")
         updateAccountStatus(env.outlook_id, 2)
     else:
+        chrome.activate_tab(id_ind_tab=tab)
         logger.warning(f"{env.name}: 登录OUTLOOK失败~")
         updateAccountStatus(env.outlook_id, 1, "邮箱登录失败~")
 
@@ -584,6 +592,7 @@ def DebugChrome(env):
         start_time = time.perf_counter()
         proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
         chrome = getChrome(proxy,env)
+        chrome.get_tab(title="Initia Wallet").close()
         # LoginINITWallet(chrome, env)
         okxLoginThread = createThread(LoginOKXWallet, (chrome,env,))
         # LoginPhantomWallet(chrome, env)

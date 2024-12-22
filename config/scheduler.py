@@ -28,6 +28,6 @@ def get_function_by_name(name):
 
 
 # 检查正在执行的任务状态
-scheduler.add_job(func=checkTasks, args=(), trigger='interval', seconds=5, id='checkTask')
+scheduler.add_job(func=checkTasks, args=(), trigger='interval', seconds=15, id='checkTask')
 # 每天21点清理7天以前的执行记录
 scheduler.add_job(func=clearTaskLog, args=(), trigger='cron', hour=21, minute=0, id='clearTaskLog')

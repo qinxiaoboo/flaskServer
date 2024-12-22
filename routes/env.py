@@ -13,6 +13,9 @@ from flaskServer.services.dto.env import updateAllStatus, updateLabel, addLabel
 from flaskServer.services.dto.user import getUserByToken
 from flaskServer.utils.envutil import can_be_list
 from flaskServer.services.dto.job import updateJob, deleteJob, getJobs, getJob
+from flaskServer.config.config import CHROME_USER_DATA_PATH
+from pathlib import Path
+from flaskServer.utils.fileUtils import removePath
 
 bp = Blueprint('envs', __name__)
 
@@ -43,7 +46,15 @@ def reset (groups):
     result = {"code": 0, 'msg': "success"}
     data = request.get_json()
     ids = data.get('ids', [])
-    logger.info(f"Received ids: {ids}")
+    resetType = data.get("type","")
+    logger.info(f"Received ids: {ids}, reset type: {resetType}")
+    if resetType == "hard":
+        envs = getEnvsByIds(ids)
+        for env in envs:
+            removePath(CHROME_USER_DATA_PATH / Path("config/") / Path(env.name))
+            removePath(CHROME_USER_DATA_PATH / Path("dowloads/") / Path(env.name))
+            removePath(CHROME_USER_DATA_PATH / Path("data/") / Path(env.name))
+            removePath(CHROME_USER_DATA_PATH / Path("cache/") / Path(env.name))
     updateAllStatus(ids, 0)
     logger.info(f"所选环境配置初始化成功，下次登录环境重新加载配置文件")
     return result
