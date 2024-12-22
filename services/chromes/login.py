@@ -140,8 +140,13 @@ def LoginOKXWallet(chrome,env):
                     tab.ele("@data-testid=okd-button").click()
                 if tab.s_ele("@type=button"): # 3.30.之前版本的okx
                     tab.ele("@type=button").click()
-                tab.ele("MATIC")
-                logger.info(f"{env.name}: OKX 登录成功")
+                if tab.s_ele("@data-testid=okd-button"): #  3.31.16版
+                    tab.ele("@data-testid=okd-button").click()
+                flag = tab.wait.eles_loaded("USDT", timeout=5, raise_err=False)
+                if flag:
+                    logger.info(f"{env.name}: OKX 登录成功")
+                else:
+                    logger.warning(f"{env.name}: OKX 登录失败 ")
             else:
                 logger.info(f"{env.name}: OKX 账号为空，跳过登录")
     tab.close()

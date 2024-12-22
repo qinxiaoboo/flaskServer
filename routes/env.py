@@ -11,6 +11,7 @@ from flaskServer.services.dto.env import getEnvsByIds
 from flaskServer.services.dto.env import getEnvsInfo
 from flaskServer.services.dto.env import updateAllStatus, updateLabel, addLabel
 from flaskServer.services.dto.user import getUserByToken
+from flaskServer.services.dto.account import updateAccountStatus
 from flaskServer.utils.envutil import can_be_list
 from flaskServer.services.dto.job import updateJob, deleteJob, getJobs, getJob
 from flaskServer.config.config import CHROME_USER_DATA_PATH
@@ -55,6 +56,9 @@ def reset (groups):
             removePath(CHROME_USER_DATA_PATH / Path("dowloads/") / Path(env.name))
             removePath(CHROME_USER_DATA_PATH / Path("data/") / Path(env.name))
             removePath(CHROME_USER_DATA_PATH / Path("cache/") / Path(env.name))
+            updateAccountStatus(env.tw_id, 0, "硬重置了tw状态~")
+            updateAccountStatus(env.discord_id, 0, "硬重置了discord状态~")
+            updateAccountStatus(env.outlook_id, 0, "硬重置了outlook状态~")
     updateAllStatus(ids, 0)
     logger.info(f"所选环境配置初始化成功，下次登录环境重新加载配置文件")
     return result
