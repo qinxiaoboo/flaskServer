@@ -37,14 +37,27 @@
             box-shadow: 0 0 6px rgba(52, 152, 219, 0.2);
             outline: none; /* 移除默认的焦点轮廓 */
           }
+          input[type="file"] {
+            width: auto;
+            padding: 5px;
+            border: 2px solid #ddd;
+            border-radius: 2px;
+            font-size: 14px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            }
+          input{
+          }
 
           /* 样式化按钮 */
           button {
+            height: 32px;
+            margin-left: 3px;
             background-color: #3498db;
             color: white;
             border: none;
             padding: 6px 14px;
-            font-size: 13px;
+            font-size: 14px;
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s, box-shadow 0.3s;
@@ -97,7 +110,7 @@
             margin-bottom: 10px;
             border: 2px solid #ccc;
             border-radius: 2px;
-            font-size: 12px;
+            font-size: 14px;
             background-color: #f9f9f9;
             transition: all 0.3s ease;
         }
@@ -107,6 +120,7 @@
             background-color: #e6e6ff;
             outline: none;
         }
+
     </style>
 </head>
 <body>
@@ -131,11 +145,10 @@
     </form>
         <br>
     <div class="container">
-
-        <div class="batch-actions">
-            <span>环境操作: </span>
+        <div class="batch-actions"  style="display: flex; align-items: center;">
+            <span  style="font-size: 16px; font-weight: bold; color: #333;">环境操作: </span>
             <!-- 选择重置类型 -->
-<!--            <label for="resetType">选择重置类型: </label>-->
+            <label for="resetType"> </label>
             <select id="resetType">
                 <option value="">请选择</option>
                 <option value="hard">硬重置</option>
@@ -145,14 +158,34 @@
             <button id="debug-action-button">调试</button>
             <button id="init-action-button">初始化</button>
             <button id="close-chrome-button">关闭浏览器</button>
-            <br>
-            <br>
-            <span>银河任务: </span>
+            <div class="file-upload-container">
+                <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data" style="display: flex; align-items: center; justify-content: space-between;">
+                    <!-- 自定义文件选择按钮 -->
+                    <input type="file" name="file" id="file" accept=".xlsx, .xls" required style="display: none;" onchange="displayFileName()">
+                    <label for="file" style="display: inline-block; padding: 8px 15px; background-color: #007bff; color: white; cursor: pointer; border-radius: 4px; font-size: 14px; text-align: center; margin-left: 5px;">
+                        导入文件
+                    </label>
+                    <!-- 显示选择的文件名 -->
+                    <div id="file-name" style="font-size: 14px; color: #555; margin-left: 10px;"></div>
+                    <!-- 提交按钮 -->
+                    <button type="submit" style="padding: 8px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; font-size: 14px; cursor: pointer;">
+                        上传
+                    </button>
+                </form>
+                <!-- 进度条 -->
+                <progress id="progressBar" style="width: 100%; height: 20px; display: none;"></progress>
+                <!-- 上传状态 -->
+                <div id="status" style="font-size: 14px; margin-top: 10px;"></div>
+            </div>
+        </div>
+        <div class="batch-actions"  style="display: flex; align-items: center;">
+            <span  style="font-size: 16px; font-weight: bold; color: #333;">银河任务: </span>
             <button onclick="handleOperation('http://' + server_address + ':' + server_port + `/${localStorage.getItem('groups')}/galxe/task/all`)" type="button">银河任务</button>
             <button onclick="handleOperation('http://' + server_address + ':' + server_port + `/${localStorage.getItem('groups')}/galxe/countpoints`)" type="button">银河统计</button>
-            <br>
-            <br>
-            <span>其他任务: </span>
+        </div>
+        <br />
+        <div class="batch-actions"  style="display: flex; align-items: center;">
+            <span  style="font-size: 16px; font-weight: bold; color: #333;">其他任务: </span>
             <button onclick="handleOperation('http://' + server_address + ':' + server_port + `/${localStorage.getItem('groups')}/todo/onenesslabs`)" type="button">Onenesslabs</button>
             <button onclick="handleOperation('http://' + server_address + ':' + server_port + `/${localStorage.getItem('groups')}/todo/Plume`)" type="button">Plume</button>
             <button onclick="handleOperation('http://' + server_address + ':' + server_port + `/${localStorage.getItem('groups')}/todo/checkTG`)" type="button">checkTG</button>
@@ -172,7 +205,6 @@
             <button onclick="handleOperation('http://' + server_address + ':' + server_port + `/${localStorage.getItem('groups')}/todo/engages`)" type="button">Engages</button>
 
 
-            <br>
         </div>
 
         <table id="data-table">
@@ -199,12 +231,6 @@
             <button id="next-page" onclick="changePage(1)">下一页</button><span id="totalCount">Total Count: Loading...</span>
         </div>
 
-<!--        <div class="batch-actions">-->
-<!--            <button id="reset-chrome-setting">重置</button>-->
-<!--            <button id="debug-action-button">调试</button>-->
-<!--            <button id="init-action-button">初始化</button>-->
-<!--        </div>-->
-
     </div>
 
     <script>
@@ -224,6 +250,7 @@
                 // 初次加载
                 fetchSystemInfo();
           });
+
     </script>
 </body>
 </html>

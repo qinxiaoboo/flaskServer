@@ -54,3 +54,12 @@ function resetLocal(){
 		searchQuery=""
 		fetchData()
 }
+
+/**
+ * 上传文件，文件发生改变时触发
+ */
+function displayFileName() {
+	var fileInput = document.getElementById('file');
+	var fileName = fileInput.files[0] ? fileInput.files[0].name : '没有选择文件';
+	document.getElementById('file-name').textContent = fileName;
+}

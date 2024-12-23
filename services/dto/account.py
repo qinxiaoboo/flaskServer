@@ -39,7 +39,7 @@ def updateAccount(name,pwd,fa2,type,email_name=None,email_pass=None, token=""):
             account = Account(name=name,pwd=pwd,email_name=email_name,email_pass=email_pass,fa2=fa2,type=type, deleted=0)
         db.session.add(account)
         db.session.commit()
-        print("新增一条账号信息，id: ", account.id)
+        print(f"账号信息，类型：{type}，名称：{name}，邮箱：{email_name}, id: ", account.id)
         return account
 
 # 更新账号信息

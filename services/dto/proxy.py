@@ -34,7 +34,7 @@ def update(ip,port,user,pwd):
             proxy = Proxy(ip=ip,port=port,user=user,pwd=pwd,status=2)
         db.session.add(proxy)
         db.session.commit()
-        print("新增一条代理信息，id：",proxy.id)
+        print(f"代理信息，IP: {ip}, Port: {port}, id：",proxy.id)
         return proxy
 
 def updateProxyStatus(env,status):

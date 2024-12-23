@@ -193,12 +193,12 @@ def updateEnv(env,group,port,cookies,proxy,tw,discord,outlook,okx,init,bitlight,
                 ENV.user_agent = getUserAgent(userAgent)
             if label and ENV.label != label:
                 ENV.label = label
-            print("更新一条环境信息，id：", ENV.id)
+            print(f"更新一条环境信息，name：{ENV.name}, id：", ENV.id)
         else:
             ENV = Env(name=env,group=group,port=port,user_agent=getUserAgent(userAgent),cookies=cookies,t_proxy_id=getId(proxy)
                       ,tw_id=getId(tw),discord_id=getId(discord),outlook_id=getId(outlook),okx_id=getId(okx),
                       init_id=getId(init),bitlight_id=getId(bitlight),label=label)
-            print("新增一条环境信息，id：", ENV.id)
+            print(f"新增一条环境信息，name：{ENV.name}, id：", ENV.id)
         db.session.add(ENV)
         db.session.commit()
         return ENV

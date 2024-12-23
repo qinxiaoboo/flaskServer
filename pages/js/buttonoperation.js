@@ -88,6 +88,52 @@ function handleInitOperation() {
     );
 }
 
+// 提交表单并显示进度
+function handleUploadFile(e) {
+    e.preventDefault(); // 阻止表单默认提交
+
+    // 获取表单数据
+    const formData = new FormData(this);  // 获取表单数据
+    const file = formData.get('file');    // 获取文件
+
+    // 获取进度条和状态元素
+    const progressBar = document.getElementById('progressBar');
+    const status = document.getElementById('status');
+
+    // 显示进度条
+    progressBar.style.display = 'block';
+
+    // 创建 XMLHttpRequest 实例
+    const xhr = new XMLHttpRequest();
+
+    // 设置上传进度监听
+    xhr.upload.onprogress = function (e) {
+        if (e.lengthComputable) {
+            const percent = (e.loaded / e.total) * 100;
+            progressBar.value = percent;
+        }
+    };
+
+    // 设置上传完成后的回调
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            status.textContent = '文件上传成功！';
+        } else {
+            status.textContent = '上传失败，请重试！';
+        }
+        progressBar.style.display = 'none';  // 隐藏进度条
+    };
+
+    // 设置上传失败的回调
+    xhr.onerror = function () {
+        status.textContent = '上传失败，请检查网络连接！';
+        progressBar.style.display = 'none';  // 隐藏进度条
+    };
+
+    // 启动文件上传
+    xhr.open('POST', 'http://' + server_address + ':' + server_port + `/${localStorage.getItem("groups")}/envs/upload`, true );
+    xhr.send(formData);
+}
 /**
  * 发送 POST 请求的通用函数
  * @param {string} url 请求的 URL

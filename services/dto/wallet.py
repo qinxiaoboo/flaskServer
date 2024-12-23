@@ -29,7 +29,7 @@ def updateWallt(env,word,address,t):
             wallet = Wallet(env=env,word_pass=word,address=address,type=t)
         db.session.add(wallet)
         db.session.commit()
-        print("新增一条钱包信息，id：",wallet.id)
+        print(f"钱包信息，环境名称：{env}, 地址：{address}，id：", wallet.id)
         return wallet
 
 if __name__ == '__main__':

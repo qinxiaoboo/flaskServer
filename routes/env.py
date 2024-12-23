@@ -17,6 +17,7 @@ from flaskServer.services.dto.job import updateJob, deleteJob, getJobs, getJob
 from flaskServer.config.config import CHROME_USER_DATA_PATH
 from pathlib import Path
 from flaskServer.utils.fileUtils import removePath
+from flaskServer.initData.env import uploadEnvs
 
 bp = Blueprint('envs', __name__)
 
@@ -93,6 +94,12 @@ def init (groups):
     envs = getEnvsByIds(ids)
     Thread(target=submit, args=(toLoginAll, envs,)).start()
     return result
+
+@app.route("/<groups>/envs/upload", methods=["POST"])
+def upload (groups):
+    file = request.files['file']  # 获取上传的文件
+    uploadEnvs(file)
+    return 'File uploaded successfully'
 
 # 重置标签
 @app.route("/envs/set/label", methods=["POST"])

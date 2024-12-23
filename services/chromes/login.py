@@ -127,22 +127,15 @@ def LoginOKXWallet(chrome,env):
                 tab.ele("@@type=submit@!btn-disabled").click()
                 if tab.s_ele("@data-testid=okd-checkbox-circle"):
                     tab.ele("@data-testid=okd-checkbox-circle").click()
-                if tab.s_ele("@data-testid=okd-button"):#  3.31.16版
+                if tab.s_ele("@data-testid=okd-button"):
                     tab.ele("@data-testid=okd-button").click()
-                tab.wait.eles_loaded("@type=submit", timeout=1, raise_err=False)
-                if tab.s_ele("@type=submit"): # 3.30.之前版本的okx
-                    tab.ele("@type=submit").click()
                 tab.wait.eles_loaded("@type=password", timeout=8, raise_err=False)
                 passwords = tab.eles("@type=password") # 密码
                 for pwd in passwords:
                     pwd.input(WALLET_PASSWORD)
-                if tab.s_ele("@data-testid=okd-button"): #  3.31.16版
+                if tab.s_ele("@data-testid=okd-button"):
                     tab.ele("@data-testid=okd-button").click()
-                if tab.s_ele("@type=button"): # 3.30.之前版本的okx
-                    tab.ele("@type=button").click()
-                if tab.s_ele("@data-testid=okd-button"): #  3.31.16版
-                    tab.ele("@data-testid=okd-button").click()
-                flag = tab.wait.eles_loaded("USDT", timeout=5, raise_err=False)
+                flag = tab.wait.eles_loaded("USDT", timeout=8, raise_err=False)
                 if flag:
                     logger.info(f"{env.name}: OKX 登录成功")
                 else:
