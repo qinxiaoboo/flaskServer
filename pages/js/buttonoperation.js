@@ -16,14 +16,35 @@ function handleOperation(url) {
  * 处理重置操作
  */
 function handleRestOperation() {
-    const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
-    sendPostRequest(
-        'http://' + server_address + ':' + server_port + `/${localStorage.getItem("groups")}/chromes/reset`,
-        { "ids": selectedIds },
-        '重置操作成功',
-        '重置操作失败'
-    );
+    const resetType = document.getElementById("resetType").value;
+    if (resetType === "hard"){
+        const confirmAction = window.confirm("您选择了硬重置操作，确定要继续吗？此操作无法撤销！");
+                if (confirmAction) {
+                    const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+                    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+                    sendPostRequest(
+                        'http://' + server_address + ':' + server_port + `/${localStorage.getItem("groups")}/chromes/reset`,
+                        { "ids": selectedIds , "type": resetType},
+                        '重置操作成功',
+                        '重置操作失败'
+                    );
+                } else {
+                    // 用户取消，不发送请求
+                    alert("操作已取消");
+                }
+    }else if (resetType === "soft"){
+        const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+            const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+            sendPostRequest(
+                'http://' + server_address + ':' + server_port + `/${localStorage.getItem("groups")}/chromes/reset`,
+                { "ids": selectedIds , "type": resetType},
+                '重置操作成功',
+                '重置操作失败'
+            );
+    }else {
+        showAlert('请选择正确的重置操作类型');
+    }
+
 }
 /**
  * 关闭浏览器操作

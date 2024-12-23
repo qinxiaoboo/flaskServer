@@ -89,6 +89,24 @@
         .normal {
             color: black;
         }
+        /* 美化选择框 */
+        select {
+            width: auto;  /* 自适应宽度 */
+            /*min-width: 120px;  !* 最小宽度限制 *!*/
+            padding: 5px;
+            margin-bottom: 10px;
+            border: 2px solid #ccc;
+            border-radius: 2px;
+            font-size: 12px;
+            background-color: #f9f9f9;
+            transition: all 0.3s ease;
+        }
+
+        select:focus {
+            border-color: #6a5acd;
+            background-color: #e6e6ff;
+            outline: none;
+        }
     </style>
 </head>
 <body>
@@ -116,6 +134,13 @@
 
         <div class="batch-actions">
             <span>环境操作: </span>
+            <!-- 选择重置类型 -->
+<!--            <label for="resetType">选择重置类型: </label>-->
+            <select id="resetType">
+                <option value="">请选择</option>
+                <option value="hard">硬重置</option>
+                <option value="soft">软重置</option>
+            </select>
             <button id="reset-chrome-setting">重置</button>
             <button id="debug-action-button">调试</button>
             <button id="init-action-button">初始化</button>
