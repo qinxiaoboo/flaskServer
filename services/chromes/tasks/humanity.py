@@ -165,6 +165,9 @@ def gethumanity(chrome,env):
                 # 等待页面加载
                 if tab.wait.load_start(timeout=10, raise_err=False):
                     print("页面加载完成")
+
+                if tab.s_ele('t:span@text():Get a new place in line'):
+                    tab.ele('t:span@text():Get a new place in line').click()
                 # 等待 'Get Started' 元素出现
                 if tab.s_ele('Get Started', timeout=10):
                     print("'Get Started' 元素已加载，跳出循环")
@@ -187,18 +190,19 @@ def gethumanity(chrome,env):
     else:
         tab.refresh()
 
-    if tab.wait.ele_displayed('@class=skip', timeout=15, raise_err=False):
-        print('点击skip弹幕')
-        tab.ele('@class=skip').click()
-    else:
-        print('没有出现skip')
+    # if tab.wait.ele_displayed('@class=skip', timeout=15, raise_err=False):
+    #     print('点击skip弹幕')
+    #     tab.ele('@class=skip').click()
+    # else:
+    #     print('没有出现skip')
 
     if tab.wait.ele_displayed('@class=skip', timeout=5, raise_err=False):
         print('点击skip弹幕')
         tab.ele('@class=skip').click()
-    if tab.wait.ele_displayed('skip', timeout=20, raise_err=False):
-        print('点击skip弹幕')
-        tab.ele('@class=skip').click()
+
+    # if tab.wait.ele_displayed('skip', timeout=20, raise_err=False):
+    #     print('点击skip弹幕')
+    #     tab.ele('@class=skip').click()
 
     if tab.wait.ele_displayed('@class=bottom', timeout=5, raise_err=False):
         print('点击签到')
@@ -247,17 +251,18 @@ def gethumanity(chrome,env):
             pass
         getDiscord(chrome, env)
         tab.wait.load_start(timeout=10)
-        if tab.wait.ele_displayed('@class=skip', timeout=40, raise_err=False):
+
+        if tab.wait.ele_displayed('@class=skip', timeout=10, raise_err=False):
             print('点击skip弹幕')
             tab.ele('@class=skip').click()
         else:
             print('没有出现skip')
 
-        if tab.wait.ele_displayed('@class=skip', timeout=20, raise_err=False):
+        if tab.wait.ele_displayed('@class=skip', timeout=10, raise_err=False):
             print('点击skip弹幕')
             tab.ele('@class=skip').click()
 
-        if tab.wait.ele_displayed('skip', timeout=20, raise_err=False):
+        if tab.wait.ele_displayed('skip', timeout=10, raise_err=False):
             print('点击skip弹幕')
             tab.ele('@class=skip').click()
 
