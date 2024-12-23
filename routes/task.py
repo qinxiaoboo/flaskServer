@@ -25,6 +25,7 @@ from flaskServer.services.chromes.tasks.Arch import arch
 from flaskServer.services.chromes.tasks.Theoriq import theoriq
 from flaskServer.services.chromes.tasks.X_active import x_active
 from flaskServer.services.chromes.tasks.Engages import engages
+from flaskServer.services.chromes.tasks.humanity_wallet import Humanity_wallet
 
 
 bp = Blueprint('tasks', __name__)
@@ -229,4 +230,15 @@ def Engages (groups):
     with app.app_context():
         envs = getEnvsByIds(ids)
         Thread(target=submit, args=(engages, envs,)).start()
+    return result
+
+@app.route("/<groups>/todo/Humanity_wallet", methods=["POST"])
+def humanity_wallet (groups):
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    with app.app_context():
+        envs = getEnvsByIds(ids)
+        Thread(target=submit, args=(Humanity_wallet, envs,)).start()
     return result
