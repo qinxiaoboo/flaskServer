@@ -187,8 +187,6 @@ def gethumanity(chrome,env):
     # tab.wait.load_start(timeout=6)
     if tab.s_ele('t:p@text():Loading your profile...'):
         chrome.wait(15, 30)
-    else:
-        tab.refresh()
 
     # if tab.wait.ele_displayed('@class=skip', timeout=15, raise_err=False):
     #     print('点击skip弹幕')
@@ -214,11 +212,18 @@ def gethumanity(chrome,env):
     else:
         if tab.wait.eles_loaded('Get Started', timeout=5, raise_err=False):
             tab.ele('Connect Wallet').click()
-            chrome.wait(1)
-            tab.ele('t:div@text():MetaMask').click()
-            if tab.ele('t:div@text():Sign message'):
-                tab.ele('t:div@text():Sign message').click()
-                chrome(2, 3)
+            chrome.wait(5, 10)
+            if tab.s_ele('@data-testid=rk-auth-message-button'):
+                tab.ele('@data-testid=rk-auth-message-button').click()
+                chrome.wait(5, 10)
+            try:
+                tab.ele('t:div@text():MetaMask').click()
+                chrome.wait(3, 6)
+            except Exception as e:
+                pass
+            if tab.s_ele('@data-testid=rk-auth-message-button'):
+                tab.ele('@data-testid=rk-auth-message-button').click()
+                chrome.wait(5, 10)
             chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
             chrome.wait(15, 20)
 
