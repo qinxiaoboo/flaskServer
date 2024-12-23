@@ -187,8 +187,6 @@ def gethumanity(chrome,env):
     # tab.wait.load_start(timeout=6)
     if tab.s_ele('t:p@text():Loading your profile...'):
         chrome.wait(15, 30)
-    else:
-        tab.refresh()
 
     # if tab.wait.ele_displayed('@class=skip', timeout=15, raise_err=False):
     #     print('点击skip弹幕')
@@ -213,71 +211,48 @@ def gethumanity(chrome,env):
 
     else:
         if tab.wait.eles_loaded('Get Started', timeout=5, raise_err=False):
-            tab.ele('@class=MuiButtonBase-root MuiIconButton-root MuiIconButton-colorPrimary MuiIconButton-sizeMd mui-1o8rzlg', index=2).click()
+            tab.ele('Connect Wallet').click()
+            chrome.wait(5, 10)
+            if tab.s_ele('@data-testid=rk-auth-message-button'):
+                tab.ele('@data-testid=rk-auth-message-button').click()
+                chrome.wait(5, 10)
+            try:
+                tab.ele('t:div@text():MetaMask').click()
+                chrome.wait(3, 6)
+            except Exception as e:
+                pass
+            if tab.s_ele('@data-testid=rk-auth-message-button'):
+                tab.ele('@data-testid=rk-auth-message-button').click()
+                chrome.wait(5, 10)
+            chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
             chrome.wait(15, 20)
-        try:
-            if chrome.get_tab(url='https://discord.com').ele('t:div@text():Log in') or chrome.get_tab(url='https://discord.com').ele('t:div@text():登录'):
-                print('重新登录discord')
-                chrome.wait(2, 3)
-                updateAccountStatus(env.discord_id, 0, "重置了Discord登录状态")
-                tab = chrome.get_tab(url="https://discord.com/")
-                if tab.s_ele("Please log in again") or tab.s_ele("请再次登录"):
-                    tab.ele(
-                        "@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85").click()
 
-                if "login" or "登录" in tab.url:
-                    logger.info(f"{env.name} 开始登录 Discord 账号")
-                    with app.app_context():
-                        discord: Account = Account.query.filter_by(id=env.discord_id).first()
-                        if discord:
-                            tab.ele("@name=email").input(discord.name)
-                            tab.ele("@name=password").input(aesCbcPbkdf2DecryptFromBase64(discord.pwd))
-                            tab.ele("@type=submit").click()
-                            fa2 = aesCbcPbkdf2DecryptFromBase64(discord.fa2)
-                            if "login" in tab.url and len(fa2) > 10:
-                                res = requests.get(fa2)
-                                if res.ok:
-                                    code = res.json().get("data").get("otp")
-                                    tab.ele("@autocomplete=one-time-code").input(code)
-                                    tab.ele("@type=submit").click()
-                        else:
-                            updateAccountStatus(env.discord_id, 1, "没有导入DISCORD 的账号信息")
-                            raise Exception(f"{env.name}: 没有导入DISCORD 账号信息")
+            if tab.wait.ele_displayed('@class=skip', timeout=10, raise_err=False):
+                print('点击skip弹幕')
+                tab.ele('@class=skip').click()
+            else:
+                print('没有出现skip')
 
-                if "channels" in tab.url or ".com/app" in tab.url:
-                    updateAccountStatus(env.discord_id, 2)
-                    logger.info(f"{env.name}登录Discord成功！")
-        except Exception as e:
-            pass
-        getDiscord(chrome, env)
-        tab.wait.load_start(timeout=10)
+            # if tab.wait.ele_displayed('@class=skip', timeout=10, raise_err=False):
+            #     print('点击skip弹幕')
+            #     tab.ele('@class=skip').click()
 
-        if tab.wait.ele_displayed('@class=skip', timeout=10, raise_err=False):
-            print('点击skip弹幕')
-            tab.ele('@class=skip').click()
-        else:
-            print('没有出现skip')
+            if tab.wait.ele_displayed('skip', timeout=10, raise_err=False):
+                print('点击skip弹幕')
+                tab.ele('@class=skip').click()
 
-        if tab.wait.ele_displayed('@class=skip', timeout=10, raise_err=False):
-            print('点击skip弹幕')
-            tab.ele('@class=skip').click()
+            if tab.wait.ele_displayed('@class=bottom', timeout=20, raise_err=False):
+                print('点击签到')
+                tab.wait.load_start(timeout=5)
+                tab.ele('@class=bottom').click(by_js=None)
+                tab.wait.load_start(timeout=6)
+                chrome.wait(15, 20)
+            elif tab.ele('@class=bottom disable'):
+                print('已经签到过不需要签到了')
 
-        if tab.wait.ele_displayed('skip', timeout=10, raise_err=False):
-            print('点击skip弹幕')
-            tab.ele('@class=skip').click()
-
-        if tab.wait.ele_displayed('@class=bottom', timeout=20, raise_err=False):
-            print('点击签到')
-            tab.wait.load_start(timeout=5)
-            tab.ele('@class=bottom').click(by_js=None)
-            tab.wait.load_start(timeout=6)
-            chrome.wait(15, 20)
-        elif tab.ele('@class=bottom disable'):
-            print('已经签到过不需要签到了')
-
-        if tab.wait.ele_displayed('@class=skip', timeout=15, raise_err=False):
-            print('点击skip弹幕')
-            tab.ele('@class=skip').click()
+            if tab.wait.ele_displayed('@class=skip', timeout=15, raise_err=False):
+                print('点击skip弹幕')
+                tab.ele('@class=skip').click()
 
     global Rewards_Balance, Ranking, Rewards, Rewards_Yesterday, wallet
     try:
@@ -360,7 +335,7 @@ def gethumanity(chrome,env):
     except Exception as e:
         logger.error(e)
 
-def Humanity(env):
+def Humanity_wallet(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)

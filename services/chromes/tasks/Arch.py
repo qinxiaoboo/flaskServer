@@ -31,6 +31,7 @@ from flaskServer.utils.decorator import chrome_retry
 from flaskServer.services.dto.task_record import updateTaskRecord, getTaskObject
 from flaskServer.services.chromes.login import LoginTW
 name = "Arch"
+from flaskServer.utils.chrome import wait_captcha_page
 
 def getTab(chrome, env):
     tab = chrome.new_tab(url="https://dashboard.arch.network?referralCode=f9c6ab90-03a4-4724-9cbd-080a192f74d2")
@@ -550,21 +551,33 @@ def weekly(chrome, env):
     tab.ele('t:span@text():START MISSIONS').click()
     chrome.wait(2, 3)
     tab.ele('t:div@text():WEEKLY MISSIONS').click()
-    chrome.wait(1)
-    tab.ele('t:button@text():Start', index=1).click()
-    chrome.wait(3, 5)
-    tab.ele('t:button@text():Start', index=1).click()
-    chrome.wait(3, 5)
+
+    x = chrome.new_tab(url="https://x.com/predictr_market")
+    x.ele('t:span@text():Follow').click()
+    chrome.wait(1, 2)
+
+    # tab.ele('t:button@text():Start').click()
+    # chrome.wait(1)
+    # if tab.ele('t:div@text():Completed'):
+    #     pass
+    # else:
+    #     logger.info(f"{env.name}   推特关注失败")
 
     count = 0
-    while count < 4:
-        element = tab.ele('t:button@text():Verify')
+    while count < 2:
+        element = tab.ele('t:button@text():Start')
         if not element:
             break
         else:
             element.click()
         count += 1
-    chrome.wait(1)
+    chrome.wait(3, 6)
+
+    if tab.ele('t:div@text():Completed'):
+        pass
+    else:
+        logger.info(f"{env.name}   推特关注失败")
+
     return
 
 
@@ -669,9 +682,6 @@ def faucet(chrome, env):
 
     # 打开文件进行读取和写入
     while True:
-        if tab.ele('Try again later'):
-            logger.info(f"{env.name}   该环境已达上限，暂时关闭")
-            quitChrome(env, chrome)
 
         # 以读取模式打开文件并读取一行
         with open(r'C:\Users\Toka\Desktop\shell\wallet.txt', 'r', encoding='utf-8') as file:
@@ -684,19 +694,67 @@ def faucet(chrome, env):
         # 获取文件的第一行
         line = lines[0].strip()  # 读取并去掉行尾的换行符
 
-        # 执行操作
-        tab.wait.ele_displayed('t:div@text():Automatic recognition completed', timeout=60)
-        tab.ele('@type=text').input(line, clear=True)
-        chrome.wait(1)
-        tab.ele('@type=submit').click()
-        chrome.wait(1)
+        if wait_captcha_page(tab, env):
+            # 执行操作
+            tab.ele('@type=text').input(line, clear=True)
+            chrome.wait(5)
+            tab.ele('@type=submit').click()
+            chrome.wait(1, 2)
+            if tab.ele('t:div@text=Limit exceeded') or tab.ele('t:p@text():Server is overload') or tab.ele('t:p@text()=Invalid capcha') or tab.ele('t:div@text():Try again later') or tab.ele('Try again later'):
+                with open(r'C:\Users\Toka\Desktop\shell\wallet.txt', 'w', encoding='utf-8') as file:
+                    file.writelines(lines)
+                logger.info(f"{env.name}   该环境已达到限制，暂时关闭")
+                quitChrome(env, chrome)
 
-        # 每处理完一行后，删除这一行
-        lines.pop(0)
+            if tab.ele('t:div@text=Limit exceeded') or tab.ele('t:p@text():Server is overload') or tab.ele('t:p@text()=Invalid capcha') or tab.ele('t:div@text():Try again later') or tab.ele('Try again later'):
+                with open(r'C:\Users\Toka\Desktop\shell\wallet.txt', 'w', encoding='utf-8') as file:
+                    file.writelines(lines)
+                logger.info(f"{env.name}   该环境已达到限制，暂时关闭")
+                quitChrome(env, chrome)
 
-        # 将剩余内容重新写回文件
-        with open(r'C:\Users\Toka\Desktop\shell\wallet.txt', 'w', encoding='utf-8') as file:
-            file.writelines(lines)
+            # 每处理完一行后，删除这一行
+            lines.pop(0)
+
+            # 将剩余内容重新写回文件
+            with open(r'C:\Users\Toka\Desktop\shell\wallet.txt', 'w', encoding='utf-8') as file:
+                file.writelines(lines)
+        else:
+            logger.info(f"{env.name}   该环境已达到限制，暂时关闭")
+            quitChrome(env, chrome)
+
+    return
+
+
+def faucet2(chrome, env):
+    tab = chrome.new_tab(url="https://faucet.testnet4.dev/")
+
+        # 以读取模式打开文件并读取一行
+    with open(r'C:\Users\Toka\Desktop\shell\wallet.txt', 'r', encoding='utf-8') as file:
+        lines = file.readlines()
+
+        # 如果文件为空，跳出循环
+        if not lines:
+            quitChrome(env, chrome)
+
+        # 获取文件的第一行
+    line = lines[0].strip()  # 读取并去掉行尾的换行符
+
+    if wait_captcha_page(tab, env):
+            # 执行操作
+            tab.ele('@type=text').input(line, clear=True)
+            chrome.wait(5)
+            tab.ele('@type=submit').click()
+            chrome.wait(1, 2)
+            # 每处理完一行后，删除这一行
+            lines.pop(0)
+
+            # 将剩余内容重新写回文件
+            with open(r'C:\Users\Toka\Desktop\shell\wallet.txt', 'w', encoding='utf-8') as file:
+                file.writelines(lines)
+
+    else:
+            logger.info(f"{env.name}   该环境已达到限制，暂时关闭")
+            quitChrome(env, chrome)
 
     return
 
@@ -776,11 +834,12 @@ def arch(env):
             chrome: ChromiumPage = OKXChrome(env)
             # getTab(chrome, env)
             # missions(chrome, env)
-            # weekly(chrome, env)
+            weekly(chrome, env)
             # daily(chrome, env)
             # community(chrome, env)
             # count(chrome, env)
-            faucet(chrome, env)
+            # faucet(chrome, env)
+            # faucet2(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:
             logger.error(f"{env.name} 执行：{e}")
