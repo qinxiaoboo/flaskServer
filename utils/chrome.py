@@ -99,7 +99,7 @@ def getChromiumPage(env, proxy): # 获取一个ChromiumPage对象
                 chrome = ChromiumPage(addr_or_opts=getChromiumOptions(ChromiumOptions(ini_path=ini_path)))
             else:
                 raise Exception(f"{env.name}: ini_path配置文件不存在")
-        chrome.set.auto_handle_alert(accept=False, all_tabs=True)
+        chrome.set.auto_handle_alert(accept=False)
         return chrome
     except Exception as e:
         quitChrome(env, chrome)
