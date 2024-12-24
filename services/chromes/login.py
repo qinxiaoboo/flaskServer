@@ -1,28 +1,23 @@
-import json
-import threading
 import time
 
-from flaskServer.services.chromes.worker import createThread
 import requests
 from DrissionPage import ChromiumOptions
 from DrissionPage import ChromiumPage
 from loguru import logger
-from flaskServer.services.chromes.mail.factory import Email
 from flaskServer.config.config import WALLET_PASSWORD
 from flaskServer.config.connect import app
-from flaskServer.entity.galxeAccount import AccountInfo
 from flaskServer.mode.account import Account
 from flaskServer.mode.env import Env
 from flaskServer.mode.proxy import Proxy
 from flaskServer.mode.wallet import Wallet
-from flaskServer.services.dto.env import updateEnvStatus
-from flaskServer.services.dto.account import getAccountById
-from flaskServer.utils.chrome import getChrome,get_Custome_Tab, quitChrome
-from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
+from flaskServer.services.chromes.mail.factory import Email
+from flaskServer.services.chromes.worker import createThread
 from flaskServer.services.content import Content
-from flaskServer.services.dto.proxy import getProxyByID
-from flaskServer.services.dto.account import updateAccountStatus,updateAccountToken
-from flaskServer.services.internal.twitter.twitter import Twitter
+from flaskServer.services.dto.account import getAccountById
+from flaskServer.services.dto.account import updateAccountStatus, updateAccountToken
+from flaskServer.services.dto.env import updateEnvStatus
+from flaskServer.utils.chrome import getChrome, get_Custome_Tab, quitChrome
+from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 from flaskServer.utils.decorator import chrome_retry
 
 
@@ -316,6 +311,10 @@ def endCheckTW(tab,env, count=1):
                 tab.close()
                 raise ConnectionError("老账号退出登录")
         elif not username:
+            if count < 3:
+                count += 1
+                endCheckTW(tab, env, count)
+                return
             raise Exception(f"{env.name} 没有获取到 TW 名称")
     token = ""
     for cookie in tab.cookies():
@@ -424,9 +423,12 @@ def LoginDiscord(chrome:ChromiumPage,env):
                     tab.refresh()
                     res = tab.listen.wait(timeout=30, raise_err=False)
                     if res:
-                        updateAccountToken(env.discord_id, res.request.headers["Authorization"])
-                        updateAccountStatus(env.discord_id, 2, "登录成功，并获取到Authorization")
-                        logger.info(f"{env.name} Discord -> 获取token并登录成功！")
+                        try:
+                            updateAccountToken(env.discord_id, res.request.headers["Authorization"])
+                            updateAccountStatus(env.discord_id, 2, "登录成功，并获取到Authorization")
+                            logger.info(f"{env.name} Discord -> 获取token并登录成功！")
+                        except KeyError as e:
+                            logger.warning(f"{env.name} Discord -> 获取token失败，但是登录可能成功！")
                     else:
                         updateAccountStatus(env.discord_id, 2, "登录成功，但是没有获取到Authorization")
                         logger.warning(f"{env.name} Discord -> 获取token失败，但是登录可能成功！")

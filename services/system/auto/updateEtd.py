@@ -1,9 +1,12 @@
-from flaskServer.config.config  import CHROME_EXTEND_UPDATE,CHROME_EXTEND_PATH
-from loguru import logger
 import json
 import os
+import re
 import shutil
-import fnmatch
+from flaskServer.config.config import YES_CAPTCHA_API_KEY
+from loguru import logger
+
+from flaskServer.config.config import CHROME_EXTEND_UPDATE, CHROME_EXTEND_PATH
+
 CHROME_EXTEND_DEFAULT_PAHT = r'C:\Users\Administrator\AppData\Local\google\Chrome\User Data\Default\Extensions\\'
 
 
@@ -45,16 +48,12 @@ def get_latest_directory(parent_dir):
     # 确保给定路径是有效的目录
     if not os.path.isdir(parent_dir):
         raise ValueError(f"{parent_dir} 不是有效的目录")
-
     # 列出目录下所有子文件夹
     directories = [d for d in os.listdir(parent_dir) if os.path.isdir(os.path.join(parent_dir, d))]
-
     if not directories:
         raise ValueError(f"{parent_dir} 目录下没有子文件夹")
-
     # 获取每个文件夹的最后修改时间，并根据修改时间排序
     directories.sort(key=lambda d: os.path.getmtime(os.path.join(parent_dir, d)), reverse=True)
-
     # 返回最新的文件夹路径
     latest_dir = os.path.join(parent_dir, directories[0])
     return latest_dir
@@ -65,7 +64,6 @@ def copy_and_replace(src_dir, dest_dir):
     for item in os.listdir(src_dir):
         src_item = os.path.join(src_dir, item)
         dest_item = os.path.join(dest_dir, item)
-
         if os.path.isdir(src_item):
             if item.startswith("_"):
                 if not os.path.exists(dest_item) :
@@ -78,9 +76,20 @@ def copy_and_replace(src_dir, dest_dir):
                 # 复制目录
                 shutil.copytree(src_item, dest_item)
         else:
-
             # 如果是文件，直接复制
             shutil.copy2(src_item, dest_item)
+
+def writeConfig(name, path):
+    if name.startswith("yescap"):
+        configPath = os.path.join(path, 'config.js')
+        # 读取文件并修改内容
+        with open(configPath, 'r', encoding='utf-8') as file:
+            content = file.read()
+        # 使用正则表达式替换 clientKey 的值
+        updated_content = re.sub(r"clientKey: '([^']*)'", f"clientKey: '{YES_CAPTCHA_API_KEY}'", content)
+        # 将修改后的内容写回文件
+        with open(configPath, 'w', encoding='utf-8') as file:
+            file.write(updated_content)
 
 
 def updateExten():
@@ -93,9 +102,10 @@ def updateExten():
                 # 比较两个目录中的 manifest.json 文件
                 dir1 = os.path.join(CHROME_EXTEND_PATH, name)
                 dir2 = get_latest_directory(os.path.join(CHROME_EXTEND_DEFAULT_PAHT, key))
-                flag  = compare_versions(dir1, dir2)
+                flag = compare_versions(dir1, dir2)
                 if flag:
                     copy_and_replace(dir2, dir1)
+                    writeConfig(name, dir1)
                     logger.info(f"{dir2}目录下的内容，移动到{dir1}目录下")
     logger.info("插件更新完成")
 

@@ -17,30 +17,28 @@ function handleOperation(url) {
  */
 function handleRestOperation() {
     const resetType = document.getElementById("resetType").value;
+    const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
     if (resetType === "hard"){
         const confirmAction = window.confirm("您选择了硬重置操作，确定要继续吗？此操作无法撤销！");
-                if (confirmAction) {
-                    const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-                    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
-                    sendPostRequest(
-                        'http://' + server_address + ':' + server_port + `/${localStorage.getItem("groups")}/chromes/reset`,
-                        { "ids": selectedIds , "type": resetType},
-                        '重置操作成功',
-                        '重置操作失败'
-                    );
-                } else {
-                    // 用户取消，不发送请求
-                    alert("操作已取消");
-                }
-    }else if (resetType === "soft"){
-        const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-            const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+        if (confirmAction) {
             sendPostRequest(
                 'http://' + server_address + ':' + server_port + `/${localStorage.getItem("groups")}/chromes/reset`,
                 { "ids": selectedIds , "type": resetType},
                 '重置操作成功',
                 '重置操作失败'
             );
+        } else {
+            // 用户取消，不发送请求
+            alert("操作已取消");
+        }
+    }else if (resetType === "soft"){
+        sendPostRequest(
+            'http://' + server_address + ':' + server_port + `/${localStorage.getItem("groups")}/chromes/reset`,
+            { "ids": selectedIds , "type": resetType},
+            '重置操作成功',
+            '重置操作失败'
+        );
     }else {
         showAlert('请选择正确的重置操作类型');
     }
@@ -91,11 +89,12 @@ function handleInitOperation() {
 // 提交表单并显示进度
 function handleUploadFile(e) {
     e.preventDefault(); // 阻止表单默认提交
-
+    const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+    const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
     // 获取表单数据
     const formData = new FormData(this);  // 获取表单数据
     const file = formData.get('file');    // 获取文件
-
+    formData.append('ids', JSON.stringify(selectedIds));
     // 获取进度条和状态元素
     const progressBar = document.getElementById('progressBar');
     const status = document.getElementById('status');
