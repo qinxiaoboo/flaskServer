@@ -249,7 +249,7 @@ def liketw(chrome, env):
     ]
 
     random_choice = random.choice(list)
-    tab = chrome.new_tab(url="https://x.com/SaharaLabsAI/status/1869428301435204003")
+    tab = chrome.new_tab(url="https://x.com/SaharaLabsAI/status/1871088052602319187")
     # 点赞
     tab.ele('@data-testid=like').click()
     chrome.wait(1)

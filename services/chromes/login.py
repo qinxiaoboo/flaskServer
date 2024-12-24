@@ -45,6 +45,42 @@ def LoginINITWallet(chrome,env):
             else:
                 logger.info(f"{env.name}: INIT 账号为空，跳过登录")
     tab.close()
+
+def LoginUnisatWallet(chrome,env):
+    tab = chrome.get_tab(title="UniSat Wallet")
+    try:
+        tab.ele("@placeholder=Password").input(WALLET_PASSWORD)
+        tab.ele("Unlock").click()
+    except Exception as e:
+        pass
+
+    if tab.s_ele("Create new wallet"):
+        with app.app_context():
+            wallet = Wallet.query.filter_by(id=env.okx_id).first()
+            if wallet:
+                tab.ele("I already have a wallet").click()
+                try:
+                    eles = tab.eles("@preset=password")
+                    for passwd in eles:
+                        passwd.input(WALLET_PASSWORD)
+                    tab.ele("Continue").click()
+                except Exception as e:
+                    pass
+                tab.ele("@style=display: flex; min-height: 50px; border-radius: 12px; justify-content: center; align-items: center; flex-direction: row; overflow: hidden; cursor: pointer; align-self: stretch; padding-left: 12px; padding-right: 12px; border-width: 1px; border-color: rgba(255, 255, 255, 0.5);",index=1).click()
+                wordpass = tab.eles("@preset=password")
+                for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
+                    wordpass[index].input(word)
+                tab.ele("Continue").click()
+                tab.ele("Taproot (P2TR)").click()
+                tab.ele("Continue").click()
+                tab.ele("@class=ant-checkbox-input", index=1).click()
+                tab.ele("@class=ant-checkbox-input", index=2).click()
+                chrome.wait(4)
+                tab.ele("@class=ant-checkbox-input", index=2).after("t:div", index=2).click()
+                logger.info(f"{env.name}: UnisatWallet 登录成功")
+                tab.close()
+
+
 # def LoginPhantomWallet(chrome,env):
 #     tab = chrome.get_tab(title="Phantom Wallet")
 #     if tab:
@@ -576,10 +612,12 @@ def LoginChrome(env):
             proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
             chrome = getChrome(proxy,env)
             okxLoginThread = createThread(LoginOKXWallet, (chrome, env,))
+            unisatLoginThread = createThread(LoginUnisatWallet, (chrome, env))
             discordLoginThread = createThread(LoginDiscord, (chrome, env,))
             twLoginThread = createThread(LoginTW, (chrome, env,))
             outlookLoginThread = createThread(LoginOutlook, (chrome, env,))
             okxLoginThread.join()
+            unisatLoginThread.join()
             discordLoginThread.join()
             twLoginThread.join()
             outlookLoginThread.join()
@@ -600,13 +638,16 @@ def DebugChrome(env):
         # LoginINITWallet(chrome, env)
         okxLoginThread = createThread(LoginOKXWallet, (chrome,env,))
         # LoginPhantomWallet(chrome, env)
+        unisatLoginThread = createThread(LoginUnisatWallet, (chrome, env))
         discordLoginThread = createThread(LoginDiscord, (chrome,env,))
         twLoginThread = createThread(LoginTW, (chrome,env,))
         outlookLoginThread = createThread(LoginOutlook, (chrome,env,))
         okxLoginThread.join()
+        unisatLoginThread.join()
         discordLoginThread.join()
         twLoginThread.join()
         outlookLoginThread.join()
+
         # chrome.new_tab("https://discord.com/invite/wwY5KvYFPC")
         # LoginBitlight(chrome, env)
         logger.info(ChromiumOptions().address)
