@@ -51,6 +51,7 @@ def LoginUnisatWallet(chrome,env):
     try:
         tab.ele("@placeholder=Password").input(WALLET_PASSWORD)
         tab.ele("Unlock").click()
+        logger.info(f"{env.name}: Unisat钱包解锁成功")
     except Exception as e:
         pass
 
@@ -78,7 +79,7 @@ def LoginUnisatWallet(chrome,env):
                 chrome.wait(4)
                 tab.ele("@class=ant-checkbox-input", index=2).after("t:div", index=2).click()
                 logger.info(f"{env.name}: UnisatWallet 登录成功")
-                tab.close()
+    tab.close()
 
 
 # def LoginPhantomWallet(chrome,env):
@@ -151,7 +152,8 @@ def LoginOKXWallet(chrome,env):
             wallet = Wallet.query.filter_by(id=env.okx_id).first()
             if wallet:
                 tab.ele("Import wallet").click()
-                tab.ele("@@text()=Seed phrase or private key@@style=font-weight: 500; flex: 1 0 0%;").click()
+                tab.ele("@class=_wallet-list__item_d9txs_4 _wallet-list__item__hover_d9txs_8 _wallet-list__cell_d9txs_23 _listCell_q2vqq_29",index=1).click()
+                # tab.ele("@@text()=Seed phrase or private key@@style=font-weight: 500; flex: 1 0 0%;").click()
                 eles = tab.eles("@type=text")
                 for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
                     eles[index].input(word)
@@ -571,6 +573,7 @@ def OKXChrome(env):
             chrome = getChrome(proxy,env)
             LoginOKXWallet(chrome,env)
             # LoginPhantomWallet(chrome,env)
+            LoginUnisatWallet(chrome,env)
             chrome.get_tab(title="Initia Wallet").close()
             return chrome
         except Exception as e:
