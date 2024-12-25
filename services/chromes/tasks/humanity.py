@@ -360,7 +360,7 @@ def gethumanity(chrome,env):
     except Exception as e:
         logger.error(e)
 
-def Humanity(chrome, env):
+def Humanity(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)

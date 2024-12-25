@@ -493,7 +493,7 @@ def getCount(chrome, env):
 
 
 
-def theoriq(chrome, env):
+def theoriq(env):
     with app.app_context():
         try:
             chrome: ChromiumPage = OKXChrome(env)
