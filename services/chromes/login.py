@@ -152,8 +152,12 @@ def LoginOKXWallet(chrome,env):
             wallet = Wallet.query.filter_by(id=env.okx_id).first()
             if wallet:
                 tab.ele("Import wallet").click()
-                tab.ele("@class=_wallet-list__item_d9txs_4 _wallet-list__item__hover_d9txs_8 _wallet-list__cell_d9txs_23 _listCell_q2vqq_29",index=1).click()
-                # tab.ele("@@text()=Seed phrase or private key@@style=font-weight: 500; flex: 1 0 0%;").click()
+                try:
+                    tab.ele("@@text()=Seed phrase or private key@@style=font-weight: 500; flex: 1 0 0%;").click()
+                except Exception as e:
+                    tab.ele(
+                        "@class=_wallet-list__item_d9txs_4 _wallet-list__item__hover_d9txs_8 _wallet-list__cell_d9txs_23 _listCell_q2vqq_29",
+                        index=1).click()
                 eles = tab.eles("@type=text")
                 for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
                     eles[index].input(word)
@@ -317,6 +321,7 @@ def endCheckTW(tab,env, count=1):
             if tw:
                 LoginTwByUserPwd(tw, tab, env)
     sheetDialog = tab.s_ele("@data-testid=sheetDialog")
+
     if sheetDialog:
         logger.info(f"{env.name}: 推特出现弹窗需要处理！")
         confram = tab.ele("@data-testid=sheetDialog").ele("@role=button")
@@ -327,6 +332,11 @@ def endCheckTW(tab,env, count=1):
             logger.warning(f"{env.name}: 弹窗不包含Yes，没有点击")
             updateAccountStatus(env.tw_id, 1, "TW账号有弹窗没有处理~")
             return
+
+    if tab.s_ele("t:span@text():Accept all cookies"):
+        logger.info(f"{env.name}: 推特接受所有cookies")
+        tab.ele("t:span@text():Accept all cookies").click()
+
     if tab.s_ele("@data-testid=SideNav_AccountSwitcher_Button"):
         account = tab.ele("@data-testid=SideNav_AccountSwitcher_Button")
         try:
@@ -573,7 +583,6 @@ def OKXChrome(env):
             chrome = getChrome(proxy,env)
             LoginOKXWallet(chrome,env)
             # LoginPhantomWallet(chrome,env)
-            LoginUnisatWallet(chrome,env)
             chrome.get_tab(title="Initia Wallet").close()
             return chrome
         except Exception as e:
