@@ -1,4 +1,3 @@
-import json
 import time
 
 import requests
@@ -9,16 +8,15 @@ from flaskServer.config.config import WALLET_PASSWORD
 from flaskServer.config.connect import app
 from flaskServer.mode.account import Account
 from flaskServer.mode.env import Env
-from flaskServer.mode.proxy import Proxy
-from flaskServer.mode.wallet import Wallet
 from flaskServer.services.chromes.mail.factory import Email
 from flaskServer.services.chromes.worker import createThread
 from flaskServer.services.content import Content
 from flaskServer.services.dto.account import getAccountById
 from flaskServer.services.dto.account import updateAccountStatus, updateAccountToken
 from flaskServer.services.dto.env import updateEnvStatus
-from flaskServer.services.dto.wallet import getWalletByID
 from flaskServer.services.dto.proxy import getProxyByID
+from flaskServer.services.dto.wallet import getWalletByID
+from flaskServer.utils.RedisHelp import RedisLock
 from flaskServer.utils.chrome import getChrome, get_Custome_Tab, quitChrome
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 from flaskServer.utils.decorator import chrome_retry
@@ -50,6 +48,8 @@ def LoginINITWallet(chrome,env):
 
 def LoginUnisatWallet(chrome,env):
     tab = chrome.get_tab(title="UniSat Wallet")
+    if not tab:
+        return
     if "unlock" in tab.url:
         try:
             tab.ele("@placeholder=Password").input(WALLET_PASSWORD)
@@ -153,9 +153,9 @@ def LoginOKXWallet(chrome,env):
         wallet = getWalletByID(env.okx_id)
         if wallet:
             tab.ele("Import wallet").click()
-            try:
+            if tab.s_ele("@@text()=Seed phrase or private key@@style=font-weight: 500; flex: 1 0 0%;"):
                 tab.ele("@@text()=Seed phrase or private key@@style=font-weight: 500; flex: 1 0 0%;").click()
-            except Exception as e:
+            else:
                 tab.ele(
                     "@class=_wallet-list__item_d9txs_4 _wallet-list__item__hover_d9txs_8 _wallet-list__cell_d9txs_23 _listCell_q2vqq_29",
                     index=1).click()
