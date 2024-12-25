@@ -49,36 +49,37 @@ def LoginINITWallet(chrome,env):
 
 def LoginUnisatWallet(chrome,env):
     tab = chrome.get_tab(title="UniSat Wallet")
-    try:
-        tab.ele("@placeholder=Password").input(WALLET_PASSWORD)
-        tab.ele("Unlock").click()
-        logger.info(f"{env.name}: Unisat钱包解锁成功")
-    except Exception as e:
-        pass
-
-    if tab.s_ele("Create new wallet"):
-        wallet = getWalletByID(env.okx_id)
-        if wallet:
-            tab.ele("I already have a wallet").click()
-            try:
-                eles = tab.eles("@preset=password")
-                for passwd in eles:
-                    passwd.input(WALLET_PASSWORD)
+    if "unlock" in tab.url:
+        try:
+            tab.ele("@placeholder=Password").input(WALLET_PASSWORD)
+            tab.ele("Unlock").click()
+            logger.info(f"{env.name}: Unisat钱包解锁成功")
+        except Exception as e:
+            pass
+    else:
+        if tab.s_ele("Create new wallet"):
+            wallet = getWalletByID(env.okx_id)
+            if wallet:
+                tab.ele("I already have a wallet").click()
+                try:
+                    eles = tab.eles("@preset=password")
+                    for passwd in eles:
+                        passwd.input(WALLET_PASSWORD)
+                    tab.ele("Continue").click()
+                except Exception as e:
+                    pass
+                tab.ele("@style=display: flex; min-height: 50px; border-radius: 12px; justify-content: center; align-items: center; flex-direction: row; overflow: hidden; cursor: pointer; align-self: stretch; padding-left: 12px; padding-right: 12px; border-width: 1px; border-color: rgba(255, 255, 255, 0.5);",index=1).click()
+                wordpass = tab.eles("@preset=password")
+                for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
+                    wordpass[index].input(word)
                 tab.ele("Continue").click()
-            except Exception as e:
-                pass
-            tab.ele("@style=display: flex; min-height: 50px; border-radius: 12px; justify-content: center; align-items: center; flex-direction: row; overflow: hidden; cursor: pointer; align-self: stretch; padding-left: 12px; padding-right: 12px; border-width: 1px; border-color: rgba(255, 255, 255, 0.5);",index=1).click()
-            wordpass = tab.eles("@preset=password")
-            for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
-                wordpass[index].input(word)
-            tab.ele("Continue").click()
-            tab.ele("Taproot (P2TR)").click()
-            tab.ele("Continue").click()
-            tab.ele("@class=ant-checkbox-input", index=1).click()
-            tab.ele("@class=ant-checkbox-input", index=2).click()
-            chrome.wait(4)
-            tab.ele("@class=ant-checkbox-input", index=2).after("t:div", index=2).click()
-            logger.info(f"{env.name}: UnisatWallet 登录成功")
+                tab.ele("Taproot (P2TR)").click()
+                tab.ele("Continue").click()
+                tab.ele("@class=ant-checkbox-input", index=1).click()
+                tab.ele("@class=ant-checkbox-input", index=2).click()
+                chrome.wait(4)
+                tab.ele("@class=ant-checkbox-input", index=2).after("t:div", index=2).click()
+                logger.info(f"{env.name}: UnisatWallet 登录成功")
     tab.close()
 
 
@@ -584,6 +585,7 @@ def OKXChrome(env):
 
 
 def NoAccountChrome(env):
+    chrome =None
     try:
         proxy = getProxyByID(env.t_proxy_id)
         chrome = getChrome(proxy,env)
@@ -595,6 +597,7 @@ def NoAccountChrome(env):
         raise e
 
 def GalxeChrome(env):
+    chrome =None
     try:
         proxy = getProxyByID(env.t_proxy_id)
         chrome = getChrome(proxy,env)
@@ -610,6 +613,7 @@ def GalxeChrome(env):
         raise e
 
 def LoginChrome(env):
+    chrome =None
     try:
         proxy = getProxyByID(env.t_proxy_id)
         chrome = getChrome(proxy,env)

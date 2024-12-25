@@ -195,20 +195,19 @@ def Task(chrome,env):
         # 登录推特
         if twitter.s_ele("Sign in to X"):
             logger.info(f"{env.name}: 推特未登录，触发登录推特")
-            with app.app_context():
-                tw: Account = Account.query.filter_by(id=env.tw_id).first()
-                if tw:
-                    twitter.ele("@autocomplete=username").input(tw.name,clear=True)
-                    twitter.ele("@@type=button@@text()=Next").click()
-                    twitter.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd),clear=True)
-                    twitter.ele("@@type=button@@text()=Log in").click()
-                    fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
-                    if "login" in twitter.url and len(fa2) > 10:
-                        tw2faV(twitter, fa2)
-                    twitter.ele('@type=button').click()
-                    chrome.wait(2)
-                else:
-                    raise Exception(f"{env.name}: 没有导入TW的账号信息")
+            tw: Account = getAccountById(env.tw_id)
+            if tw:
+                twitter.ele("@autocomplete=username").input(tw.name,clear=True)
+                twitter.ele("@@type=button@@text()=Next").click()
+                twitter.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd),clear=True)
+                twitter.ele("@@type=button@@text()=Log in").click()
+                fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                if "login" in twitter.url and len(fa2) > 10:
+                    tw2faV(twitter, fa2)
+                twitter.ele('@type=button').click()
+                chrome.wait(2)
+            else:
+                raise Exception(f"{env.name}: 没有导入TW的账号信息")
         else:
             twitter.ele('@type=button').click()
     else:
@@ -338,22 +337,21 @@ def Lottery(chrome,env):
 
 
 def Oneness(env):
-    with app.app_context():
-        try:
-            chrome: ChromiumPage = OKXChrome(env)
-            getOnenesslabs(chrome, env)
-            getCount(chrome, env)
-            Gem(chrome, env)
-            Task(chrome, env)
-            Gem(chrome, env)
-            # Lottery(chrome, env)
+    try:
+        chrome: ChromiumPage = OKXChrome(env)
+        getOnenesslabs(chrome, env)
+        getCount(chrome, env)
+        Gem(chrome, env)
+        Task(chrome, env)
+        Gem(chrome, env)
+        # Lottery(chrome, env)
 
-            logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
-        except Exception as e:
-            logger.error(f"{env.name} 执行：{e}")
-            return ("失败", e)
-        finally:
-            quitChrome(env, chrome)
+        logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
+    except Exception as e:
+        logger.error(f"{env.name} 执行：{e}")
+        return ("失败", e)
+    finally:
+        quitChrome(env, chrome)
 
 if __name__ == '__main__':
     with app.app_context():

@@ -29,11 +29,10 @@ def p_countpoints(groups):
 # 执行全量银河任务
 @app.route("/<groups>/galxe/task/all", methods=["POST"])
 def p_galxeAll (groups):
-    with app.app_context():
-        result = {"code": 0, 'msg': "success"}
-        data = request.get_json()
-        ids = data.get('ids', [])
-        logger.info(f"Received ids: {ids}")
-        envs = getEnvsByIds(ids)
-        Thread(target=submit, args=(toDoGalxeTaskAll,envs,)).start()
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    envs = getEnvsByIds(ids)
+    Thread(target=submit, args=(toDoGalxeTaskAll,envs,)).start()
     return result

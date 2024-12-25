@@ -89,20 +89,19 @@ def getHemi(chrome, env):
             tw_tab = chrome.get_tab(url="twitter")
             if "login" in tw_tab.url:
                 logger.info(f"{env.name}: 推特未登录,尝试重新登录")
-                with app.app_context():
-                    tw: Account = Account.query.filter_by(id=env.tw_id).first()
-                    if tw:
-                        tw_tab.ele("@autocomplete=username").input(tw.name)
-                        tw_tab.ele("@@type=button@@text()=Next").click()
-                        tw_tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
-                        tw_tab.ele("@@type=button@@text()=Log in").click()
-                        fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
-                        if "login" in tab.url and len(fa2) > 10:
-                            tw2faV(tab, fa2)
-                        chrome.wait(15, 20)
-                        tw_tab.ele("Authorize app").click()
-                    else:
-                        raise Exception(f"{env.name}: 没有导入TW的账号信息")
+                tw: Account = getAccountById(env.tw_id)
+                if tw:
+                    tw_tab.ele("@autocomplete=username").input(tw.name)
+                    tw_tab.ele("@@type=button@@text()=Next").click()
+                    tw_tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                    tw_tab.ele("@@type=button@@text()=Log in").click()
+                    fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                    if "login" in tab.url and len(fa2) > 10:
+                        tw2faV(tab, fa2)
+                    chrome.wait(15, 20)
+                    tw_tab.ele("Authorize app").click()
+                else:
+                    raise Exception(f"{env.name}: 没有导入TW的账号信息")
             else:
                 tw_tab.ele("Authorize app").click()
             if tab.s_ele("Your X account has been connected successfully"):

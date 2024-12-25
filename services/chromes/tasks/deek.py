@@ -68,19 +68,18 @@ def getTab(chrome, env):
             if tw_tab:
                     if "login" in tw_tab.url:
                         logger.info(f"{env.name}: 推特未登录,尝试重新登录")
-                        with app.app_context():
-                            tw: Account = Account.query.filter_by(id=env.tw_id).first()
-                            if tw:
-                                tw_tab.ele("@autocomplete=username").input(tw.name)
-                                tw_tab.ele("@@type=button@@text()=Next").click()
-                                tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
-                                tw_tab.ele("@@type=button@@text()=Log in").click()
-                                fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
-                                if "login" in tab.url and len(fa2) > 10:
-                                    tw2faV(tab, fa2)
-                                chrome.wait(25, 30)
-                            else:
-                                    raise Exception(f"{env.name}: 没有导入TW的账号信息")
+                        tw: Account = getAccountById(env.tw_id)
+                        if tw:
+                            tw_tab.ele("@autocomplete=username").input(tw.name)
+                            tw_tab.ele("@@type=button@@text()=Next").click()
+                            tab.ele("@type=password").input(aesCbcPbkdf2DecryptFromBase64(tw.pwd))
+                            tw_tab.ele("@@type=button@@text()=Log in").click()
+                            fa2 = aesCbcPbkdf2DecryptFromBase64(tw.fa2)
+                            if "login" in tab.url and len(fa2) > 10:
+                                tw2faV(tab, fa2)
+                            chrome.wait(25, 30)
+                        else:
+                                raise Exception(f"{env.name}: 没有导入TW的账号信息")
         except Exception as e:
             logger.info(f"y{env.name}: 推特登陆失败")
             return

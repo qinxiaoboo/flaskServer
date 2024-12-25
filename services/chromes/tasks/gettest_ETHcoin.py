@@ -67,16 +67,15 @@ def Faucet(chrome,env):
 
 
 def Oneness(env):
-    with app.app_context():
-        try:
-            chrome: ChromiumPage = OKXChrome(env)
-            Faucet(chrome, env)
-            logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
+    try:
+        chrome: ChromiumPage = OKXChrome(env)
+        Faucet(chrome, env)
+        logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
+        chrome.quit()
+    except Exception as e:
+        logger.error(f"{env.name}: {e}")
+        if chrome:
             chrome.quit()
-        except Exception as e:
-            logger.error(f"{env.name}: {e}")
-            if chrome:
-                chrome.quit()
 
 if __name__ == '__main__':
     # with app.app_context():

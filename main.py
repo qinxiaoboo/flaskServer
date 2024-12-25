@@ -9,7 +9,7 @@ from flaskServer.mode.env import Env
 from flaskServer.services.chromes.login import toLoginAll
 from flaskServer.services.chromes.login import DebugChrome
 from flaskServer.services.chromes.worker import submit, executor
-from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGroup
+from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGroup, getEnvByName
 from flaskServer.services.internal.tasks.spaces_stats import todo as countPoints
 from flaskServer.services.chromes.galxe.login import debugGalxeTask,toDoGalxeTaskAll
 from flaskServer.services.dto.job import addJobByDB
@@ -31,24 +31,21 @@ result = {"code": 0, 'msg': "success"}
 # 初始化所有环境
 @app.route("/init/all")
 def loginAll ():
-    with app.app_context():
-        envs = getAllEnvs()
-        Thread(target=submit, args=(toLoginAll, envs,)).start()
+    envs = getAllEnvs()
+    Thread(target=submit, args=(toLoginAll, envs,)).start()
     return "success"
 
 @app.route("/init/group/<name>")
 def loginEnvsByGroup (name):
-    with app.app_context():
-        envs = getEnvsByGroup(name)
-        Thread(target=submit, args=(toLoginAll, envs,)).start()
+    envs = getEnvsByGroup(name)
+    Thread(target=submit, args=(toLoginAll, envs,)).start()
     return "success"
 
 # 初始化单个环境
 @app.route("/init/<name>")
 def login(name):
-    with app.app_context():
-        env = Env.query.filter_by(name=name).first()
-        Thread(target=DebugChrome,args=(env,)).start()
+    env = getEnvByName(name)
+    Thread(target=DebugChrome,args=(env,)).start()
     return "success"
 
 # 银河任务统计
@@ -59,23 +56,20 @@ def countpoints():
 # 执行全量银河任务
 @app.route("/galxe/task/all")
 def galxeAll ():
-    with app.app_context():
-        envs = getAllEnvs()
-        Thread(target=submit, args=(toDoGalxeTaskAll,envs,)).start()
+    envs = getAllEnvs()
+    Thread(target=submit, args=(toDoGalxeTaskAll,envs,)).start()
     return "success"
 # 单个执行银河任务
 @app.route("/galxe/task/<name>")
 def taskSign(name):
-    with app.app_context():
-        env = Env.query.filter_by(name=name).first()
-        Thread(target=debugGalxeTask, args=(env,)).start()
+    env = getEnvByName(name)
+    Thread(target=debugGalxeTask, args=(env,)).start()
     return "success"
 
 @app.route("/task/plume/all")
 def taskPlume ():
-    with app.app_context():
-        envs = getAllEnvs()
-        Thread(target=submit, args=(toDoPlumeTaskAll, envs,)).start()
+    envs = getAllEnvs()
+    Thread(target=submit, args=(toDoPlumeTaskAll, envs,)).start()
     return "success"
 
 

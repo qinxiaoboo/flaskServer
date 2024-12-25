@@ -6,7 +6,7 @@ from flaskServer.config.config import get_ini_path
 from flaskServer.config.connect import app
 from flaskServer.mode.env import Env
 from flaskServer.services.chromes.login import LoginChrome
-from flaskServer.services.dto.env import updateEnvStatus
+from flaskServer.services.dto.env import updateEnvStatus,getEnvByName
 
 
 class Chrome:
@@ -15,10 +15,9 @@ class Chrome:
         self.chrome = None
 
     def toLogin(self):
-        with app.app_context():
-            env = Env.query.filter_by(name=self.name).first()
-            LoginChrome(env)
-            updateEnvStatus(env.name,2)
+        env = getEnvByName(self.name)
+        LoginChrome(env)
+        updateEnvStatus(env.name,2)
 
     def quit(self):
         self.chrome = ChromiumPage(addr_or_opts=ChromiumOptions(ini_path=get_ini_path(self.name)))
