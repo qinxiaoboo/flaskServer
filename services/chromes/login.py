@@ -16,6 +16,8 @@ from flaskServer.services.content import Content
 from flaskServer.services.dto.account import getAccountById
 from flaskServer.services.dto.account import updateAccountStatus, updateAccountToken
 from flaskServer.services.dto.env import updateEnvStatus
+from flaskServer.services.dto.wallet import getWalletByID
+from flaskServer.services.dto.proxy import getProxyByID
 from flaskServer.utils.chrome import getChrome, get_Custome_Tab, quitChrome
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 from flaskServer.utils.decorator import chrome_retry
@@ -29,21 +31,20 @@ def LoginINITWallet(chrome,env):
         tab.ele("@type=button")
         logger.info(f"{env.name}: INIT 解锁成功")
     else:
-        with app.app_context():
-            init_wallet = Wallet.query.filter_by(id=env.init_id).first()
-            if init_wallet:
-                tab.ele("@href=#/account/import/mnemonic").click()
-                tab.ele("@@name=password@@type=password").input(WALLET_PASSWORD)
-                tab.ele("@@name=confirm@@type=password").input(WALLET_PASSWORD)
-                tab.ele("@type=checkbox").click()
-                tab.ele("@type=submit").click()
-                for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(init_wallet.word_pass).split(" ")):
-                    tab.ele("@name=words." + str(index) + ".value").input(word)
-                tab.ele("@type=submit").click()
-                tab.ele("@type=button")
-                logger.info(f"{env.name}: INIT 登录成功")
-            else:
-                logger.info(f"{env.name}: INIT 账号为空，跳过登录")
+        init_wallet = getWalletByID(env.init_id)
+        if init_wallet:
+            tab.ele("@href=#/account/import/mnemonic").click()
+            tab.ele("@@name=password@@type=password").input(WALLET_PASSWORD)
+            tab.ele("@@name=confirm@@type=password").input(WALLET_PASSWORD)
+            tab.ele("@type=checkbox").click()
+            tab.ele("@type=submit").click()
+            for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(init_wallet.word_pass).split(" ")):
+                tab.ele("@name=words." + str(index) + ".value").input(word)
+            tab.ele("@type=submit").click()
+            tab.ele("@type=button")
+            logger.info(f"{env.name}: INIT 登录成功")
+        else:
+            logger.info(f"{env.name}: INIT 账号为空，跳过登录")
     tab.close()
 
 def LoginUnisatWallet(chrome,env):
@@ -56,29 +57,28 @@ def LoginUnisatWallet(chrome,env):
         pass
 
     if tab.s_ele("Create new wallet"):
-        with app.app_context():
-            wallet = Wallet.query.filter_by(id=env.okx_id).first()
-            if wallet:
-                tab.ele("I already have a wallet").click()
-                try:
-                    eles = tab.eles("@preset=password")
-                    for passwd in eles:
-                        passwd.input(WALLET_PASSWORD)
-                    tab.ele("Continue").click()
-                except Exception as e:
-                    pass
-                tab.ele("@style=display: flex; min-height: 50px; border-radius: 12px; justify-content: center; align-items: center; flex-direction: row; overflow: hidden; cursor: pointer; align-self: stretch; padding-left: 12px; padding-right: 12px; border-width: 1px; border-color: rgba(255, 255, 255, 0.5);",index=1).click()
-                wordpass = tab.eles("@preset=password")
-                for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
-                    wordpass[index].input(word)
+        wallet = getWalletByID(env.okx_id)
+        if wallet:
+            tab.ele("I already have a wallet").click()
+            try:
+                eles = tab.eles("@preset=password")
+                for passwd in eles:
+                    passwd.input(WALLET_PASSWORD)
                 tab.ele("Continue").click()
-                tab.ele("Taproot (P2TR)").click()
-                tab.ele("Continue").click()
-                tab.ele("@class=ant-checkbox-input", index=1).click()
-                tab.ele("@class=ant-checkbox-input", index=2).click()
-                chrome.wait(4)
-                tab.ele("@class=ant-checkbox-input", index=2).after("t:div", index=2).click()
-                logger.info(f"{env.name}: UnisatWallet 登录成功")
+            except Exception as e:
+                pass
+            tab.ele("@style=display: flex; min-height: 50px; border-radius: 12px; justify-content: center; align-items: center; flex-direction: row; overflow: hidden; cursor: pointer; align-self: stretch; padding-left: 12px; padding-right: 12px; border-width: 1px; border-color: rgba(255, 255, 255, 0.5);",index=1).click()
+            wordpass = tab.eles("@preset=password")
+            for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
+                wordpass[index].input(word)
+            tab.ele("Continue").click()
+            tab.ele("Taproot (P2TR)").click()
+            tab.ele("Continue").click()
+            tab.ele("@class=ant-checkbox-input", index=1).click()
+            tab.ele("@class=ant-checkbox-input", index=2).click()
+            chrome.wait(4)
+            tab.ele("@class=ant-checkbox-input", index=2).after("t:div", index=2).click()
+            logger.info(f"{env.name}: UnisatWallet 登录成功")
     tab.close()
 
 
@@ -98,28 +98,27 @@ def LoginUnisatWallet(chrome,env):
 #         tab.ele("Unlock").click()
 #
 #     else:
-#         with app.app_context():
-#             wallet = Wallet.query.filter_by(id=env.okx_id).first()
-#             if wallet:
-#                 tab.ele("Import an existing wallet").click()
-#                 tab.ele("@@class=sc-bdvvtL iZUbiK@@text()=Import Secret Recovery Phrase").click()
-#                 eles = tab.eles("@class=sc-bttaWv gSFlAR")
-#                 for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
-#                     eles[index].input(word)
-#                 tab.ele("Import Wallet").click()
-#                 tab.wait(20)
-#                 tab.ele("Continue").click()
-#                 passwords = tab.eles("@type=password")
-#                 for pwd in passwords:
-#                     pwd.input(WALLET_PASSWORD)
-#                 tab.ele("@type=checkbox").click()
-#                 tab.ele("Continue").click()
-#                 chrome.wait(5)
-#                 tab.ele("Get Started").click()
+#         wallet = getWalletByID(env.okx_id)
+#         if wallet:
+#             tab.ele("Import an existing wallet").click()
+#             tab.ele("@@class=sc-bdvvtL iZUbiK@@text()=Import Secret Recovery Phrase").click()
+#             eles = tab.eles("@class=sc-bttaWv gSFlAR")
+#             for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
+#                 eles[index].input(word)
+#             tab.ele("Import Wallet").click()
+#             tab.wait(20)
+#             tab.ele("Continue").click()
+#             passwords = tab.eles("@type=password")
+#             for pwd in passwords:
+#                 pwd.input(WALLET_PASSWORD)
+#             tab.ele("@type=checkbox").click()
+#             tab.ele("Continue").click()
+#             chrome.wait(5)
+#             tab.ele("Get Started").click()
 #
-#                 logger.info(f"{env.name}: Phantom 登录成功")
-#             else:
-#                 logger.info(f"{env.name}: Phantom 账号为空，跳过登录")
+#             logger.info(f"{env.name}: Phantom 登录成功")
+#         else:
+#             logger.info(f"{env.name}: Phantom 账号为空，跳过登录")
 #     tab.close()
 
 def ConfirmOKXWallet(chrome,tab,env):
@@ -140,6 +139,7 @@ def ConfirmOKXWallet(chrome,tab,env):
     else:
         ele.click()
         logger.info(f"OKX 钱包 确认成功")
+
 def LoginOKXWallet(chrome,env):
     tab = chrome.get_tab(title="OKX Wallet")
     if "unlock" in tab.url:
@@ -148,37 +148,36 @@ def LoginOKXWallet(chrome,env):
         tab.ele("@type=button")
         logger.info(f"{env.name}: OKX 解锁成功")
     else:
-        with app.app_context():
-            wallet = Wallet.query.filter_by(id=env.okx_id).first()
-            if wallet:
-                tab.ele("Import wallet").click()
-                try:
-                    tab.ele("@@text()=Seed phrase or private key@@style=font-weight: 500; flex: 1 0 0%;").click()
-                except Exception as e:
-                    tab.ele(
-                        "@class=_wallet-list__item_d9txs_4 _wallet-list__item__hover_d9txs_8 _wallet-list__cell_d9txs_23 _listCell_q2vqq_29",
-                        index=1).click()
-                eles = tab.eles("@type=text")
-                for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
-                    eles[index].input(word)
-                tab.ele("@@type=submit@!btn-disabled").click()
-                if tab.s_ele("@data-testid=okd-checkbox-circle"):
-                    tab.ele("@data-testid=okd-checkbox-circle").click()
-                if tab.s_ele("@data-testid=okd-button"):
-                    tab.ele("@data-testid=okd-button").click()
-                tab.wait.eles_loaded("@type=password", timeout=8, raise_err=False)
-                passwords = tab.eles("@type=password") # 密码
-                for pwd in passwords:
-                    pwd.input(WALLET_PASSWORD)
-                if tab.s_ele("@data-testid=okd-button"):
-                    tab.ele("@data-testid=okd-button").click()
-                flag = tab.wait.eles_loaded("USDT", timeout=8, raise_err=False)
-                if flag:
-                    logger.info(f"{env.name}: OKX 登录成功")
-                else:
-                    logger.warning(f"{env.name}: OKX 登录失败 ")
+        wallet = getWalletByID(env.okx_id)
+        if wallet:
+            tab.ele("Import wallet").click()
+            try:
+                tab.ele("@@text()=Seed phrase or private key@@style=font-weight: 500; flex: 1 0 0%;").click()
+            except Exception as e:
+                tab.ele(
+                    "@class=_wallet-list__item_d9txs_4 _wallet-list__item__hover_d9txs_8 _wallet-list__cell_d9txs_23 _listCell_q2vqq_29",
+                    index=1).click()
+            eles = tab.eles("@type=text")
+            for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
+                eles[index].input(word)
+            tab.ele("@@type=submit@!btn-disabled").click()
+            if tab.s_ele("@data-testid=okd-checkbox-circle"):
+                tab.ele("@data-testid=okd-checkbox-circle").click()
+            if tab.s_ele("@data-testid=okd-button"):
+                tab.ele("@data-testid=okd-button").click()
+            tab.wait.eles_loaded("@type=password", timeout=8, raise_err=False)
+            passwords = tab.eles("@type=password") # 密码
+            for pwd in passwords:
+                pwd.input(WALLET_PASSWORD)
+            if tab.s_ele("@data-testid=okd-button"):
+                tab.ele("@data-testid=okd-button").click()
+            flag = tab.wait.eles_loaded("USDT", timeout=8, raise_err=False)
+            if flag:
+                logger.info(f"{env.name}: OKX 登录成功")
             else:
-                logger.info(f"{env.name}: OKX 账号为空，跳过登录")
+                logger.warning(f"{env.name}: OKX 登录失败 ")
+        else:
+            logger.info(f"{env.name}: OKX 账号为空，跳过登录")
     tab.close()
 
 def LoginBitlight(chrome:ChromiumPage,env):
@@ -191,18 +190,17 @@ def LoginBitlight(chrome:ChromiumPage,env):
         for i,pwd in enumerate(passwords):
             eyes[i].click()
             pwd.input(WALLET_PASSWORD)
-        with app.app_context():
-            wallet = Wallet.query.filter_by(id=env.bitlight_id).first()
-            if wallet:
-                tab.ele("@@type=button@@text()=Continue").click()
-                eles = tab.eles("@type=password")
-                for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
-                    eles[index].input(word)
-                tab.ele("@@type=button@@text()=Continue").click()
-                tab.ele("@type=button")
-                logger.info(f"{env.name}: 登录Bitlight钱包成功！")
-            else:
-                logger.info(f"{env.name}: Bitlight 账号为空，跳过登录")
+        wallet = getWalletByID(env.bitlight_id)
+        if wallet:
+            tab.ele("@@type=button@@text()=Continue").click()
+            eles = tab.eles("@type=password")
+            for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
+                eles[index].input(word)
+            tab.ele("@@type=button@@text()=Continue").click()
+            tab.ele("@type=button")
+            logger.info(f"{env.name}: 登录Bitlight钱包成功！")
+        else:
+            logger.info(f"{env.name}: Bitlight 账号为空，跳过登录")
     else:
         tab.ele("@type=password").input(WALLET_PASSWORD)
         tab.ele("@type=button").click()
@@ -280,29 +278,28 @@ def checkTw(chrome, tab, env, count):
     return tab
 
 def verifyTw(chrome, tab, env):
-    with app.app_context():
-        tw: Account = Account.query.filter_by(id=env.tw_id).first()
-        if tw:
-            client = Email.from_account(env.id, chrome, env.name, tw.email_name, tw.email_pass)
-            code = client.getCode("confirm your email address to access all of")
+    tw: Account = getAccountById(env.tw_id)
+    if tw:
+        client = Email.from_account(env.id, chrome, env.name, tw.email_name, tw.email_pass)
+        code = client.getCode("confirm your email address to access all of")
+        logger.info(f"{env.name}: TW登录获取验证码：{code}")
+        tab.ele("@@type=text@@name=token").input(code)
+        tab.ele("@@type=submit@@value=Verify").click()
+        if tab.s_ele(".Form-message is-errored"):
+            logger.info(f"{env.name}: TW登录邮箱验证失败，重新获取验证码")
+            code = client.getCode("confirm your email address to access all of", type="other")
             logger.info(f"{env.name}: TW登录获取验证码：{code}")
             tab.ele("@@type=text@@name=token").input(code)
             tab.ele("@@type=submit@@value=Verify").click()
-            if tab.s_ele(".Form-message is-errored"):
-                logger.info(f"{env.name}: TW登录邮箱验证失败，重新获取验证码")
-                code = client.getCode("confirm your email address to access all of", type="other")
-                logger.info(f"{env.name}: TW登录获取验证码：{code}")
-                tab.ele("@@type=text@@name=token").input(code)
-                tab.ele("@@type=submit@@value=Verify").click()
-            if tab.s_ele("@@type=submit@@value=Continue to X"):
-                tab.ele("@@type=submit@@value=Continue to X").click(by_js=True)
-                logger.info(f"{env.name}: TW邮箱验证成功")
-                tab.wait.doc_loaded()
-                tab.wait(5, 6)
-                endCheckTW(tab, env)
-            else:
-                updateAccountStatus(env.tw_id, 1, "TW邮箱验证失败，请人工前往验证")
-                raise Exception(f"{env.name}: TW邮箱验证失败，请人工前往验证")
+        if tab.s_ele("@@type=submit@@value=Continue to X"):
+            tab.ele("@@type=submit@@value=Continue to X").click(by_js=True)
+            logger.info(f"{env.name}: TW邮箱验证成功")
+            tab.wait.doc_loaded()
+            tab.wait(5, 6)
+            endCheckTW(tab, env)
+        else:
+            updateAccountStatus(env.tw_id, 1, "TW邮箱验证失败，请人工前往验证")
+            raise Exception(f"{env.name}: TW邮箱验证失败，请人工前往验证")
 
 def endCheckTW(tab,env, count=1):
     if tab.s_ele("@@role=button@@text()=Retry"):
@@ -316,10 +313,9 @@ def endCheckTW(tab,env, count=1):
         logger.warning(f"{env.name} TW Retry按钮出现, 账号缓存异常，关闭页面重新登录~")
         tab.set.cookies.remove(name="auth_token", domain=".x.com")
         tab.refresh()
-        with app.app_context():
-            tw: Account = Account.query.filter_by(id=env.tw_id).first()
-            if tw:
-                LoginTwByUserPwd(tw, tab, env)
+        tw: Account = getAccountById(env.tw_id)
+        if tw:
+            LoginTwByUserPwd(tw, tab, env)
     sheetDialog = tab.s_ele("@data-testid=sheetDialog")
 
     if sheetDialog:
@@ -422,14 +418,13 @@ def LoginTW(chrome:ChromiumPage,env, count=0):
         updateAccountStatus(env.tw_id, 1, "TW登录重试次数超过三次，停止重试！")
         return
     updateAccountStatus(env.tw_id, 0, "重置了TW登录状态")
-    with app.app_context():
-        tw: Account = Account.query.filter_by(id=env.tw_id).first()
-        if tw:
-            tab = LoginTwByToken(tw, chrome, env)
-            if "logout" in tab.url or "login" in tab.url:
-                LoginTwByUserPwd(tw, tab, env)
-        else:
-            return
+    tw: Account = getAccountById(env.tw_id)
+    if tw:
+        tab = LoginTwByToken(tw, chrome, env)
+        if "logout" in tab.url or "login" in tab.url:
+            LoginTwByUserPwd(tw, tab, env)
+    else:
+        return
     return checkTw(chrome, get_Custome_Tab(tab), env, count)
 
 def LoginDiscordByToken(discord, chrome:ChromiumPage, env):
@@ -445,50 +440,49 @@ def LoginDiscordByToken(discord, chrome:ChromiumPage, env):
 
 def LoginDiscord(chrome:ChromiumPage,env):
     updateAccountStatus(env.discord_id, 0, "重置了Discord登录状态")
-    with app.app_context():
-        discord: Account = Account.query.filter_by(id=env.discord_id).first()
-        if discord:
-            tab = LoginDiscordByToken(discord, chrome, env)
-            if tab.s_ele("Please log in again"):
-                tab.ele("@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85").click()
-            if "login" in tab.url:
-                tab.refresh(ignore_cache=True)
-                tab.get("https://discord.com/login")
-                logger.info(f"{env.name} 刷新页面并清空缓存 -> 开始登录 Discord 账号")
-                tab.ele("@name=email").input(discord.name)
-                tab.ele("@name=password").input(aesCbcPbkdf2DecryptFromBase64(discord.pwd))
-                tab.ele("@type=submit").click()
-                fa2 = aesCbcPbkdf2DecryptFromBase64(discord.fa2)
-                if "login" in tab.url and len(fa2) > 10:
-                    res = requests.get(fa2)
-                    if res.ok:
-                        code = res.json().get("data").get("otp")
-                        tab.ele("@autocomplete=one-time-code").input(code)
-                        tab.ele("@type=submit").click()
-                tab.listen.start("https://discord.com/api/v9/science")
-                tab.wait.url_change("channels", timeout=15, raise_err=False)
-                if "channels" in tab.url or ".com/app" in tab.url:
-                    tab.refresh()
-                    res = tab.listen.wait(timeout=30, raise_err=False)
-                    if res:
-                        try:
-                            updateAccountToken(env.discord_id, res.request.headers["Authorization"])
-                            updateAccountStatus(env.discord_id, 2, "登录成功，并获取到Authorization")
-                            logger.info(f"{env.name} Discord -> 获取token并登录成功！")
-                        except KeyError as e:
-                            logger.warning(f"{env.name} Discord -> 获取token失败，但是登录可能成功！")
-                    else:
-                        updateAccountStatus(env.discord_id, 2, "登录成功，但是没有获取到Authorization")
+    discord: Account = getAccountById(env.discord_id)
+    if discord:
+        tab = LoginDiscordByToken(discord, chrome, env)
+        if tab.s_ele("Please log in again"):
+            tab.ele("@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85").click()
+        if "login" in tab.url:
+            tab.refresh(ignore_cache=True)
+            tab.get("https://discord.com/login")
+            logger.info(f"{env.name} 刷新页面并清空缓存 -> 开始登录 Discord 账号")
+            tab.ele("@name=email").input(discord.name)
+            tab.ele("@name=password").input(aesCbcPbkdf2DecryptFromBase64(discord.pwd))
+            tab.ele("@type=submit").click()
+            fa2 = aesCbcPbkdf2DecryptFromBase64(discord.fa2)
+            if "login" in tab.url and len(fa2) > 10:
+                res = requests.get(fa2)
+                if res.ok:
+                    code = res.json().get("data").get("otp")
+                    tab.ele("@autocomplete=one-time-code").input(code)
+                    tab.ele("@type=submit").click()
+            tab.listen.start("https://discord.com/api/v9/science")
+            tab.wait.url_change("channels", timeout=15, raise_err=False)
+            if "channels" in tab.url or ".com/app" in tab.url:
+                tab.refresh()
+                res = tab.listen.wait(timeout=30, raise_err=False)
+                if res:
+                    try:
+                        updateAccountToken(env.discord_id, res.request.headers["Authorization"])
+                        updateAccountStatus(env.discord_id, 2, "登录成功，并获取到Authorization")
+                        logger.info(f"{env.name} Discord -> 获取token并登录成功！")
+                    except KeyError as e:
                         logger.warning(f"{env.name} Discord -> 获取token失败，但是登录可能成功！")
                 else:
-                    logger.warning(f"{env.name} Discord登录异常，可能登录失败！")
-                    chrome.activate_tab(id_ind_tab=tab)
-                    updateAccountStatus(env.discord_id, 1, "等待登录超时，可能登录失败！")
-                tab.listen.stop()
+                    updateAccountStatus(env.discord_id, 2, "登录成功，但是没有获取到Authorization")
+                    logger.warning(f"{env.name} Discord -> 获取token失败，但是登录可能成功！")
             else:
-                updateAccountStatus(env.discord_id, 2, "登录成功，并获取到Authorization")
-                logger.info(f"{env.name} 通过token -> 登录Discord成功")
-            return get_Custome_Tab(tab)
+                logger.warning(f"{env.name} Discord登录异常，可能登录失败！")
+                chrome.activate_tab(id_ind_tab=tab)
+                updateAccountStatus(env.discord_id, 1, "等待登录超时，可能登录失败！")
+            tab.listen.stop()
+        else:
+            updateAccountStatus(env.discord_id, 2, "登录成功，并获取到Authorization")
+            logger.info(f"{env.name} 通过token -> 登录Discord成功")
+        return get_Custome_Tab(tab)
 
 
 def LoginOutlookByCookies(chrome, outlook, env):
@@ -506,64 +500,63 @@ def LoginOutlookByCookies(chrome, outlook, env):
 
 def LoginOutlook(chrome:ChromiumPage,env):
     updateAccountStatus(env.outlook_id, 0, "重置了OutLook登录状态")
-    with app.app_context():
-        outlook: Account = Account.query.filter_by(id=env.outlook_id).first()
-        if outlook:
-            tab = LoginOutlookByCookies(chrome, outlook, env)
-            if "outlook" in outlook.name or "hotmail" in outlook.name:
-                tab.wait.url_change("microsoft", timeout=3, raise_err=False)
-                tab.wait.url_change("https://outlook.live.com/mail/0/", timeout=5, raise_err=False)
-                if "microsoft" in tab.url or "login.srf" in tab.url:
-                    logger.info(f"{env.name}: 开始登陆 outlook邮箱")
-                    if "login.srf" not in tab.url:
-                        tab = tab.eles("@aria-label=Sign in to Outlook")[4].click.for_new_tab()
-                    tab.wait.eles_loaded('@data-testid=i0116', timeout=3, raise_err=False)
-                    if tab.s_ele("@data-testid=i0116"):
-                        tab.ele("@data-testid=i0116").input(outlook.name, clear=True)
-                    if tab.s_ele("@type=submit"):
-                        tab.ele("@type=submit").click()
-                    if tab.s_ele("@name=passwd"):
-                        if tab.s_ele("@id=userDisplayName"):
-                            text = tab.ele("@id=userDisplayName").text
-                            logger.debug(f"{env.name}: 当前准备登录的邮箱 {outlook.name}, 正在登录的邮箱：{text}")
-                            if text == outlook.name:
-                                if tab.s_ele("@id=idA_PWD_SwitchToPassword"):
-                                    ele = tab.ele("@id=idA_PWD_SwitchToPassword")
-                                    if "password" in ele.text:
-                                        ele.click()
+    outlook: Account = getAccountById(env.outlook_id)
+    if outlook:
+        tab = LoginOutlookByCookies(chrome, outlook, env)
+        if "outlook" in outlook.name or "hotmail" in outlook.name:
+            tab.wait.url_change("microsoft", timeout=3, raise_err=False)
+            tab.wait.url_change("https://outlook.live.com/mail/0/", timeout=5, raise_err=False)
+            if "microsoft" in tab.url or "login.srf" in tab.url:
+                logger.info(f"{env.name}: 开始登陆 outlook邮箱")
+                if "login.srf" not in tab.url:
+                    tab = tab.eles("@aria-label=Sign in to Outlook")[4].click.for_new_tab()
+                tab.wait.eles_loaded('@data-testid=i0116', timeout=3, raise_err=False)
+                if tab.s_ele("@data-testid=i0116"):
+                    tab.ele("@data-testid=i0116").input(outlook.name, clear=True)
+                if tab.s_ele("@type=submit"):
+                    tab.ele("@type=submit").click()
+                if tab.s_ele("@name=passwd"):
+                    if tab.s_ele("@id=userDisplayName"):
+                        text = tab.ele("@id=userDisplayName").text
+                        logger.debug(f"{env.name}: 当前准备登录的邮箱 {outlook.name}, 正在登录的邮箱：{text}")
+                        if text == outlook.name:
+                            if tab.s_ele("@id=idA_PWD_SwitchToPassword"):
+                                ele = tab.ele("@id=idA_PWD_SwitchToPassword")
+                                if "password" in ele.text:
+                                    ele.click()
+                            tab.ele("@name=passwd").input(aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
+                        else:
+                            if tab.s_ele("@data-testid=secondaryContent"):
+                                othertab_buttons = tab.ele("@data-testid=secondaryContent").children()
+                                if len(othertab_buttons) >=3:
+                                    othertab_buttons[2].click()
+                                    tab.wait.url_change("https://login.live.com/ppsecure/secure.srf?", timeout=8, raise_err=False)
+                                else:
+                                    tab.ele("@aria-label=Back").click()
+                                tab.wait.eles_loaded('@data-testid=i0116', timeout=6, raise_err=False)
+                                if tab.s_ele("@data-testid=i0116"):
+                                    tab.ele("@data-testid=i0116").input(outlook.name, clear=True)
+                                if tab.s_ele("@type=submit"):
+                                    tab.ele("@type=submit").click()
                                 tab.ele("@name=passwd").input(aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
-                            else:
-                                if tab.s_ele("@data-testid=secondaryContent"):
-                                    othertab_buttons = tab.ele("@data-testid=secondaryContent").children()
-                                    if len(othertab_buttons) >=3:
-                                        othertab_buttons[2].click()
-                                        tab.wait.url_change("https://login.live.com/ppsecure/secure.srf?", timeout=8, raise_err=False)
-                                    else:
-                                        tab.ele("@aria-label=Back").click()
-                                    tab.wait.eles_loaded('@data-testid=i0116', timeout=6, raise_err=False)
-                                    if tab.s_ele("@data-testid=i0116"):
-                                        tab.ele("@data-testid=i0116").input(outlook.name, clear=True)
-                                    if tab.s_ele("@type=submit"):
-                                        tab.ele("@type=submit").click()
-                                    tab.ele("@name=passwd").input(aesCbcPbkdf2DecryptFromBase64(outlook.pwd))
-                    tab.wait.eles_loaded('t:button@tx():Sign in', timeout=2.1, raise_err=False)
-                    if tab.s_ele("t:button@tx():Sign in"):
-                        tab.ele("t:button@tx():Sign in").click()
-                    if tab.s_ele("@aria-label=Skip for now"):
-                        logger.debug(f"{env.name}: 邮箱 Skip for now")
-                        tab.ele("@aria-label=Skip for now").click()
-                    if tab.s_ele("t:button@tx():Next"):
-                        tab.ele("t:button@tx():Next").click()
-                    if tab.s_ele("@type=checkbox"):
-                        tab.ele("@type=checkbox").click()
-                    if tab.s_ele('t:button@tx():Yes'):
-                        tab.ele('t:button@tx():Yes').click()
-            else:
-                logger.info(f"{env.name}: 邮箱格式不匹配,不登录邮箱")
-                return
+                tab.wait.eles_loaded('t:button@tx():Sign in', timeout=2.1, raise_err=False)
+                if tab.s_ele("t:button@tx():Sign in"):
+                    tab.ele("t:button@tx():Sign in").click()
+                if tab.s_ele("@aria-label=Skip for now"):
+                    logger.debug(f"{env.name}: 邮箱 Skip for now")
+                    tab.ele("@aria-label=Skip for now").click()
+                if tab.s_ele("t:button@tx():Next"):
+                    tab.ele("t:button@tx():Next").click()
+                if tab.s_ele("@type=checkbox"):
+                    tab.ele("@type=checkbox").click()
+                if tab.s_ele('t:button@tx():Yes'):
+                    tab.ele('t:button@tx():Yes').click()
         else:
-            logger.info(f"{env.name}: 邮箱 账号为空，跳过登录")
+            logger.info(f"{env.name}: 邮箱格式不匹配,不登录邮箱")
             return
+    else:
+        logger.info(f"{env.name}: 邮箱 账号为空，跳过登录")
+        return
     tab.wait.url_change("https://outlook.live.com/mail/0", timeout=8, raise_err=False)
     if "https://outlook.live.com/mail/0" in tab.url:
         logger.info(f"{env.name}: 登录OUTLOOK成功")
@@ -576,102 +569,97 @@ def LoginOutlook(chrome:ChromiumPage,env):
 
 
 def OKXChrome(env):
-    with app.app_context():
-        chrome =None
-        try:
-            proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
-            chrome = getChrome(proxy,env)
-            LoginOKXWallet(chrome,env)
-            # LoginPhantomWallet(chrome,env)
-            LoginUnisatWallet(chrome,env)
-            chrome.get_tab(title="Initia Wallet").close()
-            return chrome
-        except Exception as e:
-            quitChrome(env, chrome)
-            raise e
+    chrome =None
+    try:
+        proxy = getProxyByID(env.t_proxy_id)
+        chrome = getChrome(proxy,env)
+        LoginOKXWallet(chrome,env)
+        # LoginPhantomWallet(chrome,env)
+        LoginUnisatWallet(chrome,env)
+        chrome.get_tab(title="Initia Wallet").close()
+        return chrome
+    except Exception as e:
+        quitChrome(env, chrome)
+        raise e
 
 
 def NoAccountChrome(env):
-    with app.app_context():
-        try:
-            proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
-            chrome = getChrome(proxy,env)
-            chrome.get_tab(title="Initia Wallet").close()
-            chrome.get_tab(title="OKX Wallet").close()
-            return chrome
-        except Exception as e:
-            quitChrome(env, chrome)
-            raise e
-
-def GalxeChrome(env):
-    with app.app_context():
-        try:
-            proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
-            chrome = getChrome(proxy,env)
-            LoginINITWallet(chrome,env)
-            LoginOKXWallet(chrome, env)
-            LoginOutlook(chrome, env)
-            LoginTW(chrome, env)
-            LoginDiscord(chrome, env)
-            logger.info(f"{env.name}: {chrome.address}")
-            return chrome
-        except Exception as e:
-            quitChrome(env, chrome)
-            raise e
-
-def LoginChrome(env):
-    with app.app_context():
-        try:
-            proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
-            chrome = getChrome(proxy,env)
-            okxLoginThread = createThread(LoginOKXWallet, (chrome, env,))
-            unisatLoginThread = createThread(LoginUnisatWallet, (chrome, env))
-            discordLoginThread = createThread(LoginDiscord, (chrome, env,))
-            twLoginThread = createThread(LoginTW, (chrome, env,))
-            outlookLoginThread = createThread(LoginOutlook, (chrome, env,))
-            okxLoginThread.join()
-            unisatLoginThread.join()
-            discordLoginThread.join()
-            twLoginThread.join()
-            outlookLoginThread.join()
-            logger.info(ChromiumOptions().address)
-            updateEnvStatus(env.name, 2)
-            return chrome
-        except Exception as e:
-            quitChrome(env, chrome)
-            raise e
-
-def DebugChrome(env):
-    with app.app_context():
-        # 记录开始时间
-        start_time = time.perf_counter()
-        proxy = Proxy.query.filter_by(id=env.t_proxy_id).first()
+    try:
+        proxy = getProxyByID(env.t_proxy_id)
         chrome = getChrome(proxy,env)
         chrome.get_tab(title="Initia Wallet").close()
-        # LoginINITWallet(chrome, env)
-        okxLoginThread = createThread(LoginOKXWallet, (chrome,env,))
-        # LoginPhantomWallet(chrome, env)
+        chrome.get_tab(title="OKX Wallet").close()
+        return chrome
+    except Exception as e:
+        quitChrome(env, chrome)
+        raise e
+
+def GalxeChrome(env):
+    try:
+        proxy = getProxyByID(env.t_proxy_id)
+        chrome = getChrome(proxy,env)
+        LoginINITWallet(chrome,env)
+        LoginOKXWallet(chrome, env)
+        LoginOutlook(chrome, env)
+        LoginTW(chrome, env)
+        LoginDiscord(chrome, env)
+        logger.info(f"{env.name}: {chrome.address}")
+        return chrome
+    except Exception as e:
+        quitChrome(env, chrome)
+        raise e
+
+def LoginChrome(env):
+    try:
+        proxy = getProxyByID(env.t_proxy_id)
+        chrome = getChrome(proxy,env)
+        okxLoginThread = createThread(LoginOKXWallet, (chrome, env,))
         unisatLoginThread = createThread(LoginUnisatWallet, (chrome, env))
-        discordLoginThread = createThread(LoginDiscord, (chrome,env,))
-        twLoginThread = createThread(LoginTW, (chrome,env,))
-        outlookLoginThread = createThread(LoginOutlook, (chrome,env,))
+        discordLoginThread = createThread(LoginDiscord, (chrome, env,))
+        twLoginThread = createThread(LoginTW, (chrome, env,))
+        outlookLoginThread = createThread(LoginOutlook, (chrome, env,))
         okxLoginThread.join()
         unisatLoginThread.join()
         discordLoginThread.join()
         twLoginThread.join()
         outlookLoginThread.join()
-
-        # chrome.new_tab("https://discord.com/invite/wwY5KvYFPC")
-        # LoginBitlight(chrome, env)
         logger.info(ChromiumOptions().address)
         updateEnvStatus(env.name, 2)
-        # 记录结束时间
-        end_time = time.perf_counter()
-        # 计算执行时间
-        elapsed_time = end_time - start_time
-        logger.debug(f"{env.name} 登录用时：{elapsed_time}秒")
-
         return chrome
+    except Exception as e:
+        quitChrome(env, chrome)
+        raise e
+
+def DebugChrome(env):
+    # 记录开始时间
+    start_time = time.perf_counter()
+    proxy = getProxyByID(env.t_proxy_id)
+    chrome = getChrome(proxy,env)
+    chrome.get_tab(title="Initia Wallet").close()
+    # LoginINITWallet(chrome, env)
+    okxLoginThread = createThread(LoginOKXWallet, (chrome,env,))
+    # LoginPhantomWallet(chrome, env)
+    unisatLoginThread = createThread(LoginUnisatWallet, (chrome, env))
+    discordLoginThread = createThread(LoginDiscord, (chrome,env,))
+    twLoginThread = createThread(LoginTW, (chrome,env,))
+    outlookLoginThread = createThread(LoginOutlook, (chrome,env,))
+    okxLoginThread.join()
+    unisatLoginThread.join()
+    discordLoginThread.join()
+    twLoginThread.join()
+    outlookLoginThread.join()
+
+    # chrome.new_tab("https://discord.com/invite/wwY5KvYFPC")
+    # LoginBitlight(chrome, env)
+    logger.info(ChromiumOptions().address)
+    updateEnvStatus(env.name, 2)
+    # 记录结束时间
+    end_time = time.perf_counter()
+    # 计算执行时间
+    elapsed_time = end_time - start_time
+    logger.debug(f"{env.name} 登录用时：{elapsed_time}秒")
+
+    return chrome
 
 def toLoginAll(env):
     if env.status != 2:
