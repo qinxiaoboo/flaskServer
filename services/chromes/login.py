@@ -151,7 +151,12 @@ def LoginOKXWallet(chrome,env):
             wallet = Wallet.query.filter_by(id=env.okx_id).first()
             if wallet:
                 tab.ele("Import wallet").click()
-                tab.ele("@@text()=Seed phrase or private key@@style=font-weight: 500; flex: 1 0 0%;").click()
+                try:
+                    tab.ele("@@text()=Seed phrase or private key@@style=font-weight: 500; flex: 1 0 0%;").click()
+                except Exception as e:
+                    tab.ele(
+                        "@class=_wallet-list__item_d9txs_4 _wallet-list__item__hover_d9txs_8 _wallet-list__cell_d9txs_23 _listCell_q2vqq_29",
+                        index=1).click()
                 eles = tab.eles("@type=text")
                 for index, word in enumerate(aesCbcPbkdf2DecryptFromBase64(wallet.word_pass).split(" ")):
                     eles[index].input(word)
