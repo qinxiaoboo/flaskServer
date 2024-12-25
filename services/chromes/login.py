@@ -320,6 +320,7 @@ def endCheckTW(tab,env, count=1):
             if tw:
                 LoginTwByUserPwd(tw, tab, env)
     sheetDialog = tab.s_ele("@data-testid=sheetDialog")
+
     if sheetDialog:
         logger.info(f"{env.name}: 推特出现弹窗需要处理！")
         confram = tab.ele("@data-testid=sheetDialog").ele("@role=button")
@@ -330,6 +331,11 @@ def endCheckTW(tab,env, count=1):
             logger.warning(f"{env.name}: 弹窗不包含Yes，没有点击")
             updateAccountStatus(env.tw_id, 1, "TW账号有弹窗没有处理~")
             return
+
+    if tab.s_ele("t:span@text():Accept all cookies"):
+        logger.info(f"{env.name}: 推特接受所有cookies")
+        tab.ele("t:span@text():Accept all cookies").click()
+
     if tab.s_ele("@data-testid=SideNav_AccountSwitcher_Button"):
         account = tab.ele("@data-testid=SideNav_AccountSwitcher_Button")
         try:
