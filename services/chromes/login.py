@@ -1,3 +1,4 @@
+import json
 import time
 
 import requests
@@ -333,21 +334,31 @@ def endCheckTW(tab,env, count=1):
     if tab.s_ele("t:span@text():Accept all cookies"):
         logger.info(f"{env.name}: 推特接受所有cookies")
         tab.ele("t:span@text():Accept all cookies").click()
-
-    if tab.s_ele("@data-testid=SideNav_AccountSwitcher_Button"):
-        account = tab.ele("@data-testid=SideNav_AccountSwitcher_Button")
-        try:
-            username = account.ele("@class=css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3", index=2, timeout=5).text
-        except Exception as e:
-            account.click()
-            if tab.s_ele("@data-testid=AccountSwitcher_Logout_Button"):
-                username = tab.ele("@data-testid=AccountSwitcher_Logout_Button").text
-            else: username=""
-            account.click()
-        tw = getAccountById(env.tw_id)
-        logger.debug(f"{env.name} tw page name: {username}, db name: @{tw.name}")
-        if username and f"@{tw.name}" not in username:
-            logger.debug(f"{env.name} TW账号发生改变，点击退出账号")
+    # 获取tw用户名
+    res = tab.listen.wait(timeout=1, raise_err=False)
+    username = None
+    if res and res.response and 'screen_name' in res.response.body:
+        username = f"@{res.response.body['screen_name']}"
+        logger.debug(f"{env.name}: tw setting json: {res.response.body}")
+    else:
+        if tab.s_ele("@data-testid=SideNav_AccountSwitcher_Button"):
+            account = tab.ele("@data-testid=SideNav_AccountSwitcher_Button")
+            try:
+                username = account.ele("@class=css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3", index=2, timeout=5).text
+            except Exception as e:
+                account.click()
+                if tab.s_ele("@data-testid=AccountSwitcher_Logout_Button"):
+                    username = tab.ele("@data-testid=AccountSwitcher_Logout_Button").text
+                else:
+                    username=""
+                account.click()
+    tab.listen.stop()
+    tw = getAccountById(env.tw_id)
+    logger.debug(f"{env.name} tw page name: {username}, db name: @{tw.name}")
+    if username and f"@{tw.name}" not in username:
+        logger.debug(f"{env.name} TW账号发生改变，点击退出账号")
+        if tab.s_ele("@data-testid=SideNav_AccountSwitcher_Button"):
+            account = tab.ele("@data-testid=SideNav_AccountSwitcher_Button")
             account.click()
             if tab.s_ele("@data-testid=AccountSwitcher_Logout_Button"):
                 tab.ele("@data-testid=AccountSwitcher_Logout_Button").click()
@@ -355,12 +366,17 @@ def endCheckTW(tab,env, count=1):
                 logger.warning(f"{env.name} TW账号已经被替换，老账号退出登录")
                 tab.close()
                 raise ConnectionError("老账号退出登录")
-        elif not username:
-            if count < 3:
-                count += 1
-                endCheckTW(tab, env, count)
-                return
-            raise Exception(f"{env.name} 没有获取到 TW 名称")
+            else:
+                logger.warning(f"{env.name} 没有找到tw退出按钮，老账号退出失败，请检查tw账号~")
+        else:
+            logger.warning(f"{env.name} 没有找到tw用户头像，老账号退出失败，请检查tw账号~")
+    elif not username:
+        if count < 3:
+            count += 1
+            endCheckTW(tab, env, count)
+            return
+        raise Exception(f"{env.name} 没有获取到 TW 名称")
+    # 保存token信息
     token = ""
     for cookie in tab.cookies():
         if cookie["name"]=="auth_token":
@@ -387,6 +403,7 @@ def LoginTwByToken(tw, chrome,env):
             tab = chrome.get_tab(url="x.com")
             if tab is None:
                 tab = chrome.new_tab(url="https://x.com/home")
+    tab.listen.start("https://api.x.com/1.1/account/settings.json")
     chrome.activate_tab(id_ind_tab=tab)
     if "x.com/home" in tab.url:
         pass
