@@ -361,9 +361,9 @@ def gethumanity(chrome,env):
         logger.error(e)
 
 def Humanity(chrome, env):
-    # with app.app_context():
+    with app.app_context():
         try:
-            # chrome: ChromiumPage = OKXChrome(env)
+            chrome: ChromiumPage = OKXChrome(env)
             gethumanity(chrome, env)
             logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
         except Exception as e:

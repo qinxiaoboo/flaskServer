@@ -494,9 +494,9 @@ def getCount(chrome, env):
 
 
 def theoriq(chrome, env):
-    # with app.app_context():
+    with app.app_context():
         try:
-            # chrome: ChromiumPage = OKXChrome(env)
+            chrome: ChromiumPage = OKXChrome(env)
             getTab(chrome, env)
             # getSocialTasks(chrome, env)
             getAgenttasks(chrome, env)
