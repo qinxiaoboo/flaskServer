@@ -12,6 +12,12 @@ DataBase = "web"
 app = Flask(__name__)
 app.config[
     'SQLALCHEMY_DATABASE_URI'] = f"mysql+pymysql://{UserName}:{Password}@{HostName}:{Port}/{DataBase}?charset=utf8mb4"
+
+# 配置连接池的参数
+app.config['SQLALCHEMY_POOL_SIZE'] = 20  # 最大连接池大小
+app.config['SQLALCHEMY_POOL_TIMEOUT'] = 30  # 超时时间，单位秒
+app.config['SQLALCHEMY_MAX_OVERFLOW'] = 30  # 最多溢出20个连接
+
 # 是否显示底层执行的SQL语句
 # app.config['SQLALCHEMY_ECHO'] = True
 

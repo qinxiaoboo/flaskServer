@@ -3,14 +3,25 @@ from flaskServer.config.config import ENV_PATH
 from flaskServer.services.dto.proxy import update
 from flaskServer.services.dto.account import updateAccount
 from flaskServer.services.dto.wallet import updateWallt
-from flaskServer.services.dto.env import updateEnv
+from flaskServer.services.dto.env import updateEnv,getEnvsByIds
 
-def uploadEnvs(file):
+def readEnvs(ids):
+    envs = getEnvsByIds(ids)
+    envSet = set()
+    for env in envs:
+        envSet.add(env.name)
+    return envSet
+
+def uploadEnvs(file, ids):
+    envSet = readEnvs(ids)
     df = pd.read_excel(file)
     df = df.fillna(0)
     for index, row in df.iterrows():
         group = row["分组"]
         env = row["环境名称"]
+        if ids:
+            if env not in envSet:
+                continue
         chrom_port = row["启动端口"]
         proxy = row["代理"]
         tw = row["推特账号"]
@@ -62,4 +73,4 @@ def uploadEnvs(file):
             updateEnv(env,group, chrom_port, cookies, PROXY, TW, DISCORD, OUTLOOK, OKX, INIT, BITLIGHT,userAgent, None)
 
 if __name__ == '__main__':
-    uploadEnvs(ENV_PATH)
+    uploadEnvs(ENV_PATH, [])

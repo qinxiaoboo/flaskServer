@@ -1,3 +1,4 @@
+import json
 from threading import Thread
 
 from flask import Blueprint, request, jsonify
@@ -98,7 +99,10 @@ def init (groups):
 @app.route("/<groups>/envs/upload", methods=["POST"])
 def upload (groups):
     file = request.files['file']  # 获取上传的文件
-    uploadEnvs(file)
+    ids = request.form.get("ids")
+    if ids:
+        ids = json.loads(ids)
+        uploadEnvs(file, ids)
     return 'File uploaded successfully'
 
 # 重置标签
