@@ -583,6 +583,7 @@ def OKXChrome(env):
             chrome = getChrome(proxy,env)
             LoginOKXWallet(chrome,env)
             # LoginPhantomWallet(chrome,env)
+            LoginUnisatWallet(chrome,env)
             chrome.get_tab(title="Initia Wallet").close()
             return chrome
         except Exception as e:
