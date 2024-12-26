@@ -352,7 +352,6 @@ def endCheckTW(tab, env, count=1):
                 else:
                     username=""
                 account.click()
-    tab.listen.stop()
     tw = getAccountById(env.tw_id)
     logger.debug(f"{env.name} tw page name: {username}, db name: @{tw.name}")
     if username and f"@{tw.name}" not in username:
@@ -376,6 +375,7 @@ def endCheckTW(tab, env, count=1):
             endCheckTW(tab, env, count)
             return
         raise Exception(f"{env.name} 没有获取到 TW 名称")
+    tab.listen.stop()
     # 保存token信息
     token = ""
     for cookie in tab.cookies():
