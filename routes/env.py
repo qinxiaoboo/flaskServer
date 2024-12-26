@@ -136,7 +136,7 @@ def setslabel ():
         updateLabel(ids, label)
         logger.info(f"所选环境配置初始化成功，下次登录环境重新加载配置文件")
     else:
-        result = {"code": -1, 'error': "执行失败，传入的标签格式有误"}
+        updateLabel(ids, f"[{label}]")
     return result
 
 # 追加标签

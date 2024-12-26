@@ -35,7 +35,7 @@ def uploadEnvs(file, ids):
         # label = row["标签"]
         print(row)
         PROXY, TW, DISCORD, OUTLOOK, OKX, BITLIGHT, INIT = [None for i in range(7)]
-        if env and chrom_port:
+        if env and chrom_port and group:
             if proxy:
                 ip, port, user, pwd = proxy.split(",")
                 PROXY = update(ip, port, user, pwd)

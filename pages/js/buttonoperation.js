@@ -63,20 +63,20 @@ function handleCloseOperation(){
  */
 function handleDeleteOperation(){
     const confirmAction = window.confirm("您选择了删除操作，确定要继续吗？此操作无法撤销！");
-        if (confirmAction) {
-            const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
-            const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
-            sendPostRequest(
-                'http://' + server_address + ':' + server_port + `/${localStorage.getItem("groups")}/chromes/delete`,
-                { "ids": selectedIds },
-                '删除操作成功',
-                '删除操作失败'
-            );
-            fetchData()
-        } else {
-            // 用户取消，不发送请求
-            alert("操作已取消");
-        }
+    if (confirmAction) {
+        const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+        const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+        sendPostRequest(
+            'http://' + server_address + ':' + server_port + `/${localStorage.getItem("groups")}/chromes/delete`,
+            { "ids": selectedIds },
+            '删除操作成功',
+            '删除操作失败'
+        );
+        fetchData()
+    } else {
+        // 用户取消，不发送请求
+        alert("操作已取消");
+    }
 }
 
 /**
@@ -112,6 +112,16 @@ function handleUploadFile(e) {
     e.preventDefault(); // 阻止表单默认提交
     const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
     const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+    if (selectedIds.length === 0){
+        const confirmAction = window.confirm("您没有选择环境操作，确定要继续吗？");
+        if (confirmAction) {
+
+        } else {
+            // 用户取消，不发送请求
+            alert("操作已取消");
+            return
+        }
+    }
     // 获取表单数据
     const formData = new FormData(this);  // 获取表单数据
     const file = formData.get('file');    // 获取文件
