@@ -69,7 +69,8 @@
     <script src="../js/request.js" ></script>
     <script src="../js/config.js" defer></script>
     <script>
-        async function fetchEntries() {
+
+        function fetchEntries() {
             request.get('/dictionary').
             then((response=>{return response.json()}))
                 .then(res=>{
@@ -102,24 +103,29 @@
                         }
                     }
                 })
-
         }
+        fetchEntries()
 
-        async function addEntry() {
+        function addEntry() {
             const groupName = document.getElementById('groupName').value;
             const code = document.getElementById('code').value;
             const value = document.getElementById('value').value;
             const description = document.getElementById('description').value;
 
-            request.post('/dictionary',{ group_name: groupName, code: code, value: value, description: description })
-
-
-            fetchEntries();
+            request.post('/dictionary',{ group_name: groupName, code: code, value: value, description: description }).then((res=>{
+                    fetchEntries();
+            }))
         }
         function deleteEntry(index) {
-            request.delete(`/dictionary/${index}`)
-            fetchEntries();
-
+            const confirmAction = window.confirm("您选择了删除操作，确定要继续吗？此操作无法撤销！");
+            if (confirmAction) {
+                request.delete(`/dictionary/${index}`).then((res)=>{
+                    fetchEntries();
+                })
+            } else {
+                // 用户取消，不发送请求
+                alert("操作已取消");
+            }
         }
     </script>
 </head>

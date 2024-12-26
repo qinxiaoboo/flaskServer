@@ -10,7 +10,7 @@ from flaskServer.services.chromes.login import toLoginAll, DebugChrome
 from flaskServer.services.chromes.worker import submit
 from flaskServer.services.dto.env import getEnvsByIds
 from flaskServer.services.dto.env import getEnvsInfo
-from flaskServer.services.dto.env import updateAllStatus, updateLabel, addLabel
+from flaskServer.services.dto.env import updateAllStatus, updateLabel, addLabel, deleteEnvsByIds
 from flaskServer.services.dto.user import getUserByToken
 from flaskServer.services.dto.account import updateAccountStatus
 from flaskServer.utils.envutil import can_be_list
@@ -65,6 +65,25 @@ def reset (groups):
     logger.info(f"所选环境配置初始化成功，下次登录环境重新加载配置文件")
     return result
 
+# 删除环境
+@app.route("/<groups>/chromes/delete", methods=["POST"])
+def deletes (groups):
+    result = {"code": 0, 'msg': "success"}
+    data = request.get_json()
+    ids = data.get('ids', [])
+    logger.info(f"Received ids: {ids}")
+    envs = getEnvsByIds(ids)
+    for env in envs:
+        removePath(CHROME_USER_DATA_PATH / Path("config/") / Path(env.name))
+        removePath(CHROME_USER_DATA_PATH / Path("dowloads/") / Path(env.name))
+        removePath(CHROME_USER_DATA_PATH / Path("data/") / Path(env.name))
+        removePath(CHROME_USER_DATA_PATH / Path("cache/") / Path(env.name))
+        updateAccountStatus(env.tw_id, 3, "tw状态，状态改为3-已弃置~")
+        updateAccountStatus(env.discord_id, 3, "discord状态，状态改为3-已弃置~")
+        updateAccountStatus(env.outlook_id, 3, "outlook状态，状态改为3-已弃置~")
+    deleteEnvsByIds(ids)
+    logger.info(f"所选环境都已删除 !")
+    return result
 # 关闭浏览器
 @app.route("/<groups>/chromes/close", methods=["POST"])
 def close (groups):

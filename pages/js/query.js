@@ -1,7 +1,16 @@
-function getAccountColor(status){
-	return status === 0 ? 'gray' :
-		status === 1 ? 'red' :
-		status === 2 ? 'green' : 'black';
+function getAccountColor(status) {
+  switch (status) {
+    case 0:
+      return 'gray';
+    case 1:
+      return 'red';
+    case 2:
+      return 'green';
+    case 3:
+      return 'orange';
+    default:
+      return 'black';
+  }
 }
 
 // Function to fetch data and populate the table

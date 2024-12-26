@@ -209,6 +209,12 @@ def getId(object):
     else:
         return 0
 
+def deleteEnvsByIds(ids):
+    with app.app_context():
+        envs = Env.query.filter(Env.id.in_(ids))
+        envs.delete(synchronize_session=False)
+        db.session.commit()
+
 def updateOpenStatus(env_name, status):
     env = getEnvByName(env_name)
     with app.app_context():

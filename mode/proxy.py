@@ -7,8 +7,10 @@ class Proxy(db.Model):
     pwd = db.Column(db.String(120), unique=False, nullable=False)
     ip = db.Column(db.String(120), unique=True, nullable=False)
     port = db.Column(db.String(120), unique=False, nullable=False)
-    # 0: 初始状态 1：连接异常 2：成功
+    # 0: 初始状态 1：连接异常 2：成功, 3:污染度过高
     status = db.Column(db.Integer, unique=False, nullable=False)
+    # 污染度
+    pollutes = db.Column(db.String(2500), unique=False, nullable=False)
 
     def to_json(self):
         return {
@@ -16,7 +18,8 @@ class Proxy(db.Model):
             'user':self.name,
             'ip':self.key,
             'port':self.value,
-            'pwd': self.pwd
-
+            'pwd': self.pwd,
+            'status':self.status,
+            'pollutes': self.pollutes
         }
 

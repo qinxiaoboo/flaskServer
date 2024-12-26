@@ -59,6 +59,27 @@ function handleCloseOperation(){
 }
 
 /**
+ * 删除浏览器操作
+ */
+function handleDeleteOperation(){
+    const confirmAction = window.confirm("您选择了删除操作，确定要继续吗？此操作无法撤销！");
+        if (confirmAction) {
+            const selectedCheckboxes = document.querySelectorAll('.row-checkbox:checked');
+            const selectedIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+            sendPostRequest(
+                'http://' + server_address + ':' + server_port + `/${localStorage.getItem("groups")}/chromes/delete`,
+                { "ids": selectedIds },
+                '删除操作成功',
+                '删除操作失败'
+            );
+            fetchData()
+        } else {
+            // 用户取消，不发送请求
+            alert("操作已取消");
+        }
+}
+
+/**
  * 处理调试操作
  */
 function handleDebugOperation() {
@@ -132,6 +153,7 @@ function handleUploadFile(e) {
     // 启动文件上传
     xhr.open('POST', 'http://' + server_address + ':' + server_port + `/${localStorage.getItem("groups")}/envs/upload`, true );
     xhr.send(formData);
+    fetchData()
 }
 /**
  * 发送 POST 请求的通用函数

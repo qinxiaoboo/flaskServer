@@ -48,6 +48,16 @@ def updateProxyStatus(env,status):
         else:
             print(f"{env.name}没有查询到代理IP")
 
+def addPollutesById(proxy_id, name):
+    proxy = getProxyByID(proxy_id)
+    if proxy:
+        if name:
+            proxy.pollutes = (proxy.pollutes + "," + name).strip(',')
+        if len(proxy.pollutes.split(",")) > 5:
+            proxy.status = 3
+        with app.app_context():
+            db.session.add(proxy)
+            db.session.commit()
 
 if __name__ == '__main__':
     update("168.80.24.58","8099","oz2USP43","Pr382u")

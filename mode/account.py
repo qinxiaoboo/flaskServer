@@ -11,7 +11,7 @@ class Account(db.Model):
     fa2 = db.Column(db.String(120), unique=False, nullable=False)
     type = db.Column(db.String(120), unique=False, nullable=False)
     token = db.Column(db.String(250), unique=False, nullable=True)
-    # 0: 未登录 1：登录异常 2：登录成功
+    # 0: 未登录 1：登录异常 2：登录成功, 3:已弃置
     status = db.Column(db.Integer, unique=False, nullable=False)
     error = db.Column(db.String(120), unique=False, nullable=False)
     # 0: 未删除，1：已删除

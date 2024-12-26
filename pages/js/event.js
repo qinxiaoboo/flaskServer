@@ -11,6 +11,8 @@ document.getElementById('reset-chrome-setting').addEventListener('click', handle
 document.getElementById('debug-action-button').addEventListener('click', handleDebugOperation);
 document.getElementById('init-action-button').addEventListener('click', handleInitOperation);
 document.getElementById('close-chrome-button').addEventListener('click', handleCloseOperation);
+document.getElementById('delete-action-button').addEventListener('click', handleDeleteOperation);
+
  // 监听文件上传
 document.getElementById('uploadForm').addEventListener('submit', handleUploadFile);
 

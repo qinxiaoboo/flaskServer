@@ -14,7 +14,7 @@ from flaskServer.services.content import Content
 from flaskServer.services.dto.account import getAccountById
 from flaskServer.services.dto.account import updateAccountStatus, updateAccountToken
 from flaskServer.services.dto.env import updateEnvStatus
-from flaskServer.services.dto.proxy import getProxyByID
+from flaskServer.services.dto.proxy import getProxyByID, addPollutesById
 from flaskServer.services.dto.wallet import getWalletByID
 from flaskServer.utils.RedisHelp import RedisLock
 from flaskServer.utils.chrome import getChrome, get_Custome_Tab, quitChrome
@@ -303,7 +303,7 @@ def verifyTw(chrome, tab, env):
             updateAccountStatus(env.tw_id, 1, "TW邮箱验证失败，请人工前往验证")
             raise Exception(f"{env.name}: TW邮箱验证失败，请人工前往验证")
 
-def endCheckTW(tab,env, count=1):
+def endCheckTW(tab, env, count=1):
     if tab.s_ele("@@role=button@@text()=Retry"):
         tab.ele("@@role=button@@text()=Retry").click()
         logger.debug(f"{env.name} TW Retry按钮出现, 第{count}次 点击Retry~")
@@ -389,6 +389,7 @@ def endCheckTW(tab,env, count=1):
         ele = tab.ele("@data-testid=inlinePrompt")
         if "Your account is suspended" in ele.text:
             updateAccountStatus(env.tw_id, 1, "TW账号疑似被封，请确认账号状态~")
+            addPollutesById(env.t_proxy_id, username)
             logger.warning(f"{env.name}: TW账号疑似被封，请确认账号状态~")
             return
     logger.info(f"{env.name}: 登录推特成功")
