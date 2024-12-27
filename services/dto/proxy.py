@@ -51,13 +51,15 @@ def updateProxyStatus(env,status):
 def addPollutesById(proxy_id, name):
     proxy = getProxyByID(proxy_id)
     if proxy:
-        if name:
+        polluteList = proxy.pollutes.split(",")
+        if name and name not in polluteList:
             proxy.pollutes = (proxy.pollutes + "," + name).strip(',')
-        if len(proxy.pollutes.split(",")) > 5:
+        if len(polluteList) >= 5:
             proxy.status = 3
         with app.app_context():
             db.session.add(proxy)
             db.session.commit()
 
 if __name__ == '__main__':
-    update("168.80.24.58","8099","oz2USP43","Pr382u")
+    update("168.80.24.58", "8099", "oz2USP43", "Pr382u")
+
