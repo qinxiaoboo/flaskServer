@@ -1,11 +1,11 @@
 from flaskServer.services.chromes.worker import createThread
-from flaskServer.services.chromes.tasks.humanity import Humanity
+from flaskServer.services.chromes.tasks.Humanity.humanity import Humanity
 from flaskServer.services.chromes.tasks.Theoriq import theoriq
-from flaskServer.config.connect import app
-from DrissionPage import ChromiumPage,ChromiumOptions
+from DrissionPage import ChromiumPage
 from flaskServer.services.chromes.login import OKXChrome
 from loguru import logger
-from flaskServer.utils.chrome import quitChrome, get_Custome_Tab
+from flaskServer.utils.chrome import quitChrome
+
 
 def TaskList(chrome,env):
     HumanityTaskThread = createThread(Humanity, (chrome, env,))

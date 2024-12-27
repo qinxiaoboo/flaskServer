@@ -15,6 +15,7 @@ import time
 import random
 from flaskServer.utils.chrome import quitChrome, get_Custome_Tab
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
+from flaskServer.utils.RedisHelp import RedisLock
 
 #humanity protocol
 name = 'humanity'
@@ -268,10 +269,12 @@ def gethumanity(chrome,env):
 
         if tab.wait.ele_displayed('@class=bottom', timeout=20, raise_err=False):
             print('点击签到')
-            tab.wait.load_start(timeout=5)
-            tab.ele('@class=bottom').click(by_js=None)
-            tab.wait.load_start(timeout=6)
-            chrome.wait(15, 20)
+            with RedisLock(f"{env.name}-okx",200,200):
+                tab.wait.load_start(timeout=5)
+                tab.ele('@class=bottom').click(by_js=None)
+                tab.wait.load_start(timeout=6)
+                chrome.wait(15, 20)
+
         elif tab.ele('@class=bottom disable'):
             print('已经签到过不需要签到了')
 
@@ -360,14 +363,14 @@ def gethumanity(chrome,env):
     except Exception as e:
         logger.error(e)
 
-def Humanity(env):
-    with app.app_context():
-        try:
-            chrome: ChromiumPage = OKXChrome(env)
-            gethumanity(chrome, env)
-            logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
-        except Exception as e:
-            logger.error(f"{env.name} 执行：{e}")
-            return ("失败", e)
-        finally:
-            quitChrome(env, chrome)
+def Humanity(chrome,env):
+    # with app.app_context():
+    try:
+        # chrome: ChromiumPage = OKXChrome(env)
+        gethumanity(chrome, env)
+        logger.info(f"{env.name}环境：任务执行完毕，关闭环境")
+    except Exception as e:
+        logger.error(f"{env.name} 执行：{e}")
+        return ("失败", e)
+    finally:
+        quitChrome(env, chrome)
