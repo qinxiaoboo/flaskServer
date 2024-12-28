@@ -5,8 +5,6 @@ from flaskServer.services.dto.proxy import getProxyByID
 from flaskServer.services.dto.env import getChoiceEnvs
 import time
 
-
-
 def initChrom(chrome,env,http_host,http_port,user,pw):
     # 设置代理
     chrome.new_tab(f"chrome-extension://mnloefcpaepkpmhaoipjkpikbnkmbnic/options.html?env={env}&user={user}&pass={pw}&http_host={http_host}&http_port={http_port}")
@@ -14,6 +12,20 @@ def initChrom(chrome,env,http_host,http_port,user,pw):
     chrome.new_tab(f"chrome-extension://mnloefcpaepkpmhaoipjkpikbnkmbnic/options.html?env={env}&user={user}&pass={pw}&http_host={http_host}&http_port={http_port}")
 
 chrome = Chromium(addr_or_opts=getChromiumOptions(initChromiumOptions("custom_env", 30000, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36", None)))
+
+def get_wallet(chrome):
+    tab = chrome.new_tab(url="chrome-extension://mcohilncbfahbmgdjkbpemcciiolgcge/popup.html")
+    if tab.s_ele("@type=password"):
+        tab.ele("@data-testid=okd-input").input("123qweasd")
+        tab.ele("@type=submit").click()
+        tab.ele("@type=button")
+
+    chrome.wait(1,2)
+    tab.ele("@class=_address_1czhn_28").click()
+    next_wallet = tab.ele("@class=okui-checkbox-circle okui-checkbox-circle-checked").after("t:div")
+    tab.ele(next_wallet).click()
+    tab.close()
+
 
 proxy = [
     {"ip": "181.177.100.195", "user": "h7RtWs", "passwd": "c41FXA"},
@@ -117,20 +129,6 @@ proxy = [
     {"ip": "161.0.71.56", "user": "h7RtWs", "passwd": "c41FXA"},
     {"ip": "181.177.101.118", "user": "h7RtWs", "passwd": "c41FXA"},
 ]
-
-def get_wallet(chrome):
-    tab = chrome.new_tab(url="chrome-extension://mcohilncbfahbmgdjkbpemcciiolgcge/popup.html")
-    if tab.s_ele("@type=password"):
-        tab.ele("@data-testid=okd-input").input("123qweasd")
-        tab.ele("@type=submit").click()
-        tab.ele("@type=button")
-
-    chrome.wait(1,2)
-    tab.ele("@class=_address_1czhn_28").click()
-    next_wallet = tab.ele("@class=okui-checkbox-circle okui-checkbox-circle-checked").after("t:div")
-    tab.ele(next_wallet).click()
-    tab.close()
-
 
 
 for proxy_msg in proxy:
