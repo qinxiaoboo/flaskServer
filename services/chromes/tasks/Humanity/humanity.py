@@ -45,33 +45,6 @@ def exe_okx(chrome,env):
     except Exception as e:
         print(f'{env.name}取的ele不对或者不需要连接')
 
-def LoginDiscord(chrome:ChromiumPage,env):
-    updateAccountStatus(env.discord_id, 0, "重置了Discord登录状态")
-    tab = chrome.new_tab(url="https://discord.com/app")
-    if tab.s_ele("Please log in again"):
-        tab.ele("@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85").click()
-    if "login" in tab.url:
-        logger.info(f"{env.name} 开始登录 Discord 账号")
-        with app.app_context():
-            discord:Account = Account.query.filter_by(id=env.discord_id).first()
-            if discord:
-                tab.ele("@name=email").input(discord.name)
-                tab.ele("@name=password").input(aesCbcPbkdf2DecryptFromBase64(discord.pwd))
-                tab.ele("@type=submit").click()
-                fa2 = aesCbcPbkdf2DecryptFromBase64(discord.fa2)
-                if "login" in tab.url and len(fa2) > 10:
-                    res = requests.get(fa2)
-                    if res.ok:
-                        code = res.json().get("data").get("otp")
-                        tab.ele("@autocomplete=one-time-code").input(code)
-                        tab.ele("@type=submit").click()
-            else:
-                updateAccountStatus(env.discord_id, 1, "没有导入DISCORD 的账号信息")
-                raise Exception(f"{env.name}: 没有导入DISCORD 账号信息")
-    if "channels" in tab.url or ".com/app" in tab.url:
-        updateAccountStatus(env.discord_id, 2)
-        logger.info(f"{env.name}登录Discord成功！")
-    return get_Custome_Tab(tab)
 
 def generate_random_word(length=7):
     # 生成一个随机的字母单词
@@ -102,56 +75,6 @@ def getDiscord(chrome,env):
         logger.info(f"{env.name}   登录Discord失败！需要人工登录")
         quitChrome(env, chrome)
 
-    # try:
-    #     print('开始discord认证')
-    #     tab = chrome.get_tab(title='Discord | Authorize access to your account') or \
-    #           chrome.get_tab(title='Discord | 授权访问您的账号') or \
-    #           chrome.get_tab(title='Discord') or \
-    #           chrome.get_tab('Onboarding | Humanity Protocol')
-    #     if tab == None:
-    #         logger.info(f'{env.name}:还有其他的语言需要加判断')
-    #         quitChrome(env, chrome)
-    #     elif tab:
-    #         if tab.title == 'Discord | Authorize access to your account' or 'Discord | 授权访问您的账号':
-    #             print(f'{tab.title}进入')
-    #             tab.wait.load_start(timeout=6)
-    #             tab.ele("@type=button", index=2).wait(10).click()  # 等待按钮可点击
-    #         elif tab.title == 'Discord':
-    #             print('Discord 进入')
-    #             login_button = tab.ele('@class=button_dd4f85 lookFilled_dd4f85 colorPrimary_dd4f85 sizeMedium_dd4f85 grow_dd4f85')
-    #             welcome_message = tab.ele('Welcome back!')
-    #             # 如果需要重新登录
-    #             if login_button:
-    #                 logger.info(f'{env.name}的discord需要重新登录')
-    #                 login_button.wait(6).click()  # 等待登录按钮可点击
-    #                 tab.wait.load_start(timeout=6)  # 等待页面加载完成
-    #                 LoginDiscord(chrome, env)
-    #                 tab.wait.load_start(timeout=6)  # 等待重新加载的页面完成
-    #                 chrome.close_tabs()
-    #
-    #             # 如果显示 "Welcome back!" 信息
-    #             elif welcome_message:
-    #                 logger.info(f"{env.name}的Discord未登录，尝试重新登录")
-    #                 LoginDiscord(chrome, env)
-    #                 tab.wait.load_start(timeout=6)  # 等待页面加载完成
-    #                 chrome.close_tabs()
-    #             # 点击授权登录按钮
-    #             print('4')
-    #             if tab.ele("@type=button", index=2):
-    #                 print('开始授权')
-    #                 tab.ele("@type=button", index=2).wait(10).click()  # 等待按钮可点击
-    #                 logger.info(f"{env.name}: 登录discord完成----------------------------------")
-    #                 tab.wait.load_start(timeout=5)  # 等待页面加载完成
-    #         # 处理 Onboarding 页面
-    #         elif tab.title == 'Onboarding | Humanity Protocol':
-    #             print('Onboarding | Humanity Protocol进入')
-    #             tab.ele("@type=button", index=2).wait(10).click()  # 等待按钮可点击
-    #             logger.info(f"{env.name}: 登录discord完成----------------------------------")
-    #     else:
-    #         logger.info(f'{env.name}:还有其他的语言需要加判断')
-    #         quitChrome(env, chrome)
-    # except Exception as e:
-    #     logger.error(e)
 
 def gethumanity(chrome,env):
     tab = chrome.new_tab(url=humanity_url)
@@ -274,6 +197,7 @@ def gethumanity(chrome,env):
                 tab.ele('@class=bottom').click(by_js=None)
                 tab.wait.load_start(timeout=6)
                 chrome.wait(15, 20)
+
 
         elif tab.ele('@class=bottom disable'):
             print('已经签到过不需要签到了')
