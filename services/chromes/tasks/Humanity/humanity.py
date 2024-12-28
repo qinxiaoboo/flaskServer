@@ -45,7 +45,6 @@ def exe_okx(chrome,env):
     except Exception as e:
         print(f'{env.name}取的ele不对或者不需要连接')
 
-
 def generate_random_word(length=7):
     # 生成一个随机的字母单词
     letters = string.ascii_lowercase + string.digits  # 包含小写字母、大写字母和数字
@@ -74,7 +73,6 @@ def getDiscord(chrome,env):
     except Exception as e:
         logger.info(f"{env.name}   登录Discord失败！需要人工登录")
         quitChrome(env, chrome)
-
 
 def gethumanity(chrome,env):
     tab = chrome.new_tab(url=humanity_url)
@@ -111,22 +109,25 @@ def gethumanity(chrome,env):
     # tab.wait.load_start(timeout=6)
     if tab.s_ele('t:p@text():Loading your profile...'):
         chrome.wait(15, 30)
+        if tab.s_ele('t:p@text():Loading your profile...'):
+            tab.refresh()
     else:
         tab.refresh()
 
-    # if tab.wait.ele_displayed('@class=skip', timeout=15, raise_err=False):
-    #     print('点击skip弹幕')
-    #     tab.ele('@class=skip').click()
-    # else:
-    #     print('没有出现skip')
-
-    if tab.wait.ele_displayed('@class=skip', timeout=5, raise_err=False):
+    chrome.wait(15, 20)
+    if tab.wait.ele_displayed('@class=skip', timeout=15, raise_err=False):
         print('点击skip弹幕')
         tab.ele('@class=skip').click()
-
-    # if tab.wait.ele_displayed('skip', timeout=20, raise_err=False):
+    else:
+        print('没有出现skip')
+    #
+    # if tab.wait.ele_displayed('@class=skip', timeout=5, raise_err=False):
     #     print('点击skip弹幕')
     #     tab.ele('@class=skip').click()
+
+    if tab.wait.ele_displayed('skip', timeout=10, raise_err=False):
+        print('点击skip弹幕')
+        tab.ele('@class=skip').click()
 
     if tab.wait.ele_displayed('@class=bottom', timeout=5, raise_err=False):
         print('点击签到')
@@ -136,6 +137,7 @@ def gethumanity(chrome,env):
         print('已经签到过不需要签到了')
 
     else:
+        tab.refresh()
         if tab.wait.eles_loaded('Get Started', timeout=5, raise_err=False):
             tab.ele('@class=MuiButtonBase-root MuiIconButton-root MuiIconButton-colorPrimary MuiIconButton-sizeMd mui-1o8rzlg', index=2).click()
             chrome.wait(15, 20)
@@ -189,8 +191,9 @@ def gethumanity(chrome,env):
         if tab.wait.ele_displayed('skip', timeout=10, raise_err=False):
             print('点击skip弹幕')
             tab.ele('@class=skip').click()
+        tab.refresh()
 
-        if tab.wait.ele_displayed('@class=bottom', timeout=20, raise_err=False):
+        if tab.wait.ele_displayed('@class=bottom', timeout=60, raise_err=False):
             print('点击签到')
             with RedisLock(f"{env.name}-okx",200,200):
                 tab.wait.load_start(timeout=5)
@@ -198,9 +201,19 @@ def gethumanity(chrome,env):
                 tab.wait.load_start(timeout=6)
                 chrome.wait(15, 20)
 
+        # elif tab.ele('@class=bottom disable'):
+        #     print('已经签到过不需要签到了')
 
-        elif tab.ele('@class=bottom disable'):
-            print('已经签到过不需要签到了')
+        else:
+            tab.refresh()
+            tab.wait.ele_displayed('@class=bottom', timeout=30, raise_err=False)
+            print('点击签到')
+            tab.wait.load_start(timeout=5)
+            tab.ele('@class=bottom').click(by_js=None)
+            tab.wait.load_start(timeout=6)
+            chrome.wait(3, 6)
+            chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+            chrome.wait(15, 20)
 
         if tab.wait.ele_displayed('@class=skip', timeout=15, raise_err=False):
             print('点击skip弹幕')
