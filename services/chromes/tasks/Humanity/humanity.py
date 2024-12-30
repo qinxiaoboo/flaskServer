@@ -137,24 +137,25 @@ def gethumanity(chrome,env):
         # tab.refresh()
         if tab.wait.eles_loaded('Get Started', timeout=5, raise_err=False):
             if "ONE" in env.name or "NB" in env.name:
-                try:
-                    tab.ele('Connect Wallet').click()
-                    chrome.wait(5, 10)
-                    if tab.s_ele('@data-testid=rk-auth-message-button'):
-                        tab.ele('@data-testid=rk-auth-message-button').click()
-                        chrome.wait(5, 10)
+                with RedisLock(f"{env.name}-okx", 200, 200):
                     try:
-                        tab.ele('t:div@text():MetaMask').click()
-                        chrome.wait(3, 6)
+                        tab.ele('Connect Wallet').click()
+                        chrome.wait(5, 10)
+                        if tab.s_ele('@data-testid=rk-auth-message-button'):
+                            tab.ele('@data-testid=rk-auth-message-button').click()
+                            chrome.wait(5, 10)
+                        try:
+                            tab.ele('t:div@text():MetaMask').click()
+                            chrome.wait(3, 6)
+                        except Exception as e:
+                            pass
+                        if tab.s_ele('@data-testid=rk-auth-message-button'):
+                            tab.ele('@data-testid=rk-auth-message-button').click()
+                            chrome.wait(5, 10)
+                        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+                        chrome.wait(15, 20)
                     except Exception as e:
                         pass
-                    if tab.s_ele('@data-testid=rk-auth-message-button'):
-                        tab.ele('@data-testid=rk-auth-message-button').click()
-                        chrome.wait(5, 10)
-                    chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
-                    chrome.wait(15, 20)
-                except Exception as e:
-                    pass
             else:
                 try:
                     tab.ele('@class=MuiButtonBase-root MuiIconButton-root MuiIconButton-colorPrimary MuiIconButton-sizeMd mui-1o8rzlg', index=2).click()
@@ -231,12 +232,12 @@ def gethumanity(chrome,env):
         #     print('已经签到过不需要签到了')
 
         else:
-            tab.refresh()
-            if tab.s_ele('t:p@text():Loading your profile...'):
+            # tab.refresh()
+            if tab.s_ele('@class=bottom'):
+                pass
+            else:
+                tab.refresh()
                 chrome.wait(15, 30)
-                # if tab.s_ele('t:p@text():Loading your profile...'):
-                #     tab.refresh()
-                #     chrome.wait(15, 30)
             tab.wait.ele_displayed('@class=bottom', timeout=30, raise_err=False)
             with RedisLock(f"{env.name}-okx",200,200):
                 chrome.wait(30, 60)
