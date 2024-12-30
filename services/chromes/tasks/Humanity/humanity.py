@@ -136,7 +136,7 @@ def gethumanity(chrome,env):
     else:
         # tab.refresh()
         if tab.wait.eles_loaded('Get Started', timeout=5, raise_err=False):
-            if "ONE" or "NB" in env.name:
+            if "ONE" in env.name or "NB" in env.name:
                 try:
                     tab.ele('Connect Wallet').click()
                     chrome.wait(5, 10)
