@@ -98,10 +98,10 @@ def gethumanity(chrome,env):
         chrome.wait(15, 30)
         if tab.s_ele('t:p@text():Loading your profile...'):
             tab.refresh()
-    else:
-        tab.refresh()
+    # else:
+    #     tab.refresh()
 
-    chrome.wait(15, 20)
+    # chrome.wait(15, 20)
     if tab.wait.ele_displayed('@class=skip', timeout=15, raise_err=False):
         print('点击skip弹幕')
         tab.ele('@class=skip').click()
@@ -139,8 +139,11 @@ def gethumanity(chrome,env):
             if "ONE" in env.name or "NB" in env.name:
                 with RedisLock(f"{env.name}-okx", 200, 200):
                     try:
-                        tab.ele('Connect Wallet').click()
-                        chrome.wait(5, 10)
+                        if tab.s_ele('t:span@text()=Connect Wallet'):
+                            print('钱包登录')
+                            tab.ele('t:span@text()=Connect Wallet').click()
+                            chrome.wait(5, 10)
+
                         if tab.s_ele('@data-testid=rk-auth-message-button'):
                             tab.ele('@data-testid=rk-auth-message-button').click()
                             chrome.wait(5, 10)
@@ -154,8 +157,35 @@ def gethumanity(chrome,env):
                             chrome.wait(5, 10)
                         chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
                         chrome.wait(15, 20)
+
                     except Exception as e:
-                        pass
+
+                        try:
+
+                            tab.refresh()
+                            chrome.wait(40, 60)
+                            if tab.s_ele('t:span@text()=Connect Wallet'):
+                                print('钱包登录')
+                                tab.ele('t:span@text()=Connect Wallet').click()
+                                chrome.wait(5, 10)
+
+                            if tab.s_ele('@data-testid=rk-auth-message-button'):
+                                tab.ele('@data-testid=rk-auth-message-button').click()
+                                chrome.wait(5, 10)
+                            try:
+                                tab.ele('t:div@text():MetaMask').click()
+                                chrome.wait(5, 10)
+                            except Exception as e:
+                                pass
+                            if tab.s_ele('@data-testid=rk-auth-message-button'):
+                                tab.ele('@data-testid=rk-auth-message-button').click()
+                                chrome.wait(5, 10)
+                            chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+                            chrome.wait(5, 10)
+
+                        except Exception as e:
+                            pass
+
             else:
                 try:
                     tab.ele('@class=MuiButtonBase-root MuiIconButton-root MuiIconButton-colorPrimary MuiIconButton-sizeMd mui-1o8rzlg', index=2).click()
@@ -213,34 +243,34 @@ def gethumanity(chrome,env):
         if tab.wait.ele_displayed('skip', timeout=10, raise_err=False):
             print('点击skip弹幕')
             tab.ele('@class=skip').click()
-        tab.refresh()
 
-        if tab.wait.ele_displayed('@class=bottom', timeout=60, raise_err=False):
-            print('点击签到')
+        if tab.s_ele('t:p@text():Loading your profile...'):
+            chrome.wait(30)
+            if tab.s_ele('t:p@text():Loading your profile...'):
+                tab.refresh()
+
+        if tab.s_ele('@class=bottom'):
             with RedisLock(f"{env.name}-okx",200,200):
-                tab.wait.load_start(timeout=5)
-                chrome.wait(30, 60)
                 tab.ele('@class=bottom').click(by_js=None)
                 tab.wait.load_start(timeout=6)
                 chrome.wait(5, 8)
                 try:
-                    chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
-                    chrome.wait(15, 20)
+                    if chrome.get_tab(title="OKX Wallet"):
+                        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+                        chrome.wait(15, 20)
                 except Exception as e:
                     pass
-        # elif tab.ele('@class=bottom disable'):
-        #     print('已经签到过不需要签到了')
 
         else:
-            # tab.refresh()
+            tab.refresh()
+            chrome.wait(60)
             if tab.s_ele('@class=bottom'):
                 pass
             else:
                 tab.refresh()
-                chrome.wait(15, 30)
-            tab.wait.ele_displayed('@class=bottom', timeout=30, raise_err=False)
+
             with RedisLock(f"{env.name}-okx",200,200):
-                chrome.wait(30, 60)
+                chrome.wait(60)
                 tab.wait.load_start(timeout=5)
                 tab.ele('@class=bottom').click(by_js=None)
                 tab.wait.load_start(timeout=6)
