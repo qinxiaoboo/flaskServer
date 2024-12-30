@@ -221,7 +221,7 @@ def gethumanity(chrome,env):
                 chrome.wait(30, 60)
                 tab.ele('@class=bottom').click(by_js=None)
                 tab.wait.load_start(timeout=6)
-                chrome.wait(3, 6)
+                chrome.wait(5, 8)
                 try:
                     chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
                     chrome.wait(15, 20)
@@ -243,10 +243,13 @@ def gethumanity(chrome,env):
                 tab.wait.load_start(timeout=5)
                 tab.ele('@class=bottom').click(by_js=None)
                 tab.wait.load_start(timeout=6)
-                chrome.wait(3, 6)
-                chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
-                chrome.wait(15, 20)
-
+                chrome.wait(5, 8)
+                try:
+                    if chrome.get_tab(title="OKX Wallet"):
+                        chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+                        chrome.wait(15, 20)
+                except Exception as e:
+                    pass
         if tab.wait.ele_displayed('@class=skip', timeout=15, raise_err=False):
             print('点击skip弹幕')
             tab.ele('@class=skip').click()

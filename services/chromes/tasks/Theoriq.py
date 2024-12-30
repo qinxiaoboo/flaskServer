@@ -14,7 +14,7 @@ import time
 from flaskServer.utils.chrome import quitChrome, get_Custome_Tab
 from flaskServer.utils.crypt import aesCbcPbkdf2DecryptFromBase64
 import requests
-
+from flaskServer.utils.RedisHelp import RedisLock
 name = 'Theoriq'
 Theoriq_url = 'https://quests.theoriq.ai?r=NpRqz3aq'
 
@@ -173,21 +173,24 @@ def getTab(chrome, env):
     tab = chrome.new_tab(url=Theoriq_url)
     tab.set.window.max()
     chrome.wait(5, 10)
+
     try:
         num = 1
         while num < 3:
             if tab.s_ele('CONNECT WALLET'):
                 # print('点击次数：', num)
+
                 tab.ele('CONNECT WALLET').click()
                 # print("CONNECT WALLET 点击完成")
                 chrome.wait(2, 3)
 
             if tab.ele('@class=px-6 flex justify-between items-center gap-4 p-2 bg-[#181818] text-white rounded', index=2):
-                tab.ele('@class=px-6 flex justify-between items-center gap-4 p-2 bg-[#181818] text-white rounded', index=2).click()
-                chrome.wait(2, 3)
-                exe_okx(chrome, env)
-                chrome.wait(5, 10)
-                num += 1
+                with RedisLock(f"{env.name}-okx", 200, 200):
+                    tab.ele('@class=px-6 flex justify-between items-center gap-4 p-2 bg-[#181818] text-white rounded', index=2).click()
+                    chrome.wait(2, 3)
+                    exe_okx(chrome, env)
+                    chrome.wait(5, 10)
+                    num += 1
 
             # if tab.ele('CONNECT METAMASK'):
             #     tab.ele('CONNECT METAMASK').click()
@@ -328,7 +331,7 @@ def getAgenttasks(chrome, env):
             try:
                 if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Send email"):
                     logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
-                    quitChrome(env, chrome)
+                    # quitChrome(env, chrome)
             except Exception as e:
                 pass
 
@@ -338,7 +341,7 @@ def getAgenttasks(chrome, env):
                     chrome.wait(10, 15)
                     if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Send email"):
                         logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
-                        quitChrome(env, chrome)
+                        # quitChrome(env, chrome)
                     chrome.wait(25, 30)
             except Exception as e:
                 pass
@@ -352,7 +355,7 @@ def getAgenttasks(chrome, env):
                     chrome.wait(10, 15)
                 if chrome.get_tab(url='https://x.com/').s_ele("@@type=submit@@value=Send email"):
                     logger.info(f"{env.name}   该环境推特需要邮箱验证，请前往验证")
-                    quitChrome(env, chrome)
+                    # quitChrome(env, chrome)
             except Exception as e:
                 pass
 
