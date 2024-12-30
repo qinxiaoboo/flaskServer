@@ -1,7 +1,7 @@
 import toml,csv
 from pathlib import Path
 
-cfg = toml.load(open(r'C:\tools\wf-chrome\flaskServer\config.toml', 'r', encoding='utf-8'))
+cfg = toml.load(open(r'D:\python\wf-chrome\flaskServer\config.toml', 'r', encoding='utf-8'))
 
 ENV_PATH = cfg.get('ENV_PATH')
 THREAD_POOL_NUM = cfg.get('THREAD_POOL_NUM')
@@ -12,9 +12,11 @@ CHROME_EXTEND_PATH = cfg.get("CHROME_EXTEND_PATH")
 
 CHROME_USER_DATA_PATH = cfg.get("CHROME_USER_DATA_PATH")
 
+CHROME_EXTEND_UPDATE = cfg.get("CHROME_EXTEND_UPDATE")
+
 DEFAULT_OPEN_PAGE = cfg.get("DEFAULT_OPEN_PAGE")
 DEFAULT_REMOVE_PAGE = cfg.get("DEFAULT_REMOVE_PAGE")
-
+YES_CAPTCHA_API_KEY = cfg.get("YES_CAPTCHA_API_KEY")
 WALLET_PASSWORD = cfg.get("WALLET_PASSWORD")
 TEXT_PASSWORD = cfg.get("TEXT_PASSWORD")
 RANDOM_ORDER = cfg.get("RANDOM_ORDER")

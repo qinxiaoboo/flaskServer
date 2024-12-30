@@ -25,7 +25,7 @@ def StartTask(env):
     finally:
         quitChrome(env, chrome)
 
-
-def Time_Tasks():
+def Time_Tasks(a):
+    print(a)
     submit(StartTask, getAllEnvs())
 
