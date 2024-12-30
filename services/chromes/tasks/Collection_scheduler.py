@@ -5,7 +5,8 @@ from DrissionPage import ChromiumPage
 from flaskServer.services.chromes.login import OKXChrome
 from loguru import logger
 from flaskServer.utils.chrome import quitChrome
-
+from flaskServer.services.dto.env import updateAllStatus,getAllEnvs,getEnvsByGroup
+from flaskServer.services.chromes.worker import submit
 
 def TaskList(chrome,env):
     HumanityTaskThread = createThread(Humanity, (chrome, env,))
@@ -25,5 +26,6 @@ def StartTask(env):
         quitChrome(env, chrome)
 
 
-
+def Time_Tasks():
+    submit(StartTask, getAllEnvs())
 

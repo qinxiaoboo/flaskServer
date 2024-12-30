@@ -4,6 +4,8 @@ from flaskServer.services.chromes.faucet.G0 import toDo as toDoFaucet0G
 from flaskServer.services.chromes.tasks.plumenetwork import toDoFaucet as toDoFaucetPlumenetwork
 from flaskServer.services.chromes.worker import checkTasks
 from flaskServer.services.dto.taskLog import clearTaskLog
+from flaskServer.services.chromes.tasks.Collection_scheduler import Time_Tasks as Scheduled_Time_Tasks
+
 
 # 定时任务配置
 class Config(object):
@@ -16,7 +18,8 @@ app.config.from_object(Config())
 def get_function_by_name(name):
     functions = {
         'toDoFaucet0G': toDoFaucet0G,
-        'toDoFaucetPlumenetwork': toDoFaucetPlumenetwork
+        'toDoFaucetPlumenetwork': toDoFaucetPlumenetwork,
+        'Scheduled_Time_Tasks': Scheduled_Time_Tasks
     }
     return functions.get(name)
 
