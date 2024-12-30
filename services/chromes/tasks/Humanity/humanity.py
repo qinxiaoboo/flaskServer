@@ -32,19 +32,6 @@ document.querySelector("body > div.MuiBox-root.mui-186aokm > div > div > div > d
 button.click();
 '''
 
-def exe_okx(chrome,env):
-    try:
-        if chrome.get_tab(title="OKX Wallet").ele('@data-testid=okd-button', index=2):
-            chrome.wait(3, 4)
-            chrome.get_tab(title="OKX Wallet").ele('@data-testid=okd-button', index=2).click()
-            chrome.wait(3, 4)
-            try:
-                chrome.get_tab(title="OKX Wallet").ele('@data-testid=okd-button', index=2).click()
-            except Exception as e:
-                print('不需要二次确认')
-    except Exception as e:
-        print(f'{env.name}取的ele不对或者不需要连接')
-
 def generate_random_word(length=7):
     # 生成一个随机的字母单词
     letters = string.ascii_lowercase + string.digits  # 包含小写字母、大写字母和数字
@@ -142,37 +129,38 @@ def gethumanity(chrome,env):
                 pass
 
 
-    elif tab.wait.ele_displayed('@class=bottom disable', timeout=5, raise_err=False):
-        print('已经签到过不需要签到了')
+    # elif tab.wait.ele_displayed('@class=bottom disable', timeout=5, raise_err=False):
+    #     print('已经签到过不需要签到了')
 
 
     else:
         # tab.refresh()
         if tab.wait.eles_loaded('Get Started', timeout=5, raise_err=False):
-            try:
-                tab.ele('@class=MuiButtonBase-root MuiIconButton-root MuiIconButton-colorPrimary MuiIconButton-sizeMd mui-1o8rzlg', index=2).click()
-                chrome.wait(15, 20)
-            except Exception as e:
-                pass
-
-            try:
-                tab.ele('Connect Wallet').click()
-                chrome.wait(5, 10)
-                if tab.s_ele('@data-testid=rk-auth-message-button'):
-                    tab.ele('@data-testid=rk-auth-message-button').click()
-                    chrome.wait(5, 10)
+            if "ONE" in env.name:
                 try:
-                    tab.ele('t:div@text():MetaMask').click()
-                    chrome.wait(3, 6)
+                    tab.ele('Connect Wallet').click()
+                    chrome.wait(5, 10)
+                    if tab.s_ele('@data-testid=rk-auth-message-button'):
+                        tab.ele('@data-testid=rk-auth-message-button').click()
+                        chrome.wait(5, 10)
+                    try:
+                        tab.ele('t:div@text():MetaMask').click()
+                        chrome.wait(3, 6)
+                    except Exception as e:
+                        pass
+                    if tab.s_ele('@data-testid=rk-auth-message-button'):
+                        tab.ele('@data-testid=rk-auth-message-button').click()
+                        chrome.wait(5, 10)
+                    chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+                    chrome.wait(15, 20)
                 except Exception as e:
                     pass
-                if tab.s_ele('@data-testid=rk-auth-message-button'):
-                    tab.ele('@data-testid=rk-auth-message-button').click()
-                    chrome.wait(5, 10)
-                chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
-                chrome.wait(15, 20)
-            except Exception as e:
-                pass
+            else:
+                try:
+                    tab.ele('@class=MuiButtonBase-root MuiIconButton-root MuiIconButton-colorPrimary MuiIconButton-sizeMd mui-1o8rzlg', index=2).click()
+                    chrome.wait(15, 20)
+                except Exception as e:
+                    pass
 
         try:
             if chrome.get_tab(url='https://discord.com').ele('t:div@text():Log in') or chrome.get_tab(url='https://discord.com').ele('t:div@text():登录'):
@@ -230,6 +218,7 @@ def gethumanity(chrome,env):
             print('点击签到')
             with RedisLock(f"{env.name}-okx",200,200):
                 tab.wait.load_start(timeout=5)
+                chrome.wait(30, 60)
                 tab.ele('@class=bottom').click(by_js=None)
                 tab.wait.load_start(timeout=6)
                 chrome.wait(3, 6)
@@ -245,17 +234,18 @@ def gethumanity(chrome,env):
             tab.refresh()
             if tab.s_ele('t:p@text():Loading your profile...'):
                 chrome.wait(15, 30)
-                if tab.s_ele('t:p@text():Loading your profile...'):
-                    print('1')
-                    tab.refresh()
+                # if tab.s_ele('t:p@text():Loading your profile...'):
+                #     tab.refresh()
+                #     chrome.wait(15, 30)
             tab.wait.ele_displayed('@class=bottom', timeout=30, raise_err=False)
-            print('点击签到')
-            tab.wait.load_start(timeout=5)
-            tab.ele('@class=bottom').click(by_js=None)
-            tab.wait.load_start(timeout=6)
-            chrome.wait(3, 6)
-            chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
-            chrome.wait(15, 20)
+            with RedisLock(f"{env.name}-okx",200,200):
+                chrome.wait(30, 60)
+                tab.wait.load_start(timeout=5)
+                tab.ele('@class=bottom').click(by_js=None)
+                tab.wait.load_start(timeout=6)
+                chrome.wait(3, 6)
+                chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+                chrome.wait(15, 20)
 
         if tab.wait.ele_displayed('@class=skip', timeout=15, raise_err=False):
             print('点击skip弹幕')
