@@ -121,9 +121,9 @@ def gethumanity(chrome,env):
     else:
         print('没有出现skip')
     #
-    # if tab.wait.ele_displayed('@class=skip', timeout=5, raise_err=False):
-    #     print('点击skip弹幕')
-    #     tab.ele('@class=skip').click()
+    if tab.wait.ele_displayed('@class=skip', timeout=5, raise_err=False):
+        print('点击skip弹幕')
+        tab.ele('@class=skip').click()
 
     if tab.wait.ele_displayed('skip', timeout=10, raise_err=False):
         print('点击skip弹幕')
@@ -131,16 +131,49 @@ def gethumanity(chrome,env):
 
     if tab.wait.ele_displayed('@class=bottom', timeout=5, raise_err=False):
         print('点击签到')
-        tab.ele('@class=bottom').click(by_js=None)
-        tab.wait.load_start(timeout=6)
+        with RedisLock(f"{env.name}-okx", 200, 200):
+            tab.ele('@class=bottom').click(by_js=None)
+            chrome.wait(5, 8)
+            try:
+                if chrome.get_tab(title="OKX Wallet"):
+                    chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+                    chrome.wait(15, 20)
+            except Exception as e:
+                pass
+
+
     elif tab.wait.ele_displayed('@class=bottom disable', timeout=5, raise_err=False):
         print('已经签到过不需要签到了')
 
+
     else:
-        tab.refresh()
+        # tab.refresh()
         if tab.wait.eles_loaded('Get Started', timeout=5, raise_err=False):
-            tab.ele('@class=MuiButtonBase-root MuiIconButton-root MuiIconButton-colorPrimary MuiIconButton-sizeMd mui-1o8rzlg', index=2).click()
-            chrome.wait(15, 20)
+            try:
+                tab.ele('@class=MuiButtonBase-root MuiIconButton-root MuiIconButton-colorPrimary MuiIconButton-sizeMd mui-1o8rzlg', index=2).click()
+                chrome.wait(15, 20)
+            except Exception as e:
+                pass
+
+            try:
+                tab.ele('Connect Wallet').click()
+                chrome.wait(5, 10)
+                if tab.s_ele('@data-testid=rk-auth-message-button'):
+                    tab.ele('@data-testid=rk-auth-message-button').click()
+                    chrome.wait(5, 10)
+                try:
+                    tab.ele('t:div@text():MetaMask').click()
+                    chrome.wait(3, 6)
+                except Exception as e:
+                    pass
+                if tab.s_ele('@data-testid=rk-auth-message-button'):
+                    tab.ele('@data-testid=rk-auth-message-button').click()
+                    chrome.wait(5, 10)
+                chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+                chrome.wait(15, 20)
+            except Exception as e:
+                pass
+
         try:
             if chrome.get_tab(url='https://discord.com').ele('t:div@text():Log in') or chrome.get_tab(url='https://discord.com').ele('t:div@text():登录'):
                 print('重新登录discord')
@@ -199,8 +232,12 @@ def gethumanity(chrome,env):
                 tab.wait.load_start(timeout=5)
                 tab.ele('@class=bottom').click(by_js=None)
                 tab.wait.load_start(timeout=6)
-                chrome.wait(15, 20)
-
+                chrome.wait(3, 6)
+                try:
+                    chrome.get_tab(title="OKX Wallet").ele("@type=button", index=2).click()
+                    chrome.wait(15, 20)
+                except Exception as e:
+                    pass
         # elif tab.ele('@class=bottom disable'):
         #     print('已经签到过不需要签到了')
 
