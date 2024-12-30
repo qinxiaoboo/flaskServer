@@ -59,7 +59,7 @@ def getDiscord(chrome,env):
         chrome.wait(5, 10)
     except Exception as e:
         logger.info(f"{env.name}   登录Discord失败！需要人工登录")
-        quitChrome(env, chrome)
+        # quitChrome(env, chrome)
 
 def gethumanity(chrome,env):
     tab = chrome.new_tab(url=humanity_url)
