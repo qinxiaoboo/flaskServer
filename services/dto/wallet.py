@@ -33,4 +33,4 @@ def updateWallt(env,word,address,t):
         return wallet
 
 if __name__ == '__main__':
-    updateWallt("Q-1","drip secret frown define acid goose tenant into beyond memory horn pear","init1z2900y05r38nxfrxygmg43606hlynwu64n5u6d","INIT")
+    updateWallt("Q-1","","","INIT")
